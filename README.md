@@ -1,13 +1,13 @@
 # Wild Rift Draft Helper
 
-Champion-select helper for Wild Rift. Pick your lane, your champion and your opponent, and see the current core build, full build, runes, situational swaps and the tier list. Swap core items and runes, and your choices are saved per champion. An AI agent can then tailor the build to the enemy team.
+Champion-select helper for Wild Rift. Pick your lane, your champion and your opponent, and see the current core build, full build, runes, situational swaps and the tier list. Pick your champion with counterpicks in mind ("Strong against [opponent]"), see who counters whom and who pairs well with you, and press and hold any item for its stats. Builds follow the lane you play. Swap core items and runes, and your choices are saved per champion and lane. An AI agent can then tailor the build to the enemy team.
 
 ```
 Website ── FastAPI ──> data layer ──> WildRiftFire data (refreshed when the patch changes)
                   └──> Strands agent (Claude Haiku 4.5) ──MCP──> MCP server ──> data layer
 ```
 
-- **`wildrift/wildriftfire.py`**: downloads the tier list, every champion's build, the item list, icons and the patch number from [WildRiftFire.com](https://www.wildriftfire.com). It only reads public pages that robots.txt allows, one per second.
+- **`wildrift/wildriftfire.py`**: downloads the tier list, every champion's builds per lane (with counters and synergies), the item and rune lists, icons and the patch number from [WildRiftFire.com](https://www.wildriftfire.com), plus item stats and descriptions from [WR-META](https://wr-meta.com/items/). It only reads public pages that robots.txt allows, one per second.
 - **`wildrift/data.py`**: data access with no LLM calls. Covers champions by position and tier, builds, items, core swaps and your champion pool.
 - **`wildrift/mcp_server.py`**: an MCP server exposing the data as tools. Any MCP client can use it, for example Claude Desktop.
 - **`wildrift/agent.py`**: a Strands agent that calls those tools to tailor a build. Only this part costs API credits, and repeat drafts are cached.
@@ -84,4 +84,4 @@ GitHub Actions runs all of these on every push, plus a Docker build (`.github/wo
 - AWS: ECS Fargate behind an ALB, plus a scheduled Lambda for the patch check
 - Persistent storage for pools and usage counters (e.g. a small database)
 
-Builds and tier list from WildRiftFire.com. Fan project, not endorsed by Riot Games.
+Builds, tiers and counters from WildRiftFire.com; item details from WR-META.com. Fan project, not endorsed by Riot Games.

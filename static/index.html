@@ -43,18 +43,21 @@
   <section class="card">
     <div class="build-head"><h2>Core build</h2><span id="buildState" class="build-state"></span>
       <button id="resetBuild" class="link hidden">Reset</button></div>
+    <p id="laneNote" class="muted hidden"></p>
     <div id="core" class="core"></div>
     <div class="sub"><h3>Boots</h3><div id="boots" class="strip"></div></div>
     <div class="sub"><h3>Full build</h3><div id="final" class="strip"></div></div>
     <div class="sub" id="sitBlock"><h3>Situational swaps</h3><div id="situational"></div></div>
     <div class="sub"><h3>Runes <span class="plain">(tap to swap)</span></h3><div id="runes" class="runes"></div></div>
     <div class="sub"><h3>Summoner spells · Starting item</h3><div id="spells" class="strip"></div></div>
+    <p class="hint-hold">Press and hold any item or rune for details.</p>
   </section>
 
   <section class="card">
     <h2 id="matchupTitle">Matchup</h2>
     <div id="matchupTags" class="tags"></div>
     <ul id="matchupTips"></ul>
+    <div id="synergies" class="sub"></div>
   </section>
 
   <section class="card">
@@ -75,11 +78,21 @@
   </div>
 </div>
 
+<div id="info" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+  <div class="sheet-panel info-panel">
+    <div class="sheet-head">
+      <strong id="infoTitle" class="info-title"></strong>
+      <button id="infoClose" aria-label="Close">×</button>
+    </div>
+    <div id="infoBody" class="sheet-body"></div>
+  </div>
+</div>
+
 <footer>
   <div id="dataLine"></div>
   <button id="signOut" class="link">Enter access token</button>
   <button id="checkUpdate" class="link">Check for a new patch</button>
-  <div>Builds and tier list from WildRiftFire.com. Fan project, not endorsed by Riot Games.</div>
+  <div>Builds, tiers and counters from WildRiftFire.com. Item details from WR-META.com. Fan project, not endorsed by Riot Games.</div>
 </footer>
 
 </body>

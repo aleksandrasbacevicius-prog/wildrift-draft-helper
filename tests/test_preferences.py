@@ -94,11 +94,12 @@ def test_stale_saved_build_is_ignored():
     data.save_preferences("alex", "Darius", build["core"], build["runes"])
     path = data.PREFS_DIR / "alex.json"
     saved = json.loads(path.read_text(encoding="utf-8"))
-    saved["Darius"]["core"][0] = "Item Removed In A Patch"
+    key = data._prefs_key("Darius", None)
+    saved[key]["core"][0] = "Item Removed In A Patch"
     path.write_text(json.dumps(saved), encoding="utf-8")
     assert data.get_preferences("alex", "Darius") is None
-    saved["Darius"]["core"][0] = build["core"][0]
-    saved["Darius"]["runes"][0] = "Rune Removed In A Patch"
+    saved[key]["core"][0] = build["core"][0]
+    saved[key]["runes"][0] = "Rune Removed In A Patch"
     path.write_text(json.dumps(saved), encoding="utf-8")
     assert data.get_preferences("alex", "Darius") is None
 

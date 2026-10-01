@@ -28,7 +28,11 @@ TIER_LIST = """
 """
 
 GUIDE = """
-<div class="wf-champion__data__items data-block">
+<div class="wf-champion__guide-selector">
+  <span class="active" data-guide-id="40"> <img src="/images/lanes/white-solo.png"> Solo Build </span>
+  <span data-guide-id="280"> <img src="/images/lanes/white-jungle.png"> Jungle Build </span>
+</div>
+<div class="wf-champion__data__items data-block" data-guide-id="40">
   <div class="section starting"><div class="name">Ruby Crystal</div></div>
   <div class="section core">
     <div class="name">Stridebreaker</div><div class="name">Sterak&#039;s Gage</div><div class="name">Black Cleaver</div>
@@ -36,18 +40,40 @@ GUIDE = """
   <div class="section boots"><div class="name">Plated Steelcaps</div></div>
   <div class="section final"><div class="name">Plated Steelcaps</div><div class="name">Stridebreaker</div></div>
 </div>
-<div class="wf-champion__data__spells data-block">
+<div class="wf-champion__data__spells data-block" data-guide-id="40">
   <img src="/images/summoners/flash.png" alt="Flash"><img src="/images/summoners/ghost.png" alt="Ghost">
   <img class="keystone" src="/images/runes/conqueror.png" alt="Conqueror">
   <img class="Resolve" src="/images/runes/second-wind.png" alt="Second Wind">
 </div>
-<div class="wf-champion__data__situational data-block">
+<div class="wf-champion__data__situational  data-block" data-guide-id="40">
   <span class="situation" name="situation">vs AP / CC</span>
   <div class="name">Plated Steelcaps</div><div class="name">Mercury&#039;s Treads</div>
   <span class="situation" name="situation">Only one item</span>
   <div class="name">Thornmail</div>
 </div>
-<div class="skills-counters-block"></div>
+<div class="skills-counters-block data-block " data-guide-id="40">
+  <div class="data-mod counters-mod counters">
+    <div class="ico-holder"><img class="lane" src="/images/lanes/white-solo.png"> <span>Dr. Mundo</span></div>
+    <div class="ico-holder"><img class="lane" src="/images/lanes/white-solo.png"> <span>Malphite</span></div>
+  </div>
+  <div class="data-mod counters-mod synergies">
+    <div class="ico-holder"><img class="lane" src="/images/lanes/white-jungle.png"> <span>Lillia</span></div>
+    <div class="ico-holder"><img class="lane" src="/images/lanes/white-support.png"> <span>Thresh</span></div>
+  </div>
+</div>
+<div class="wf-champion__data__items data-block inactive" data-guide-id="280">
+  <div class="section core"><div class="name">Trinity Force</div><div class="name">Sterak&#039;s Gage</div></div>
+  <div class="section boots"><div class="name">Plated Steelcaps</div></div>
+</div>
+<div class="wf-champion__data__spells data-block inactive" data-guide-id="280">
+  <img src="/images/summoners/smite.png" alt="Smite">
+  <img class="keystone" src="/images/runes/phase-rush.png" alt="Phase Rush">
+</div>
+<div class="skills-counters-block data-block  inactive" data-guide-id="280">
+  <div class="data-mod counters-mod counters">
+    <div class="ico-holder"><img class="lane" src="/images/lanes/white-jungle.png"> <span>Vi</span></div>
+  </div>
+</div>
 """
 
 ITEM_LIST = """
@@ -72,6 +98,18 @@ RUNE_LIST = """
   </div>
 </div>
 <div class="wf-tier-list__tiers__sidebar"></div>
+"""
+
+
+WRMETA_ITEMS = """
+<div class="bild-img-short"><p>
+  <b class="iname">Stridebreaker</b><br><b class="cdr">Slows enemies nearby after a short dash</b><br><br>
+  <b class="istats"><i><img src="hp.png"></i> +400 Max Health</b><br>
+  <b class="istats"><i><img src="ad.png"></i> +40 Attack Damage</b><br><br>
+  <b class="istats2">Breaking Shockwave (Active):</b> Dash, dealing <i>100% AD</i> damage<br>
+  <i><img src="Gold_icon.png"></i> <b class="goldt">3100</b> <br>
+  <b class="cdr">Stridebreaker TIPS:</b> Good for fighters. </p></div>
+<div class="bild-img-short"><p><b class="iname">Sterak&#039;s Gage</b><br><b class="cdr">Shield when low</b></p></div>
 """
 
 
@@ -112,6 +150,23 @@ def test_parse_guide():
     assert build["runes"] == ["Conqueror", "Second Wind"]
 
 
+def test_parse_guides_per_lane():
+    builds = w.parse_guides(GUIDE)
+    assert list(builds) == ["baron", "jungle"]  # recommended lane first
+    assert builds["baron"]["countered_by"] == [
+        {"name": "Dr. Mundo", "position": "baron"},
+        {"name": "Malphite", "position": "baron"},
+    ]
+    assert builds["baron"]["synergies"] == [
+        {"name": "Lillia", "position": "jungle"},
+        {"name": "Thresh", "position": "support"},
+    ]
+    assert builds["jungle"]["core"] == ["Trinity Force", "Sterak's Gage"]
+    assert builds["jungle"]["spells"] == ["Smite"] and builds["jungle"]["runes"] == ["Phase Rush"]
+    assert builds["jungle"]["countered_by"] == [{"name": "Vi", "position": "jungle"}]
+    assert builds["jungle"]["situational"] == []
+
+
 def test_parse_guide_missing_sections():
     build = w.parse_guide("<html>nothing useful</html>")
     assert build["core"] == [] and build["situational"] == [] and build["runes"] == []
@@ -145,12 +200,13 @@ def offline_site(tmp_path, monkeypatch):
         "/rune-list": RUNE_LIST,
         "/guide/darius": GUIDE,
         "/guide/chogath": "<html>broken page</html>",
+        w.ITEM_DETAILS_URL: WRMETA_ITEMS,
     }
     requested, icons = [], []
 
     def fake_get(url):
         requested.append(url)
-        return pages[url.removeprefix(w.SITE)]
+        return pages[url] if url in pages else pages[url.removeprefix(w.SITE)]
 
     def fake_icon(url, path):
         icons.append((url, path))
@@ -178,7 +234,32 @@ def test_refresh_end_to_end(offline_site):
     downloaded = {str(path.relative_to(path.parents[1])).replace("\\", "/") for _, path in icons}
     assert {"champions/darius.png", "items/ruby-crystal.png", "runes/conqueror.png", "spells/flash.png"} <= downloaded
     assert {"lanes/baron.png", "lanes/dragon.png"} <= downloaded
-    assert all(url.startswith(w.SITE) for url in requested)
+    assert all(url.startswith((w.SITE, w.ITEM_DETAILS_URL)) for url in requested)
+    assert items["Stridebreaker"]["details"]["gold"] == 3100
+    assert items["Sterak's Gage"]["details"]["summary"] == "Shield when low"
+
+
+def test_parse_item_details():
+    details = w.parse_item_details(WRMETA_ITEMS)
+    assert details["stridebreaker"] == {
+        "summary": "Slows enemies nearby after a short dash",
+        "stats": ["+400 Max Health", "+40 Attack Damage"],
+        "effects": [{"name": "Breaking Shockwave (Active)", "text": "Dash, dealing 100% AD damage"}],
+        "gold": 3100,
+        "tip": "Good for fighters.",
+    }
+    assert "steraksgage" in details  # names are matched without punctuation
+
+
+def test_item_details_are_optional(offline_site, monkeypatch):
+    def fail(url):
+        raise OSError("WR-META is down")
+
+    monkeypatch.setattr(w, "get", fail)
+    items = {"Stridebreaker": {"name": "Stridebreaker"}}
+    logs = []
+    w.add_item_details(items, log=logs.append)
+    assert "details" not in items["Stridebreaker"] and "unavailable" in logs[0]
 
 
 def test_refresh_survives_a_broken_guide_page(offline_site):

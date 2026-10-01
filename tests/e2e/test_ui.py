@@ -146,3 +146,48 @@ def test_champion_without_build_shows_a_message(phone, open_server):
     expect(phone.locator("#core")).to_contain_text("No build available for Yuumi")
     phone.locator("#me").select_option("Thresh")  # the page still works afterwards
     expect(phone.locator("#core .item")).to_have_count(3)
+
+
+def test_counterpicks_group_your_champion_list(phone, open_server):
+    load(phone, open_server)
+    phone.locator("#me").select_option("Garen")  # your own pick is never in the opponent list
+    phone.locator("#vs").select_option("Darius")
+    group = phone.locator('#me optgroup[label="Strong against Darius"]')
+    expect(group).to_have_count(1)
+    assert {"Malphite", "Dr. Mundo", "Ornn"} & {o.split(" · ")[-1] for o in group.locator("option").all_inner_texts()}
+    expect(phone.locator('#me optgroup[label="Baron tier list"]')).to_have_count(1)  # general tier list still there
+
+
+def test_matchup_shows_who_counters_whom(phone, open_server):
+    load(phone, open_server)
+    phone.locator("#me").select_option("Garen")
+    phone.locator("#vs").select_option("Darius")
+    phone.locator("#me").select_option("Malphite")
+    expect(phone.locator("#matchupTags")).to_contain_text("You counter Darius")
+
+
+def test_build_follows_the_lane(phone, open_server):
+    load(phone, open_server)
+    phone.locator('.lane[data-pos="jungle"]').click()
+    phone.locator("#me").select_option("Darius")
+    expect(phone.locator('#core .item[data-slot="0"]')).to_contain_text("Trinity Force")  # Darius' jungle build
+
+
+def test_press_and_hold_shows_item_details(phone, open_server):
+    load(phone, open_server)
+    first = phone.locator('#core .item[data-slot="0"] [data-info]')
+    first.dispatch_event("pointerdown")
+    phone.wait_for_timeout(600)
+    first.dispatch_event("pointerup")
+    expect(phone.locator("#info")).to_be_visible()
+    expect(phone.locator("#infoBody")).to_contain_text("gold")
+    expect(phone.locator("#sheet")).to_be_hidden()  # the hold didn't also open the swap picker
+    phone.wait_for_timeout(500)  # a person's next tap
+    phone.locator("#infoClose").click()
+    expect(phone.locator("#info")).to_be_hidden()
+
+
+def test_right_click_shows_rune_details(phone, open_server):
+    load(phone, open_server)
+    phone.locator('.rune[data-rune-slot="0"] [data-info]').click(button="right")
+    expect(phone.locator("#infoBody")).to_contain_text("Keystone")

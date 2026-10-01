@@ -100,9 +100,17 @@ def test_check_for_update_reports_errors(monkeypatch):
     assert api_module.update_status["state"] == "error" and "network down" in api_module.update_status["message"]
 
 
+def test_first_refresh_allowed_right_after_boot(monkeypatch):
+    # On Linux, time.monotonic() is seconds since boot, so it can be small on a new server or CI machine.
+    monkeypatch.setattr(api_module, "check_for_update", lambda: None)
+    monkeypatch.setattr(api_module.time, "monotonic", lambda: 60.0)
+    monkeypatch.setattr(api_module, "_last_manual_refresh", float("-inf"))
+    assert client.post("/api/refresh").status_code == 202
+
+
 def test_refresh_endpoint_has_cooldown(monkeypatch):
     monkeypatch.setattr(api_module, "check_for_update", lambda: None)
-    monkeypatch.setattr(api_module, "_last_manual_refresh", 0.0)
+    monkeypatch.setattr(api_module, "_last_manual_refresh", float("-inf"))
     assert client.post("/api/refresh").status_code == 202
     assert client.post("/api/refresh").status_code == 429
 

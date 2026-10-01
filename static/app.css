@@ -142,3 +142,19 @@ footer { font-size: .72rem; color: var(--muted); text-align: center; padding: 8p
 .rune { cursor: pointer; }
 .rune.swapped img { outline: 2px solid var(--accent); outline-offset: 2px; }
 .pick .tier { display: inline-block; margin-bottom: 2px; }
+
+.tag.good { color: var(--t-b); border-color: currentColor; }
+.tag.bad { color: var(--t-splus); border-color: currentColor; }
+#synergies .strip img { width: 28px; height: 28px; border-radius: 7px; }
+#laneNote { margin: 0 0 8px; font-size: .78rem; }
+
+/* Press-and-hold details */
+[data-info] { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.info-panel { max-height: 70vh; }
+.info-title { display: flex; align-items: center; gap: 10px; }
+.info-title img, .info-title .badge { width: 40px; height: 40px; border-radius: 9px; }
+.info-summary { font-weight: 600; margin-top: 0; }
+.info-gold { color: var(--accent); font-weight: 700; margin: 4px 0; }
+.info-stats { margin: 6px 0 10px; }
+#infoBody p { margin: 6px 0; font-size: .9rem; }
+.hint-hold { font-size: .7rem; color: var(--muted); margin: 6px 0 0; }

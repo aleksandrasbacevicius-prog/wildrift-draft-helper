@@ -34,17 +34,29 @@ def get_champion(name: str) -> dict:
 
 
 @server.tool()
-def get_build(name: str) -> dict:
-    """Get the champion's current build: starting item, core items, boots, final build,
-    situational swaps (e.g. 'vs Healing: replace X with Y'), summoner spells and runes."""
-    return _safe(data.get_build, name)
+def get_build(name: str, position: str | None = None) -> dict:
+    """Get the champion's current build for a lane (baron, jungle, mid, dragon, support): starting item,
+    core items, boots, final build, situational swaps (e.g. 'vs Healing: replace X with Y'), summoner
+    spells, runes, and who counters them / synergises with them in that lane."""
+    return _safe(data.get_build, name, position)
 
 
 @server.tool()
-def get_matchup(my_champion: str, enemy: str) -> dict:
-    """Get lane matchup info: the enemy's tiers, strengths, weaknesses, how to play against them,
-    damage type and whether they heal. Tips exist only for some champions (see has_tips)."""
-    return _safe(data.get_matchup, my_champion, enemy)
+def get_matchup(my_champion: str, enemy: str, position: str | None = None) -> dict:
+    """Get lane matchup info: whether either champion counters the other, the enemy's tiers, strengths,
+    weaknesses, how to play against them, damage type and whether they heal.
+    Hand-written tips exist only for some champions (see has_tips)."""
+    return _safe(data.get_matchup, my_champion, enemy, position)
+
+
+@server.tool()
+def get_counters(champion: str, position: str | None = None) -> list[dict] | dict:
+    """List champions that are strong against (counter) this champion in a lane, best tier first."""
+    try:
+        data.get_champion(champion)
+    except data.UnknownChampionError as e:
+        return {"error": e.args[0]}
+    return [{"name": c["name"], "tiers": c["positions"]} for c in data.strong_against(champion, position)]
 
 
 @server.tool()

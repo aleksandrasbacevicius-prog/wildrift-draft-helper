@@ -12,7 +12,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, StringConstraints
@@ -122,7 +122,9 @@ def get_usage(user: str = Depends(require_access)) -> dict:
     return ai_usage.status(user)
 
 
-_last_manual_refresh = 0.0
+# Never refreshed yet. Not 0.0: on Linux the monotonic clock starts near 0 at boot, so a freshly started
+# server or CI machine would otherwise look like it refreshed moments ago.
+_last_manual_refresh = float("-inf")
 
 
 @app.post("/api/refresh", status_code=202, dependencies=protected)
@@ -145,10 +147,14 @@ def list_champions(position: str | None = None) -> list[dict]:
         _no_data()
 
 
+Position = Annotated[str | None, Query(pattern="^(baron|jungle|mid|dragon|support)$")]
+
+
 @app.get("/api/champions/{name}/build")
-def get_build(name: str) -> dict:
+def get_build(name: str, position: Position = None) -> dict:
+    """The build for that lane, or the champion's recommended lane if they have no separate build for it."""
     try:
-        return _with_item_icons(data.get_build(name))
+        return _with_item_icons(data.get_build(name, position))
     except data.UnknownChampionError as e:
         raise HTTPException(status_code=404, detail=e.args[0]) from e
     except data.NoDataError:
@@ -156,9 +162,9 @@ def get_build(name: str) -> dict:
 
 
 @app.get("/api/matchup")
-def get_matchup(me: str, vs: str) -> dict:
+def get_matchup(me: str, vs: str, position: Position = None) -> dict:
     try:
-        return data.get_matchup(me, vs)
+        return data.get_matchup(me, vs, position)
     except data.UnknownChampionError as e:
         raise HTTPException(status_code=404, detail=e.args[0]) from e
     except data.NoDataError:
@@ -186,18 +192,32 @@ class Preferences(BaseModel):
     runes: list[Name] = Field(min_length=1, max_length=8)
 
 
-@app.get("/api/preferences/{champion}")
-def get_preferences(champion: str, request: Request) -> dict:
+@app.get("/api/counters/{champion}")
+def get_counters(champion: str, position: Position = None) -> list[dict]:
+    """Champions that are strong against this one in that lane (counterpicks)."""
     try:
-        return {"saved": data.get_preferences(identify(request), champion)}
+        data.get_champion(champion)
+        return data.strong_against(champion, position)
+    except data.UnknownChampionError as e:
+        raise HTTPException(status_code=404, detail=e.args[0]) from e
+    except data.NoDataError:
+        _no_data()
+
+
+@app.get("/api/preferences/{champion}")
+def get_preferences(champion: str, request: Request, position: Position = None) -> dict:
+    try:
+        return {"saved": data.get_preferences(identify(request), champion, position)}
     except data.UnknownChampionError as e:
         raise HTTPException(status_code=404, detail=e.args[0]) from e
 
 
 @app.put("/api/preferences/{champion}")
-def save_preferences(champion: str, body: Preferences, user: str = Depends(write_rate_limit)) -> dict:
+def save_preferences(
+    champion: str, body: Preferences, position: Position = None, user: str = Depends(write_rate_limit)
+) -> dict:
     try:
-        return {"saved": data.save_preferences(user, champion, body.core, body.runes)}
+        return {"saved": data.save_preferences(user, champion, body.core, body.runes, position)}
     except (data.UnknownChampionError, data.UnknownItemError, data.UnknownRuneError) as e:
         raise HTTPException(status_code=404, detail=e.args[0]) from e
     except ValueError as e:
@@ -205,9 +225,9 @@ def save_preferences(champion: str, body: Preferences, user: str = Depends(write
 
 
 @app.delete("/api/preferences/{champion}")
-def reset_preferences(champion: str, user: str = Depends(write_rate_limit)) -> dict:
+def reset_preferences(champion: str, position: Position = None, user: str = Depends(write_rate_limit)) -> dict:
     try:
-        data.reset_preferences(user, champion)
+        data.reset_preferences(user, champion, position)
     except data.UnknownChampionError as e:
         raise HTTPException(status_code=404, detail=e.args[0]) from e
     return {"saved": None}

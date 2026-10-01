@@ -106,16 +106,67 @@ def get_champion(name: str) -> dict:
     }
 
 
-def get_build(name: str) -> dict:
+def get_build(name: str, position: str | None = None) -> dict:
+    """The champion's build for a lane. Falls back to their recommended lane's build when they have
+    no separate build for that lane. "position" in the result says which lane the build is for."""
     champ = _find(name)
-    if not champ.get("build"):
+    builds = champ.get("builds") or {}
+    if position in builds:
+        build, used = builds[position], position
+    elif champ.get("build"):
+        build = champ["build"]
+        used = next((pos for pos, b in builds.items() if b is build or b == build), None)
+    else:
         raise UnknownChampionError(f"No build available for {champ['name']}")
-    return {"name": champ["name"], **champ["build"], "patch": meta()["patch"]}
-
-
-def get_matchup(my_champion: str, enemy: str) -> dict:
-    mine, theirs = get_champion(my_champion), get_champion(enemy)
     return {
+        "name": champ["name"],
+        "position": used,
+        "countered_by": [],
+        "synergies": [],
+        **build,
+        "patch": meta()["patch"],
+    }
+
+
+def _names(entries: list[dict]) -> list[str]:
+    return [e["name"] for e in entries]
+
+
+def strong_against(enemy: str, position: str | None = None) -> list[dict]:
+    """Champions listed as countering `enemy` in that lane, with their tiers, best tier first.
+    Only champions in the current champion list are returned."""
+    try:
+        counters = get_build(enemy, position)["countered_by"]
+    except UnknownChampionError:
+        return []
+    result = []
+    for entry in counters:
+        name = _known_name(entry["name"])
+        if name:
+            champ = _find(name)
+            result.append({"name": name, "icon": champ["icon"], "positions": champ["positions"]})
+    lane = position or ""
+    return sorted(result, key=lambda c: TIER_ORDER.get(c["positions"].get(lane, ""), 9))
+
+
+def get_matchup(my_champion: str, enemy: str, position: str | None = None) -> dict:
+    mine, theirs = get_champion(my_champion), get_champion(enemy)
+
+    def counter_names(name: str) -> list[str]:
+        try:
+            return _names(get_build(name, position)["countered_by"])
+        except UnknownChampionError:
+            return []
+
+    try:
+        my_synergies = get_build(my_champion, position)["synergies"]
+    except UnknownChampionError:
+        my_synergies = []
+    return {
+        "enemy_countered_by": counter_names(theirs["name"]),
+        "you_counter_enemy": mine["name"] in counter_names(theirs["name"]),
+        "enemy_counters_you": theirs["name"] in counter_names(mine["name"]),
+        "your_synergies": my_synergies,
         "you": mine["name"],
         "enemy": theirs["name"],
         "enemy_tiers": theirs["positions"],
@@ -184,10 +235,10 @@ def resolve_rune(name: str) -> str:
     raise UnknownRuneError(f"'{name}' is not a known rune")
 
 
-def validate_runes(champion: str, runes: list[str]) -> list[str]:
+def validate_runes(champion: str, runes: list[str], position: str | None = None) -> list[str]:
     """Check a rune page: same number of runes as the build, keystone first, minors after, no repeats.
     Row rules inside each tree aren't known, so those aren't checked."""
-    expected = len(get_build(champion)["runes"])
+    expected = len(get_build(champion, position)["runes"])
     names = [resolve_rune(r) for r in runes]
     if len(names) != expected:
         raise ValueError(f"Expected {expected} runes, got {len(names)}")
@@ -202,14 +253,14 @@ def validate_runes(champion: str, runes: list[str]) -> list[str]:
     return names
 
 
-def swap_core_item(champion: str, remove: str, add: str) -> dict:
+def swap_core_item(champion: str, remove: str, add: str, position: str | None = None) -> dict:
     """Return the champion's build with one core item replaced by another."""
-    return _swap(get_build(champion), remove, add)
+    return _swap(get_build(champion, position), remove, add)
 
 
-def apply_swaps(champion: str, swaps: list[tuple[str, str]]) -> dict:
+def apply_swaps(champion: str, swaps: list[tuple[str, str]], position: str | None = None) -> dict:
     """Apply several (remove, add) swaps in order to the champion's build."""
-    build = get_build(champion)
+    build = get_build(champion, position)
     for remove, add in swaps:
         build = _swap(build, remove, add)
     return build
@@ -271,26 +322,35 @@ def _all_prefs(user: str) -> dict:
     return _read(path) if path.exists() else {}
 
 
-def get_preferences(user: str | None, champion: str) -> dict | None:
-    """A user's saved core items and runes for a champion, or None."""
+def _prefs_key(champion: str, position: str | None) -> str:
+    """Saved builds are per champion per lane, e.g. "Darius@jungle"."""
+    build = get_build(champion, position)
+    return f"{build['name']}@{build['position']}" if build["position"] else build["name"]
+
+
+def get_preferences(user: str | None, champion: str, position: str | None = None) -> dict | None:
+    """A user's saved core items and runes for a champion in a lane, or None."""
     if not user:
         return None
-    saved = _all_prefs(user).get(_find(champion)["name"])
+    try:
+        saved = _all_prefs(user).get(_prefs_key(champion, position))
+    except UnknownChampionError:
+        return None
     if not saved:
         return None
     # A patch can remove items or runes or change the build's shape; then the saved build is dropped.
     try:
-        build = get_build(champion)
+        build = get_build(champion, position)
         items_ok = all(i in _wrf()["items"] for i in saved["core"]) and len(saved["core"]) == len(build["core"])
-        validate_runes(champion, saved["runes"])
+        validate_runes(champion, saved["runes"], position)
     except (UnknownChampionError, UnknownRuneError, ValueError, KeyError):
         return None
     return saved if items_ok else None
 
 
-def save_preferences(user: str, champion: str, core: list[str], runes: list[str]) -> dict:
-    """Save a user's own core items and runes for a champion (validated like swaps)."""
-    build = get_build(champion)
+def save_preferences(user: str, champion: str, core: list[str], runes: list[str], position: str | None = None) -> dict:
+    """Save a user's own core items and runes for a champion in a lane (validated like swaps)."""
+    build = get_build(champion, position)
     core_items = [resolve_item(i) for i in core]
     if len(core_items) != len(build["core"]) or len(set(core_items)) != len(core_items):
         raise ValueError(f"Core needs {len(build['core'])} different items")
@@ -298,13 +358,14 @@ def save_preferences(user: str, champion: str, core: list[str], runes: list[str]
     if boots:
         raise ValueError(f"Boots can't be core items: {', '.join(boots)}")
     prefs = _all_prefs(user)
-    prefs[build["name"]] = {"core": core_items, "runes": validate_runes(build["name"], runes)}
+    key = _prefs_key(champion, position)
+    prefs[key] = {"core": core_items, "runes": validate_runes(build["name"], runes, position)}
     PREFS_DIR.mkdir(parents=True, exist_ok=True)
     _prefs_file(user).write_text(json.dumps(prefs, indent=1), encoding="utf-8")
-    return prefs[build["name"]]
+    return prefs[key]
 
 
-def reset_preferences(user: str, champion: str) -> None:
+def reset_preferences(user: str, champion: str, position: str | None = None) -> None:
     prefs = _all_prefs(user)
-    if prefs.pop(_find(champion)["name"], None) is not None:
+    if prefs.pop(_prefs_key(champion, position), None) is not None:
         _prefs_file(user).write_text(json.dumps(prefs, indent=1), encoding="utf-8")

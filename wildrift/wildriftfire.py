@@ -25,7 +25,9 @@ SITE = "https://www.wildriftfire.com"
 HEADERS = {"User-Agent": "wildrift-draft-helper (personal, non-commercial)"}
 REQUEST_DELAY = 1.0  # seconds between page requests
 # Scraped pages can point anywhere, so only these hosts are ever contacted.
-ALLOWED_HOSTS = {"www.wildriftfire.com", "wildriftfire.com", "www.mobafire.com", "mobafire.com"}
+ALLOWED_HOSTS = {"www.wildriftfire.com", "wildriftfire.com", "www.mobafire.com", "mobafire.com", "wr-meta.com"}
+# Item stats and descriptions come from WR-META's public item list (its robots.txt allows /items/).
+ITEM_DETAILS_URL = "https://wr-meta.com/items/"
 MAX_PAGE_BYTES = 3 * 1024 * 1024
 MAX_IMAGE_BYTES = 512 * 1024
 MAX_AGE_DAYS = 7  # tier lists move within a patch, so refresh weekly anyway
@@ -86,27 +88,95 @@ def _items_in(section: str) -> list[str]:
     return [html.unescape(n).strip() for n in re.findall(r'<div class="name">([^<]+)', section)]
 
 
-def parse_guide(page: str) -> dict:
+# Lane names in image file names on guide pages -> in-game positions
+LANE_IMAGES = {
+    "solo": "baron",
+    "baron": "baron",
+    "jungle": "jungle",
+    "mid": "mid",
+    "duo": "dragon",
+    "adc": "dragon",
+    "dragon": "dragon",
+    "support": "support",
+}
+
+
+def _champions_in(section: str) -> list[dict]:
+    """Champion entries in a counters/synergies list: name plus the lane they're listed for."""
+    found = []
+    for lane, name in re.findall(r"/images/lanes/white-([a-z]+)\.png.*?<span>([^<]+)</span>", section, re.S):
+        found.append({"name": html.unescape(name).strip(), "position": LANE_IMAGES.get(lane, lane)})
+    return found
+
+
+def _parse_build(blocks: dict[str, str]) -> dict:
+    """One lane's build from that lane's page blocks (items, spells, situational, counters)."""
     build: dict = {}
-    block = page[page.find("wf-champion__data__items") : page.find("wf-champion__data__spells")]
+    items = blocks.get("items", "")
     for name in ("starting", "core", "boots", "final"):
-        m = re.search(rf'<div class="section {name}">(.*?)(?=<div class="section |$)', block, re.S)
+        m = re.search(rf'<div class="section {name}">(.*?)(?=<div class="section |$)', items, re.S)
         build[name] = _items_in(m.group(1)) if m else []
 
     situational = []
-    sit = page[page.find("wf-champion__data__situational") : page.find("skills-counters-block")]
     for label, body in re.findall(
-        r'<span class="situation"[^>]*>([^<]+)</span>(.*?)(?=<span class="situation"|$)', sit, re.S
+        r'<span class="situation"[^>]*>([^<]+)</span>(.*?)(?=<span class="situation"|$)',
+        blocks.get("situational", ""),
+        re.S,
     ):
-        items = _items_in(body)
-        if len(items) >= 2:
-            situational.append({"when": html.unescape(label).strip(), "replace": items[0], "with": items[1]})
+        found = _items_in(body)
+        if len(found) >= 2:
+            situational.append({"when": html.unescape(label).strip(), "replace": found[0], "with": found[1]})
     build["situational"] = situational
 
-    spells = page[page.find("wf-champion__data__spells") : page.find("wf-champion__data__situational")]
+    spells = blocks.get("spells", "")
     build["spells"] = [html.unescape(n) for n in re.findall(r"/images/summoners/[^\"]+\" alt=\"([^\"]+)\"", spells)]
     build["runes"] = [html.unescape(n) for n in re.findall(r"/images/runes/[^\"]+\" alt=\"([^\"]+)\"", spells)]
+
+    counters = blocks.get("counters", "")
+    countered = re.search(r"counters-mod counters\"(.*?)(?=counters-mod synergies|$)", counters, re.S)
+    synergies = re.search(r"counters-mod synergies\"(.*)", counters, re.S)
+    build["countered_by"] = _champions_in(countered.group(1)) if countered else []
+    build["synergies"] = _champions_in(synergies.group(1)) if synergies else []
     return build
+
+
+BLOCK_KINDS = {
+    "wf-champion__data__items": "items",
+    "wf-champion__data__spells": "spells",
+    "wf-champion__data__situational": "situational",
+    "skills-counters-block": "counters",
+}
+
+
+def parse_guides(page: str) -> dict[str, dict]:
+    """Every lane's build on a champion page, keyed by position. The page's recommended lane comes first."""
+    # Which guide id belongs to which lane, from the lane selector ("Solo Build", "Jungle Build", ...)
+    lanes = {}
+    for guide_id, lane in re.findall(
+        r'<span[^>]*data-guide-id="(\d+)"[^>]*>\s*<img src="/images/lanes/white-([a-z]+)\.png">', page
+    ):
+        lanes.setdefault(guide_id, LANE_IMAGES.get(lane, lane))
+
+    # Each block is tagged with its guide id; it runs until the next block starts.
+    markers = list(re.finditer(r'<div class="([^"]*?)\s*data-block[^"]*"\s*data-guide-id="(\d+)"', page))
+    blocks: dict[str, dict[str, str]] = {}
+    for i, m in enumerate(markers):
+        kind = next((k for cls, k in BLOCK_KINDS.items() if cls in m.group(1)), None)
+        if kind:
+            end = markers[i + 1].start() if i + 1 < len(markers) else len(page)
+            blocks.setdefault(m.group(2), {})[kind] = page[m.start() : end]
+
+    builds = {}
+    for guide_id, parts in blocks.items():
+        position = lanes.get(guide_id, f"guide-{guide_id}")
+        builds.setdefault(position, _parse_build(parts))
+    return builds
+
+
+def parse_guide(page: str) -> dict:
+    """The recommended (first) build on a champion page."""
+    builds = parse_guides(page)
+    return next(iter(builds.values())) if builds else _parse_build({})
 
 
 def parse_item_list(page: str) -> dict:
@@ -119,6 +189,56 @@ def parse_item_list(page: str) -> dict:
         name = html.unescape(name).strip()
         items[name] = {"name": name, "categories": [c for c in categories.split(",") if c], "icon_url": SITE + img}
     return items
+
+
+def _text(fragment: str) -> str:
+    """HTML fragment to plain text."""
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", fragment))).strip()
+
+
+def _item_key(name: str) -> str:
+    return re.sub(r"[^a-z0-9]", "", name.lower())
+
+
+def parse_item_details(page: str) -> dict[str, dict]:
+    """Stats, effects, gold cost and a buying tip per item, from WR-META's item list."""
+    details = {}
+    for block in page.split('<div class="bild-img-short">')[1:]:
+        name = re.search(r'<b class="iname">(.*?)</b>', block, re.S)
+        if not name:
+            continue
+        name = _text(name.group(1))
+        summary = re.search(r'<b class="iname">.*?</b>\s*<br>\s*<b class="cdr">(.*?)</b>', block, re.S)
+        stats = [_text(s) for s in re.findall(r'<b class="istats">(.*?)</b>', block, re.S)]
+        effects = []
+        for label, body in re.findall(r'<b class="istats2">(.*?)</b>(.*?)(?=<br>|<b class="istats2">|$)', block, re.S):
+            effects.append({"name": _text(label).rstrip(":"), "text": _text(body)})
+        gold = re.search(r'<b class="goldt">\s*(\d+)\s*</b>', block)
+        tip = re.search(r"TIPS:</b>(.*?)</p>", block, re.S)
+        details[_item_key(name)] = {
+            "summary": _text(summary.group(1)) if summary else "",
+            "stats": [s for s in stats if s],
+            "effects": [e for e in effects if e["text"]],
+            "gold": int(gold.group(1)) if gold else None,
+            "tip": _text(tip.group(1)) if tip else "",
+        }
+    return details
+
+
+def add_item_details(items: dict, log=print) -> None:
+    """Attach WR-META's stats and descriptions to our items, matched by name. Optional: failures are logged."""
+    try:
+        details = parse_item_details(get(ITEM_DETAILS_URL))
+    except Exception as e:
+        log(f"Item details unavailable ({e})")
+        return
+    matched = 0
+    for name, item in items.items():
+        found = details.get(_item_key(name))
+        if found:
+            item["details"] = found
+            matched += 1
+    log(f"Item details for {matched}/{len(items)} items")
 
 
 def parse_rune_list(page: str) -> dict:
@@ -198,19 +318,22 @@ def refresh(log=print) -> dict:
     for i, champ in enumerate(champions.values(), 1):
         time.sleep(REQUEST_DELAY)
         try:
-            champ["build"] = parse_guide(get(f"{SITE}/guide/{champ['guide']}"))
-            if not champ["build"]["core"]:
+            builds = {pos: b for pos, b in parse_guides(get(f"{SITE}/guide/{champ['guide']}")).items() if b["core"]}
+            if not builds:
                 raise ValueError("no core items found on the page")
+            champ["builds"] = builds
+            champ["build"] = next(iter(builds.values()))  # the page's recommended lane
         except Exception as e:  # one broken page shouldn't stop the refresh
             log(f"  {champ['name']}: build failed ({e})")
-            champ["build"] = None
+            champ["build"], champ["builds"] = None, {}
         if i % 20 == 0:
             log(f"  builds {i}/{len(champions)}")
 
     # Builds can use items missing from the item list (e.g. starting items like Ruby Crystal).
-    for champ in champions.values():
+    all_builds = [b for c in champions.values() for b in (c.get("builds") or {}).values()]
+    for build in all_builds:
         for section in ("starting", "core", "boots", "final"):
-            for name in (champ["build"] or {}).get(section, []):
+            for name in build.get(section, []):
                 if name not in items:
                     items[name] = {"name": name, "categories": [], "icon_url": f"{SITE}/images/items/{slug(name)}.png"}
 
@@ -227,11 +350,11 @@ def refresh(log=print) -> dict:
     download_lane_icons()
 
     # Runes appear in builds and in situational swaps (e.g. "vs Burst: Conqueror -> Aftershock").
-    rune_names = set(runes) | {r for c in champions.values() for r in (c["build"] or {}).get("runes", [])}
+    rune_names = set(runes) | {r for b in all_builds for r in b.get("runes", [])}
     rune_names |= {
         name
-        for c in champions.values()
-        for s in (c["build"] or {}).get("situational", [])
+        for b in all_builds
+        for s in b.get("situational", [])
         for name in (s["replace"], s["with"])
         if name not in items
     }
@@ -240,13 +363,15 @@ def refresh(log=print) -> dict:
             _download_icon(f"{SITE}/images/runes/{slug(rune)}.png", ICON_DIR / "runes" / f"{slug(rune)}.png")
         except Exception as e:
             log(f"  icon for rune {rune} failed ({e})")
-    for spell in {s for c in champions.values() for s in (c["build"] or {}).get("spells", [])}:
+    for spell in {s for b in all_builds for s in b.get("spells", [])}:
         try:
             _download_icon(f"{SITE}/images/summoners/{slug(spell)}.png", ICON_DIR / "spells" / f"{slug(spell)}.png")
         except Exception as e:
             log(f"  icon for spell {spell} failed ({e})")
 
     meta = {"patch": patch, "fetched": datetime.now().isoformat(timespec="seconds"), "source": SITE}
+    add_item_details(items, log)
+
     # Write each file to a temp name first, then swap it in, so the app never reads a half-written file.
     # meta.json goes last: it marks the refresh as complete.
     for name, content in (("champions", champions), ("items", items), ("runes", runes), ("meta", meta)):

@@ -34,3 +34,11 @@ def test_get_items_and_runes():
 
 def test_matchup_has_tips_flag():
     assert mcp.get_matchup("Darius", "Garen")["has_tips"] is True
+
+
+def test_get_counters_and_lane_build():
+    from wildrift import mcp_server as mcp
+
+    assert {c["name"] for c in mcp.get_counters("Darius", "baron")} <= {"Dr. Mundo", "Malphite", "Ornn"}
+    assert "error" in mcp.get_counters("Nobody")
+    assert mcp.get_build("Darius", "jungle")["position"] == "jungle"

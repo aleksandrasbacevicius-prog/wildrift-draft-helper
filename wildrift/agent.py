@@ -28,7 +28,8 @@ CACHE_SIZE = 200
 
 SYSTEM_PROMPT = """You help a Wild Rift player adjust their build during champion select.
 
-Use the tools to fetch the player's current build for this patch and the enemy champions' info.
+Use the tools to fetch the player's current build for this patch and lane, and the enemy champions' info,
+including whether the lane opponent counters the player (get_matchup).
 The build includes items, runes and situational swaps for both (e.g. "vs Healing: replace X with Y").
 Decide which swaps apply to this enemy team, and whether anything else should change. Consider damage
 types (mostly AD vs AP), healing (anti-heal), crowd control (tenacity), burst and tankiness.
@@ -76,9 +77,9 @@ def tailor_build(
     swaps = swaps or []
     for name in [my_champion, *enemies]:
         data.get_champion(name)  # fail fast on unknown names, before any API call
-    locked_build = data.apply_swaps(my_champion, swaps) if swaps else None
-    chosen_runes = data.validate_runes(my_champion, runes) if runes else None
-    if chosen_runes == data.get_build(my_champion)["runes"]:
+    locked_build = data.apply_swaps(my_champion, swaps, position) if swaps else None
+    chosen_runes = data.validate_runes(my_champion, runes, position) if runes else None
+    if chosen_runes == data.get_build(my_champion, position)["runes"]:
         chosen_runes = None  # unchanged from the recommended page
 
     key = (

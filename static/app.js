@@ -11,6 +11,7 @@ const itemGroupOrder = () => {
   return [...first, ...ITEM_GROUPS.filter((g) => !first.includes(g)), "Other"];
 };
 const state = {
+  counters: [], vsName: "",
   position: "baron", all: [], byPosition: {}, items: [], profile: {},
   build: null, original: [], poolDraft: new Set(),
 };
@@ -68,7 +69,12 @@ const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", 
 const laneIcon = (p) => `/icons/wrf/lanes/${p}.png`;
 const tierBadge = (t) => (t ? `<span class="tier ${t}">${t}</span>` : "");
 const champ = (name) => state.all.find((c) => c.name === name);
-const icon = (entry) => (entry.icon ? `<img src="${entry.icon}" alt="" title="${escapeHtml(entry.name)}">` : `<span class="badge" title="${escapeHtml(entry.name)}">${escapeHtml(entry.name.slice(0, 2))}</span>`);
+const icon = (entry) => {
+  const name = escapeHtml(entry.name);
+  return entry.icon
+    ? `<img src="${entry.icon}" alt="" title="${name}" data-info="${name}">`
+    : `<span class="badge" title="${name}" data-info="${name}">${escapeHtml(entry.name.slice(0, 2))}</span>`;
+};
 
 // Small Markdown subset for the agent's reply: headings, bold, bullet and numbered lists.
 function renderMarkdown(md) {
@@ -97,21 +103,38 @@ function renderLanes() {
     `<button class="lane" data-pos="${p}" aria-pressed="${p === state.position}"><img src="${laneIcon(p)}" alt="">${label}</button>`).join("");
 }
 
-function option(c, position, selected) {
+function option(c, position, selected, suffix = "") {
   const tier = c.positions[position];
-  return `<option value="${escapeHtml(c.name)}" ${c.name === selected ? "selected" : ""}>${tier ? tier + " · " : ""}${escapeHtml(c.name)}</option>`;
+  return `<option value="${escapeHtml(c.name)}" ${c.name === selected ? "selected" : ""}>${tier ? tier + " · " : ""}${escapeHtml(c.name)}${suffix}</option>`;
 }
 
 function fillMe(selected) {
   const pos = state.position, pool = state.profile[pos] || [];
   const ranked = state.byPosition[pos] || [];
+  const counterNames = state.counters.map((c) => c.name);
   const mine = pool.map(champ).filter(Boolean);
-  const others = ranked.filter((c) => !pool.includes(c.name));
-  selected = selected && (pool.includes(selected) || ranked.some((c) => c.name === selected)) ? selected : (mine[0] || ranked[0] || state.all[0]).name;
+  const strong = state.counters.filter((c) => !pool.includes(c.name));
+  const others = ranked.filter((c) => !pool.includes(c.name) && !counterNames.includes(c.name));
+  const known = [...mine, ...strong, ...others].map((c) => c.name);
+  selected = known.includes(selected) ? selected : (mine[0] || ranked[0] || state.all[0]).name;
+  const vs = state.vsName;
+  const mark = (c) => (counterNames.includes(c.name) ? " (counter)" : "");
   $("me").innerHTML =
-    (mine.length ? `<optgroup label="My pool">${mine.map((c) => option(c, pos, selected)).join("")}</optgroup>` : "") +
+    (mine.length ? `<optgroup label="My pool">${mine.map((c) => option(c, pos, selected, mark(c))).join("")}</optgroup>` : "") +
+    (strong.length && vs ? `<optgroup label="Strong against ${escapeHtml(vs)}">${strong.map((c) => option(c, pos, selected)).join("")}</optgroup>` : "") +
     `<optgroup label="${LANES[pos]} tier list">${others.map((c) => option(c, pos, selected)).join("")}</optgroup>`;
   $("me").value = selected;
+}
+
+// Who is strong against the lane opponent, used to group "Your champion" for counterpicking.
+async function loadCounters() {
+  state.vsName = $("vs").value;
+  try {
+    state.counters = await api(`/api/counters/${encodeURIComponent(state.vsName)}?position=${state.position}`);
+  } catch {
+    state.counters = [];
+  }
+  fillMe($("me").value);
 }
 
 function fillVs(selected) {
@@ -157,6 +180,9 @@ function renderBuild() {
         aria-label="Swap rune ${escapeHtml(r.name)}">${icon(r)}<span>${escapeHtml(r.name)}</span></div>`;
   }).join("");
   $("spells").innerHTML = [...b.spells, ...b.starting].map((x) => `${icon(x)}<span class="muted">${escapeHtml(x.name)}</span>`).join("");
+  const otherLane = b.position && b.position !== state.position;
+  $("laneNote").textContent = otherLane ? `No separate ${LANES[state.position]} build for ${b.name}; showing their ${LANES[b.position] || b.position} build.` : "";
+  $("laneNote").classList.toggle("hidden", !otherLane);
   const changed = isCustomised();
   $("buildState").textContent = changed ? (state.savedFor === b.name ? "Your saved build" : "Not saved yet") : "Recommended build";
   $("resetBuild").classList.toggle("hidden", !changed);
@@ -172,8 +198,8 @@ const runeByName = (name) => state.runeList.find((r) => r.name === name) || { na
 async function loadBuild() {
   const name = $("me").value;
   const [build, prefs] = await Promise.all([
-    api(`/api/champions/${encodeURIComponent(name)}/build`),
-    api(`/api/preferences/${encodeURIComponent(name)}`, {}, true).catch(() => ({ saved: null })),
+    api(`/api/champions/${encodeURIComponent(name)}/build?position=${state.position}`),
+    api(`/api/preferences/${encodeURIComponent(name)}?position=${state.position}`, {}, true).catch(() => ({ saved: null })),
   ]);
   state.build = build;
   state.original = build.core.map((i) => i.name);
@@ -193,13 +219,13 @@ async function savePreferences() {
   const b = state.build;
   try {
     if (isCustomised()) {
-      await api(`/api/preferences/${encodeURIComponent(b.name)}`, {
+      await api(`/api/preferences/${encodeURIComponent(b.name)}?position=${state.position}`, {
         method: "PUT", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ core: b.core.map((i) => i.name), runes: b.runes.map((r) => r.name) }),
       });
       state.savedFor = b.name;
     } else {
-      await api(`/api/preferences/${encodeURIComponent(b.name)}`, { method: "DELETE" });
+      await api(`/api/preferences/${encodeURIComponent(b.name)}?position=${state.position}`, { method: "DELETE" });
       state.savedFor = null;
     }
   } catch (e) {
@@ -291,15 +317,23 @@ async function applyPick(name) {
 async function loadMatchup() {
   const me = $("me").value, vs = $("vs").value;
   $("matchupTitle").textContent = `Playing against ${vs}`;
-  const m = await api(`/api/matchup?me=${encodeURIComponent(me)}&vs=${encodeURIComponent(vs)}`);
+  const m = await api(`/api/matchup?me=${encodeURIComponent(me)}&vs=${encodeURIComponent(vs)}&position=${state.position}`);
   const tier = m.enemy_tiers[state.position];
   $("matchupTags").innerHTML =
+    (m.you_counter_enemy ? `<span class="tag good">You counter ${escapeHtml(vs)}</span>` : "") +
+    (m.enemy_counters_you ? `<span class="tag bad">${escapeHtml(vs)} counters you</span>` : "") +
     (tier ? `<span class="tag">${LANES[state.position]} ${tierBadge(tier)}</span>` : "") +
     (m.enemy_damage_type ? `<span class="tag ${m.enemy_damage_type}">${m.enemy_damage_type} damage</span>` : "") +
     (m.enemy_heals ? `<span class="tag">Heals: consider anti-heal</span>` : "");
   $("matchupTips").innerHTML = m.has_tips
     ? m.how_to_play_against_enemy.map((t) => `<li>${escapeHtml(t)}</li>`).join("")
     : `<li class="muted">No hand-written tips for ${escapeHtml(vs)} yet. The AI button can still help.</li>`;
+  $("synergies").innerHTML = m.your_synergies.length
+    ? `<h3>${escapeHtml(me)} pairs well with</h3><div class="strip">${m.your_synergies.map((s) => {
+        const c = champ(s.name);
+        return `${c ? `<img src="${c.icon}" alt="">` : ""}<span class="muted">${escapeHtml(s.name)} (${LANES[s.position] || s.position})</span>`;
+      }).join("")}</div>`
+    : "";
 }
 
 function updatePortraits() {
@@ -329,8 +363,10 @@ async function setPosition(pos) {
   try { localStorage.setItem("position", pos); } catch {}
   renderLanes();
   closePoolEditor();
+  state.counters = [];
   fillMe();
   fillVs();
+  await loadCounters();
   renderEnemies();
   await refreshView();
 }
@@ -441,6 +477,75 @@ async function checkForUpdate() {
   }, 3000);
 }
 
+
+// Press and hold (or right-click) an item or rune to see its details.
+const HOLD_MS = 450;
+let holdTimer = null;
+let suppressNextClick = false;
+
+function infoHtml(name) {
+  const item = state.items.find((i) => i.name === name);
+  if (item) {
+    const d = item.details;
+    if (!d) return `<p class="muted">No stats available for this item yet.</p>`;
+    return `
+      ${d.summary ? `<p class="info-summary">${escapeHtml(d.summary)}</p>` : ""}
+      ${d.gold ? `<p class="info-gold">${d.gold} gold</p>` : ""}
+      ${d.stats.length ? `<ul class="info-stats">${d.stats.map((x) => `<li>${escapeHtml(x)}</li>`).join("")}</ul>` : ""}
+      ${d.effects.map((e) => `<p><strong>${escapeHtml(e.name)}:</strong> ${escapeHtml(e.text)}</p>`).join("")}
+      ${d.tip ? `<p class="muted">${escapeHtml(d.tip)}</p>` : ""}`;
+  }
+  const rune = state.runeList.find((r) => r.name === name);
+  if (rune) {
+    const kind = rune.kind === "keystone" ? "Keystone" : `${rune.tree} rune`;
+    return `<p>${tierBadge(rune.tier)} ${escapeHtml(kind)}</p>
+      <p class="muted">Rune descriptions aren't available from our data sources yet.</p>`;
+  }
+  return null;
+}
+
+function showInfo(name) {
+  const body = infoHtml(name);
+  if (!body) return false;
+  const entry = state.items.find((i) => i.name === name) || state.runeList.find((r) => r.name === name);
+  $("infoTitle").innerHTML = `${icon({ ...entry, name })}<span>${escapeHtml(name)}</span>`;
+  $("infoBody").innerHTML = body;
+  $("info").classList.remove("hidden");
+  return true;
+}
+
+function closeInfo() {
+  $("info").classList.add("hidden");
+}
+
+function setUpHoldForInfo() {
+  const cancel = () => { clearTimeout(holdTimer); holdTimer = null; };
+  document.addEventListener("pointerdown", (e) => {
+    const target = e.target.closest("[data-info]");
+    if (!target || target.closest("#info")) return;
+    cancel();
+    holdTimer = setTimeout(() => {
+      holdTimer = null;
+      if (showInfo(target.dataset.info)) suppressNextClick = true;
+    }, HOLD_MS);
+  });
+  ["pointerup", "pointercancel", "pointerleave", "scroll"].forEach((t) => document.addEventListener(t, cancel, true));
+  // Some phones send no click after a long press; don't let the flag swallow the next real tap.
+  document.addEventListener("pointerup", () => suppressNextClick && setTimeout(() => (suppressNextClick = false), 400), true);
+  document.addEventListener("pointermove", (e) => { if (Math.abs(e.movementX) + Math.abs(e.movementY) > 6) cancel(); });
+  // A hold shouldn't also count as a tap (which would open the swap picker or pick an item).
+  document.addEventListener("click", (e) => {
+    if (suppressNextClick) { suppressNextClick = false; e.stopPropagation(); e.preventDefault(); }
+  }, true);
+  document.addEventListener("contextmenu", (e) => {
+    const target = e.target.closest("[data-info]");
+    if (target) { e.preventDefault(); cancel(); showInfo(target.dataset.info); }
+  });
+  $("infoClose").addEventListener("click", closeInfo);
+  $("info").addEventListener("click", (e) => e.target === $("info") && closeInfo());
+  document.addEventListener("keydown", (e) => e.key === "Escape" && closeInfo());
+}
+
 async function init() {
   const { busy, hasData } = await showMeta();
   if (!hasData) {
@@ -457,7 +562,7 @@ async function init() {
 
   $("lanes").addEventListener("click", (e) => { const b = e.target.closest(".lane"); if (b) setPosition(b.dataset.pos); });
   $("me").addEventListener("change", () => { fillVs($("vs").value); refreshView(); });
-  $("vs").addEventListener("change", () => refreshView({ build: false }));
+  $("vs").addEventListener("change", async () => { await loadCounters(); refreshView({ build: false }); });
   const openFrom = (e) => { const item = e.target.closest(".item"); if (item) openPicker("item", Number(item.dataset.slot)); };
   $("core").addEventListener("click", openFrom);
   $("core").addEventListener("keydown", (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), openFrom(e)));
@@ -483,6 +588,7 @@ async function init() {
   });
   $("savePool").addEventListener("click", savePool);
   $("tailor").addEventListener("click", tailor);
+  setUpHoldForInfo();
   $("checkUpdate").addEventListener("click", checkForUpdate);
   updateTokenLink();
   $("signOut").addEventListener("click", () => {
