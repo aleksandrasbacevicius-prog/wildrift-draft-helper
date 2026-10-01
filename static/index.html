@@ -174,6 +174,16 @@
 <script>
 const $ = (id) => document.getElementById(id);
 const LANES = { baron: "Baron", jungle: "Jungle", mid: "Mid", dragon: "Dragon", support: "Support" };
+const ITEM_GROUPS = ["Fighter", "Assassin", "Marksman", "Magic", "Defense", "Support"];
+// Item groups most relevant to each lane come first in the swap picker.
+const LANE_ITEM_FIRST = {
+  baron: ["Fighter", "Defense"], jungle: ["Fighter", "Assassin"], mid: ["Magic", "Assassin"],
+  dragon: ["Marksman"], support: ["Support", "Defense"],
+};
+const itemGroupOrder = () => {
+  const first = LANE_ITEM_FIRST[state.position] || [];
+  return [...first, ...ITEM_GROUPS.filter((g) => !first.includes(g)), "Other"];
+};
 const state = {
   position: "baron", all: [], byPosition: {}, items: [], profile: {},
   build: null, original: [], poolDraft: new Set(),
@@ -257,19 +267,20 @@ function renderEnemies() {
 
 function renderBuild() {
   const b = state.build;
-  const itemOptions = (selected) => itemGroupOrder().map((group) => {
-    const items = state.items.filter((i) => group === "Other"
-      ? !i.categories.some((c) => ITEM_GROUPS.includes(c)) && !i.categories.includes("Boots")
-      : i.categories.includes(group));
-    // An item can sit in several groups; only the first copy carries "selected".
-    const options = items.map((i) => {
-      const isSelected = i.name === selected && !selectedShown;
-      if (isSelected) selectedShown = true;
-      return `<option ${isSelected ? "selected" : ""}>${escapeHtml(i.name)}</option>`;
+  const itemOptions = (selected) => {
+    let selectedShown = false; // an item can sit in several groups; only the first copy is selected
+    return itemGroupOrder().map((group) => {
+      const items = state.items.filter((i) => group === "Other"
+        ? !i.categories.some((c) => ITEM_GROUPS.includes(c)) && !i.categories.includes("Boots")
+        : i.categories.includes(group));
+      const options = items.map((i) => {
+        const isSelected = i.name === selected && !selectedShown;
+        if (isSelected) selectedShown = true;
+        return `<option ${isSelected ? "selected" : ""}>${escapeHtml(i.name)}</option>`;
+      }).join("");
+      return items.length ? `<optgroup label="${group}">${options}</optgroup>` : "";
     }).join("");
-    return items.length ? `<optgroup label="${group}">${options}</optgroup>` : "";
-  }).join("");
-  let selectedShown;
+  };
   $("core").innerHTML = b.core.map((item, slot) => {
     const swapped = item.name !== state.original[slot];
     return `<div class="item ${swapped ? "swapped" : ""}">
