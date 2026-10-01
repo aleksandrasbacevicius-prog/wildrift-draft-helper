@@ -85,7 +85,8 @@ def test_pool_editor_saves(phone, open_server):
     load(phone, open_server)
     phone.locator('.lane[data-pos="mid"]').click()
     phone.locator("#editPool").click()
-    phone.locator('.pool-pick[data-name="Syndra"]').click()
+    phone.locator("#vs").select_option("Syndra")  # the opponent's champion is left out of your list
+    phone.locator('.pool-pick[data-name="Ahri"]').click()
     phone.locator("#savePool").click()
     expect(phone.locator('#me optgroup[label="My pool"] option')).to_have_count(1)
 
@@ -109,7 +110,7 @@ def test_token_is_asked_for_once(phone, secured_server):
     assert len(dialogs) == 1  # one prompt for two saves
     phone.reload()
     expect(phone.locator("#buildState")).to_have_text("Your saved build")  # remembered on this device
-    expect(phone.locator("#signOut")).to_have_text("Forget access token")
+    expect(phone.locator("#signOut")).to_have_text("Sign out on this phone")
     assert len(dialogs) == 1
 
 
@@ -124,10 +125,10 @@ def test_wrong_token_explains_and_stops_asking(phone, secured_server):
     load(phone, secured_server)
     phone.locator('#core .item[data-slot="0"]').click()
     phone.locator(".pick:not(.current):not([disabled])").first.click()
-    expect(phone.locator("#buildState")).to_contain_text("wasn't accepted")
+    expect(phone.locator("#buildState")).to_contain_text("isn't valid anymore")
     phone.locator('#core .item[data-slot="1"]').click()
     phone.locator(".pick:not(.current):not([disabled])").first.click()
-    expect(phone.locator("#buildState")).to_contain_text("Access token needed")
+    expect(phone.locator("#buildState")).to_contain_text("Sign-in needed")
     assert len(dialogs) == 1  # no prompt on every move
 
 
@@ -148,22 +149,51 @@ def test_champion_without_build_shows_a_message(phone, open_server):
     expect(phone.locator("#core .item")).to_have_count(3)
 
 
-def test_counterpicks_group_your_champion_list(phone, open_server):
+def test_counter_strip_under_the_opponent(phone, open_server):
     load(phone, open_server)
-    phone.locator("#me").select_option("Garen")  # your own pick is never in the opponent list
     phone.locator("#vs").select_option("Darius")
-    group = phone.locator('#me optgroup[label="Strong against Darius"]')
-    expect(group).to_have_count(1)
-    assert {"Malphite", "Dr. Mundo", "Ornn"} & {o.split(" · ")[-1] for o in group.locator("option").all_inner_texts()}
+    strip = phone.locator("#counterStrip")
+    expect(strip).to_contain_text("Counters to Darius")
+    names = set(strip.locator(".counter-pick").evaluate_all("els => els.map(e => e.dataset.champ)"))
+    assert names and names <= {"Malphite", "Dr. Mundo", "Ornn"}
     expect(phone.locator('#me optgroup[label="Baron tier list"]')).to_have_count(1)  # general tier list still there
+    assert "Darius" not in phone.locator("#me option").all_inner_texts()[0]  # can't pick the opponent's champion
 
 
-def test_matchup_shows_who_counters_whom(phone, open_server):
+def test_tapping_a_counter_plays_it_and_shows_the_verdict(phone, open_server):
     load(phone, open_server)
-    phone.locator("#me").select_option("Garen")
     phone.locator("#vs").select_option("Darius")
-    phone.locator("#me").select_option("Malphite")
-    expect(phone.locator("#matchupTags")).to_contain_text("You counter Darius")
+    phone.locator('.counter-pick[data-champ="Malphite"]').click()
+    expect(phone.locator("#me")).to_have_value("Malphite")
+    expect(phone.locator("#verdict")).to_contain_text("Malphite counters Darius")
+
+
+def test_verdict_warns_and_suggests_counters(phone, open_server):
+    load(phone, open_server)
+    phone.locator("#vs").select_option("Malphite")
+    phone.locator("#me").select_option("Darius")
+    expect(phone.locator("#verdict .bad")).to_contain_text("Malphite counters Darius")
+
+
+def test_personal_link_signs_in_without_typing(phone, secured_server):
+    dialogs = []
+    phone.on("dialog", lambda d: (dialogs.append(d.message), d.dismiss()))
+    phone.goto(f"{secured_server}/#key={TOKEN}")
+    expect(phone.locator("#core .item")).to_have_count(3)
+    expect(phone.locator("#whoami")).to_have_text("Signed in as chocoloco")
+    assert "#key" not in phone.url  # removed from the address bar
+    phone.locator('#core .item[data-slot="0"]').click()
+    phone.locator(".pick:not(.current):not([disabled])").first.click()
+    expect(phone.locator("#buildState")).to_have_text("Your saved build")
+    assert dialogs == []
+
+
+def test_hold_target_is_not_an_image(phone, open_server):
+    # iPhone shows its "save image" menu when an <img> is held; the hold target must be the box around it.
+    load(phone, open_server)
+    target = phone.locator('#core .item[data-slot="0"] [data-info]')
+    assert target.evaluate("el => el.tagName") == "SPAN"
+    assert target.locator("img").evaluate("el => getComputedStyle(el).pointerEvents") == "none"
 
 
 def test_build_follows_the_lane(phone, open_server):

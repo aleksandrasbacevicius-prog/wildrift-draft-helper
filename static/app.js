@@ -41,7 +41,7 @@ function askForToken() {
 
 function updateTokenLink() {
   const link = document.getElementById("signOut");
-  if (link) link.textContent = tokenStore.get() ? "Forget access token" : "Enter access token";
+  if (link) link.textContent = tokenStore.get() ? "Sign out on this phone" : "Enter access token";
 }
 
 async function api(path, options = {}, quiet = false) {
@@ -58,8 +58,8 @@ async function api(path, options = {}, quiet = false) {
     const hadToken = Boolean(tokenStore.get());
     tokenStore.set("");
     throw new Error(hadToken
-      ? "That access token wasn't accepted. Use \"Enter access token\" at the bottom of the page to try again."
-      : "Access token needed. Use \"Enter access token\" at the bottom of the page.");
+      ? "That sign-in isn't valid anymore. Ask for a new personal link, or use \"Enter access token\" at the bottom."
+      : "Sign-in needed. Open your personal link, or use \"Enter access token\" at the bottom of the page.");
   }
   if (!res.ok) throw new Error(body.detail || `Request failed (${res.status})`);
   return body;
@@ -71,9 +71,10 @@ const tierBadge = (t) => (t ? `<span class="tier ${t}">${t}</span>` : "");
 const champ = (name) => state.all.find((c) => c.name === name);
 const icon = (entry) => {
   const name = escapeHtml(entry.name);
-  return entry.icon
-    ? `<img src="${entry.icon}" alt="" title="${name}" data-info="${name}">`
-    : `<span class="badge" title="${name}" data-info="${name}">${escapeHtml(entry.name.slice(0, 2))}</span>`;
+  const inner = entry.icon
+    ? `<img src="${entry.icon}" alt="" draggable="false">`
+    : `<span class="badge">${escapeHtml(entry.name.slice(0, 2))}</span>`;
+  return `<span class="ico" title="${name}" data-info="${name}">${inner}</span>`;
 };
 
 // Small Markdown subset for the agent's reply: headings, bold, bullet and numbered lists.
@@ -109,21 +110,54 @@ function option(c, position, selected, suffix = "") {
 }
 
 function fillMe(selected) {
-  const pos = state.position, pool = state.profile[pos] || [];
+  const pos = state.position, pool = state.profile[pos] || [], vs = $("vs").value;
   const ranked = state.byPosition[pos] || [];
-  const counterNames = state.counters.map((c) => c.name);
-  const mine = pool.map(champ).filter(Boolean);
-  const strong = state.counters.filter((c) => !pool.includes(c.name));
-  const others = ranked.filter((c) => !pool.includes(c.name) && !counterNames.includes(c.name));
-  const known = [...mine, ...strong, ...others].map((c) => c.name);
-  selected = known.includes(selected) ? selected : (mine[0] || ranked[0] || state.all[0]).name;
-  const vs = state.vsName;
-  const mark = (c) => (counterNames.includes(c.name) ? " (counter)" : "");
+  const mine = pool.map(champ).filter((c) => c && c.name !== vs);
+  const others = ranked.filter((c) => !pool.includes(c.name) && c.name !== vs);
+  // Counters from another lane's list still need to be pickable from the strip.
+  const listed = new Set([...mine, ...others].map((c) => c.name));
+  const extra = state.counters.filter((c) => !listed.has(c.name) && c.name !== vs);
+  const known = [...mine, ...others, ...extra].map((c) => c.name);
+  selected = known.includes(selected) ? selected : (mine[0] || others[0] || extra[0] || state.all[0]).name;
   $("me").innerHTML =
-    (mine.length ? `<optgroup label="My pool">${mine.map((c) => option(c, pos, selected, mark(c))).join("")}</optgroup>` : "") +
-    (strong.length && vs ? `<optgroup label="Strong against ${escapeHtml(vs)}">${strong.map((c) => option(c, pos, selected)).join("")}</optgroup>` : "") +
-    `<optgroup label="${LANES[pos]} tier list">${others.map((c) => option(c, pos, selected)).join("")}</optgroup>`;
+    (mine.length ? `<optgroup label="My pool">${mine.map((c) => option(c, pos, selected)).join("")}</optgroup>` : "") +
+    `<optgroup label="${LANES[pos]} tier list">${others.map((c) => option(c, pos, selected)).join("")}</optgroup>` +
+    (extra.length ? `<optgroup label="Other counters">${extra.map((c) => option(c, pos, selected)).join("")}</optgroup>` : "");
   $("me").value = selected;
+}
+
+// "Counters to <opponent>": tappable icons under the opponent picker, your pool highlighted.
+function renderCounterStrip() {
+  const vs = $("vs").value, pool = state.profile[state.position] || [];
+  const counters = [...state.counters].sort((a, b) => pool.includes(b.name) - pool.includes(a.name));
+  $("counterStrip").classList.toggle("hidden", !counters.length);
+  $("counterStrip").innerHTML = counters.length
+    ? `<div class="strip-label">Counters to ${escapeHtml(vs)} <span class="plain">(tap to play)</span></div>
+       <div class="counter-row">${counters.map((c) => `
+         <button class="counter-pick ${pool.includes(c.name) ? "mine" : ""} ${c.name === $("me").value ? "chosen" : ""}" data-champ="${escapeHtml(c.name)}">
+           <img src="${c.icon}" alt="" draggable="false"><span>${escapeHtml(c.name)}</span>
+           ${tierBadge(c.positions[state.position])}${pool.includes(c.name) ? '<span class="pool-mark">your pool</span>' : ""}
+         </button>`).join("")}</div>`
+    : "";
+}
+
+// Verdict under your pick: who counters whom, with alternatives when you're the one countered.
+function renderVerdict(m) {
+  const me = $("me").value, vs = $("vs").value, pool = state.profile[state.position] || [];
+  let html = "";
+  if (m.you_counter_enemy) {
+    html = `<div class="verdict-line good">✓ ${escapeHtml(me)} counters ${escapeHtml(vs)}</div>`;
+  } else if (m.enemy_counters_you) {
+    const options = [...state.counters]
+      .filter((c) => c.name !== me)
+      .sort((a, b) => pool.includes(b.name) - pool.includes(a.name))
+      .slice(0, 3)
+      .map((c) => `${escapeHtml(c.name)}${c.positions[state.position] ? ` (${c.positions[state.position]})` : ""}`);
+    html = `<div class="verdict-line bad">✗ ${escapeHtml(vs)} counters ${escapeHtml(me)}</div>` +
+      (options.length ? `<div class="verdict-try">Try: ${options.join(", ")}</div>` : "");
+  }
+  $("verdict").innerHTML = html;
+  $("verdict").classList.toggle("hidden", !html);
 }
 
 // Who is strong against the lane opponent, used to group "Your champion" for counterpicking.
@@ -135,14 +169,13 @@ async function loadCounters() {
     state.counters = [];
   }
   fillMe($("me").value);
+  renderCounterStrip();
 }
 
 function fillVs(selected) {
+  // Fall back to every champion if this lane's tier list is empty.
   const ranked = state.byPosition[state.position] || [];
-  const me = $("me").value;
-  // Fall back to every champion if this lane's tier list has nobody else in it.
-  let choices = ranked.filter((c) => c.name !== me);
-  if (!choices.length) choices = state.all.filter((c) => c.name !== me);
+  const choices = ranked.length ? ranked : state.all;
   selected = choices.some((c) => c.name === selected) ? selected : choices[0].name;
   $("vs").innerHTML = choices.map((c) => option(c, state.position, selected)).join("");
   $("vs").value = selected;
@@ -318,10 +351,10 @@ async function loadMatchup() {
   const me = $("me").value, vs = $("vs").value;
   $("matchupTitle").textContent = `Playing against ${vs}`;
   const m = await api(`/api/matchup?me=${encodeURIComponent(me)}&vs=${encodeURIComponent(vs)}&position=${state.position}`);
+  renderVerdict(m);
+  renderCounterStrip();
   const tier = m.enemy_tiers[state.position];
   $("matchupTags").innerHTML =
-    (m.you_counter_enemy ? `<span class="tag good">You counter ${escapeHtml(vs)}</span>` : "") +
-    (m.enemy_counters_you ? `<span class="tag bad">${escapeHtml(vs)} counters you</span>` : "") +
     (tier ? `<span class="tag">${LANES[state.position]} ${tierBadge(tier)}</span>` : "") +
     (m.enemy_damage_type ? `<span class="tag ${m.enemy_damage_type}">${m.enemy_damage_type} damage</span>` : "") +
     (m.enemy_heals ? `<span class="tag">Heals: consider anti-heal</span>` : "");
@@ -364,7 +397,6 @@ async function setPosition(pos) {
   renderLanes();
   closePoolEditor();
   state.counters = [];
-  fillMe();
   fillVs();
   await loadCounters();
   renderEnemies();
@@ -453,12 +485,14 @@ async function loadUsage() {
   try {
     showUsage(await api("/api/usage", {}, true));
   } catch {
-    $("aiUsage").textContent = "5 custom builds per person every 48h. You'll be asked for your access token.";
+    $("whoami").textContent = "";
+    $("aiUsage").textContent = "5 custom builds per person every 48h. Open your personal link to sign in.";
   }
 }
 
 function showUsage(u) {
   if (!u) return;
+  $("whoami").textContent = u.user && u.user !== "local" ? `Signed in as ${u.user}` : "";
   const wait = u.remaining ? "" : ` Next one in ${u.next_free_in_hours}h.`;
   $("aiUsage").textContent = `${u.remaining} of ${u.limit} custom builds left for you (per ${u.window_hours}h). Repeats are free.${wait}`;
   $("tailor").disabled = u.remaining === 0;
@@ -546,7 +580,15 @@ function setUpHoldForInfo() {
   document.addEventListener("keydown", (e) => e.key === "Escape" && closeInfo());
 }
 
+function signInFromLink() {
+  const key = new URLSearchParams(location.hash.slice(1)).get("key");
+  if (!key) return;
+  tokenStore.set(key.trim());
+  history.replaceState(null, "", location.pathname + location.search); // keep the key out of history and screenshots
+}
+
 async function init() {
+  signInFromLink();
   const { busy, hasData } = await showMeta();
   if (!hasData) {
     $("result").innerHTML = `<p class="muted">Downloading champion data for the first time. This takes a few minutes…</p>`;
@@ -561,8 +603,18 @@ async function init() {
   Object.keys(LANES).forEach((p, i) => (state.byPosition[p] = positions[i]));
 
   $("lanes").addEventListener("click", (e) => { const b = e.target.closest(".lane"); if (b) setPosition(b.dataset.pos); });
-  $("me").addEventListener("change", () => { fillVs($("vs").value); refreshView(); });
-  $("vs").addEventListener("change", async () => { await loadCounters(); refreshView({ build: false }); });
+  $("me").addEventListener("change", () => refreshView());
+  $("vs").addEventListener("change", async () => {
+    const before = $("me").value;
+    await loadCounters();
+    refreshView({ build: $("me").value !== before }); // your pick only changes if it was the new opponent
+  });
+  $("counterStrip").addEventListener("click", (e) => {
+    const pick = e.target.closest(".counter-pick");
+    if (!pick) return;
+    $("me").value = pick.dataset.champ;
+    refreshView();
+  });
   const openFrom = (e) => { const item = e.target.closest(".item"); if (item) openPicker("item", Number(item.dataset.slot)); };
   $("core").addEventListener("click", openFrom);
   $("core").addEventListener("keydown", (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), openFrom(e)));

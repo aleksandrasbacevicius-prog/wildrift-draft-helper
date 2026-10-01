@@ -158,3 +158,31 @@ footer { font-size: .72rem; color: var(--muted); text-align: center; padding: 8p
 .info-stats { margin: 6px 0 10px; }
 #infoBody p { margin: 6px 0; font-size: .9rem; }
 .hint-hold { font-size: .7rem; color: var(--muted); margin: 6px 0 0; }
+
+/* Icons sit in a touchable box; the image itself ignores touches, so a hold never opens
+   iPhone's "save image" menu. */
+.ico { display: inline-block; line-height: 0; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.ico img { pointer-events: none; -webkit-user-drag: none; }
+img { -webkit-touch-callout: none; }
+
+/* Counter strip under the opponent picker */
+.counter-strip { margin: 10px 0 12px; }
+.strip-label { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 6px; }
+.counter-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.counter-pick {
+  display: flex; flex-direction: column; align-items: center; gap: 3px; width: 76px; padding: 6px 4px;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--bg); color: var(--text);
+  font-size: .7rem; cursor: pointer;
+}
+.counter-pick img { width: 44px; height: 44px; border-radius: 10px; pointer-events: none; }
+.counter-pick.mine { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.counter-pick.chosen { background: var(--card); outline: 2px solid var(--t-b); }
+.pool-mark { font-size: .6rem; color: var(--accent); font-weight: 700; }
+
+/* Verdict under your pick */
+.verdict { margin-top: 10px; }
+.verdict-line { font-weight: 700; padding: 8px 10px; border-radius: 10px; font-size: .9rem; }
+.verdict-line.good { background: color-mix(in srgb, var(--t-b) 18%, transparent); color: var(--t-b); }
+.verdict-line.bad { background: color-mix(in srgb, var(--t-splus) 18%, transparent); color: var(--t-splus); }
+.verdict-try { font-size: .82rem; color: var(--muted); margin: 6px 2px 0; }
+#whoami { font-weight: 600; margin-bottom: 2px; }

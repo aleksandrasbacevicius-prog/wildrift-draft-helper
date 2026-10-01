@@ -24,3 +24,11 @@ def test_needs_a_name(monkeypatch):
     monkeypatch.setattr(sys, "argv", ["tokens"])
     with pytest.raises(SystemExit):
         tokens.main()
+
+
+def test_prints_personal_links(monkeypatch, capsys):
+    monkeypatch.setattr(sys, "argv", ["tokens", "rozhes", "--url", "https://app.example.com/"])
+    tokens.main()
+    out = capsys.readouterr().out.splitlines()
+    token = out[0].removeprefix("APP_TOKENS=rozhes:")
+    assert out[-1] == f"rozhes: https://app.example.com/#key={token}"

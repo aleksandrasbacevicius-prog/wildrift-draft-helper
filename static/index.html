@@ -20,13 +20,15 @@
 
   <section class="card">
     <div class="picker">
-      <img id="meIcon" class="portrait" alt="">
-      <div class="grow"><label for="me">Your champion</label><select id="me"></select></div>
-    </div>
-    <div class="picker">
       <img id="vsIcon" class="portrait" alt="">
       <div class="grow"><label for="vs">Lane opponent</label><select id="vs"></select></div>
     </div>
+    <div id="counterStrip" class="counter-strip hidden"></div>
+    <div class="picker">
+      <img id="meIcon" class="portrait" alt="">
+      <div class="grow"><label for="me">Your champion</label><select id="me"></select></div>
+    </div>
+    <div id="verdict" class="verdict hidden"></div>
     <button id="editPool" class="link">Edit my pool</button>
     <div id="poolEditor" class="hidden">
       <p class="muted">Tap champions to add or remove them from your <span id="poolLane"></span> pool. Sorted by tier.</p>
@@ -90,6 +92,7 @@
 
 <footer>
   <div id="dataLine"></div>
+  <div id="whoami"></div>
   <button id="signOut" class="link">Enter access token</button>
   <button id="checkUpdate" class="link">Check for a new patch</button>
   <div>Builds, tiers and counters from WildRiftFire.com. Item details from WR-META.com. Fan project, not endorsed by Riot Games.</div>
