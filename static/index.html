@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0e1116">
+<title>Draft Helper</title>
+<style>
+  :root {
+    --bg: #f4f5f7; --card: #ffffff; --text: #16181d; --muted: #5f6672;
+    --line: #e2e5ea; --accent: #c8932f; --accent-text: #1a1406;
+    --ad: #c2410c; --ap: #6d28d9; --warn-bg: #fff4e0; --warn-text: #7a4b00;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1116; --card: #171b22; --text: #e9ecf1; --muted: #9aa3b0;
+      --line: #262c36; --accent: #e0b25a; --accent-text: #1a1406;
+      --ad: #fb923c; --ap: #a78bfa; --warn-bg: #2b2112; --warn-text: #f3c77a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  main { max-width: 560px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 1.4rem; margin: 4px 0 16px; }
+  h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; }
+  .picker { display: flex; align-items: center; gap: 12px; }
+  .picker + .picker { margin-top: 12px; }
+  .portrait { width: 56px; height: 56px; border-radius: 12px; background: var(--line); flex: none; object-fit: cover; }
+  .picker label { display: block; font-size: .8rem; color: var(--muted); }
+  select {
+    width: 100%; font-size: 16px; /* 16px stops iOS zooming in on focus */
+    padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--text); appearance: none;
+  }
+  .grow { flex: 1; min-width: 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    border: 2px solid transparent; border-radius: 12px; padding: 0; background: none; cursor: pointer;
+    opacity: .45; transition: opacity .15s, border-color .15s;
+  }
+  .chip img { width: 44px; height: 44px; border-radius: 10px; display: block; }
+  .chip[aria-pressed="true"] { opacity: 1; border-color: var(--accent); }
+  .items { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .item { text-align: center; font-size: .78rem; }
+  .item img, .item .badge { width: 52px; height: 52px; border-radius: 10px; display: block; margin: 0 auto 6px; }
+  .item .badge { background: var(--line); display: grid; place-items: center; font-weight: 700; }
+  .item.swapped img { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .item { position: relative; }
+  /* Invisible native picker over the whole item: tap the item to swap it (wheel picker on iPhone). */
+  .item select { position: absolute; inset: 0; opacity: 0; cursor: pointer; padding: 0; }
+  .swap { font-size: .72rem; color: var(--accent); margin-top: 2px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+  .mini { display: flex; align-items: center; gap: 6px; font-size: .82rem; background: var(--bg); border-radius: 10px; padding: 4px 8px 4px 4px; }
+  .mini img { width: 28px; height: 28px; border-radius: 7px; }
+  .label { font-size: .8rem; color: var(--muted); width: 100%; margin-top: 4px; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .tag { font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); }
+  .tag.AD { color: var(--ad); border-color: currentColor; }
+  .tag.AP { color: var(--ap); border-color: currentColor; }
+  ul { margin: 0; padding-left: 20px; }
+  li + li { margin-top: 4px; }
+  .note { background: var(--warn-bg); color: var(--warn-text); border-radius: 10px; padding: 8px 10px; font-size: .82rem; margin-top: 10px; }
+  button.primary {
+    width: 100%; font-size: 1rem; font-weight: 700; padding: 14px; border: 0; border-radius: 12px;
+    background: var(--accent); color: var(--accent-text); cursor: pointer;
+  }
+  button.primary:disabled { opacity: .6; cursor: wait; }
+  .hint { font-size: .78rem; color: var(--muted); text-align: center; margin-top: 6px; }
+  #result { white-space: normal; }
+  #result p { margin: 0 0 8px; }
+  .error { color: var(--ad); }
+  footer { font-size: .72rem; color: var(--muted); text-align: center; padding: 8px 16px 24px; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Draft Helper</h1>
+
+  <section class="card">
+    <div class="picker">
+      <img id="meIcon" class="portrait" alt="">
+      <div class="grow"><label for="me">Your champion</label><select id="me"></select></div>
+    </div>
+    <div class="picker">
+      <img id="vsIcon" class="portrait" alt="">
+      <div class="grow"><label for="vs">Lane opponent</label><select id="vs"></select></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Rest of enemy team <span style="text-transform:none;letter-spacing:0">(optional, up to 4)</span></h2>
+    <div id="team" class="chips"></div>
+  </section>
+
+  <section class="card">
+    <h2>Build</h2>
+    <div id="core" class="items"></div>
+    <div id="boots" class="row"></div>
+    <div id="situational" class="row"></div>
+    <div id="buildNote" class="note hidden">Placeholder build, not the current server build.</div>
+  </section>
+
+  <section class="card">
+    <h2 id="matchupTitle">Matchup</h2>
+    <div id="matchupTags" class="tags"></div>
+    <ul id="matchupTips"></ul>
+  </section>
+
+  <section class="card">
+    <button id="tailor" class="primary">Tailor build with AI</button>
+    <p class="hint">Uses Claude Haiku. Roughly 1–2¢ per new draft.</p>
+    <div id="result"></div>
+  </section>
+</main>
+<footer>
+  Fan project, not endorsed by Riot Games. Icons from Riot's Data Dragon (League of Legends PC art).
+</footer>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const state = { champions: [], items: [], build: null, original: [], team: new Set() };
+
+async function api(path, options) {
+  const res = await fetch(path, options);
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.detail || `Request failed (${res.status})`);
+  return body;
+}
+
+function iconOrBadge(src, name, size) {
+  if (src) return `<img src="${src}" alt="" width="${size}" height="${size}">`;
+  return `<span class="badge">${name.slice(0, 2)}</span>`;
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+// Small Markdown subset for the agent's reply: headings, bold, bullet and numbered lists.
+function renderMarkdown(md) {
+  const lines = escapeHtml(md).split("\n");
+  let html = "", list = null;
+  const close = () => { if (list) { html += `</${list}>`; list = null; } };
+  for (const raw of lines) {
+    const line = raw.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    const bullet = line.match(/^\s*[-*]\s+(.*)/), numbered = line.match(/^\s*\d+[.)]\s+(.*)/);
+    const heading = line.match(/^#{1,6}\s+(.*)/);
+    if (bullet || numbered) {
+      const tag = bullet ? "ul" : "ol";
+      if (list !== tag) { close(); html += `<${tag}>`; list = tag; }
+      html += `<li>${(bullet || numbered)[1]}</li>`;
+    } else {
+      close();
+      if (heading) html += `<p><strong>${heading[1]}</strong></p>`;
+      else if (line.trim()) html += `<p>${line}</p>`;
+    }
+  }
+  close();
+  return html;
+}
+
+function fillSelect(select, value) {
+  select.innerHTML = state.champions.map((c) => `<option>${c.name}</option>`).join("");
+  select.value = value;
+}
+
+function champ(name) { return state.champions.find((c) => c.name === name); }
+
+function renderTeam() {
+  const me = $("me").value, vs = $("vs").value;
+  [me, vs].forEach((n) => state.team.delete(n));
+  $("team").innerHTML = state.champions
+    .filter((c) => c.name !== me && c.name !== vs)
+    .map((c) => `<button class="chip" aria-pressed="${state.team.has(c.name)}" data-name="${c.name}" title="${c.name}">
+        <img src="${c.icon}" alt="${c.name}"></button>`)
+    .join("");
+}
+
+function renderBuild() {
+  const b = state.build;
+  const options = (selected) => state.items
+    .filter((i) => !i.tags.includes("boots"))
+    .map((i) => `<option ${i.name === selected ? "selected" : ""}>${i.name}</option>`).join("");
+  $("core").innerHTML = b.core.map((item, slot) => `
+    <div class="item ${item.name !== state.original[slot] ? "swapped" : ""}">
+      ${iconOrBadge(item.icon, item.name, 52)}
+      <div>${item.name}</div>
+      <div class="swap">${item.name !== state.original[slot] ? `was ${state.original[slot]}` : "tap to swap"}</div>
+      <select data-slot="${slot}" aria-label="Swap core item ${slot + 1}">${options(item.name)}</select>
+    </div>`).join("");
+  $("boots").innerHTML = `<span class="label">Boots</span><span class="mini">${iconOrBadge(b.boots.icon, b.boots.name, 28)}${b.boots.name}</span>`;
+  $("situational").innerHTML = `<span class="label">Situational</span>` +
+    b.situational.map((i) => `<span class="mini">${iconOrBadge(i.icon, i.name, 28)}${i.name}</span>`).join("");
+  $("buildNote").classList.toggle("hidden", b.verified !== false);
+}
+
+async function loadBuild() {
+  const build = await api(`/api/champions/${encodeURIComponent($("me").value)}/build`);
+  state.build = build;
+  state.original = build.core.map((i) => i.name);
+  renderBuild();
+}
+
+async function loadMatchup() {
+  const me = $("me").value, vs = $("vs").value;
+  $("matchupTitle").textContent = `Playing against ${vs}`;
+  if (me === vs) {
+    $("matchupTags").innerHTML = "";
+    $("matchupTips").innerHTML = "<li>Mirror matchup.</li>";
+    return;
+  }
+  const m = await api(`/api/matchup?me=${encodeURIComponent(me)}&vs=${encodeURIComponent(vs)}`);
+  $("matchupTags").innerHTML =
+    `<span class="tag ${m.enemy_damage_type}">${m.enemy_damage_type} damage</span>` +
+    (m.enemy_heals ? `<span class="tag">Heals: consider anti-heal</span>` : "");
+  $("matchupTips").innerHTML = m.how_to_play_against_enemy.map((t) => `<li>${t}</li>`).join("");
+}
+
+function updatePortraits() {
+  $("meIcon").src = champ($("me").value).icon;
+  $("vsIcon").src = champ($("vs").value).icon;
+}
+
+async function onChampionChange(changedMe) {
+  updatePortraits();
+  renderTeam();
+  $("result").innerHTML = "";
+  await Promise.all([changedMe ? loadBuild() : null, loadMatchup()]);
+}
+
+function onSwap(select) {
+  const slot = Number(select.dataset.slot), name = select.value;
+  const core = state.build.core;
+  if (core.some((item, i) => i !== slot && item.name === name)) {
+    select.value = core[slot].name;
+    alert(`${name} is already in your core build.`);
+    return;
+  }
+  const item = state.items.find((i) => i.name === name);
+  core[slot] = { name, icon: item.icon };
+  $("result").innerHTML = "";
+  renderBuild();
+}
+
+async function tailor() {
+  const button = $("tailor");
+  const swaps = state.build.core
+    .map((item, slot) => ({ remove: state.original[slot], add: item.name }))
+    .filter((s) => s.remove !== s.add);
+  const enemies = [$("vs").value, ...state.team];
+  button.disabled = true;
+  button.textContent = "Thinking…";
+  $("result").innerHTML = "";
+  try {
+    const { result } = await api("/api/builds/tailor", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ champion: $("me").value, enemies, swaps }),
+    });
+    $("result").innerHTML = renderMarkdown(result);
+  } catch (e) {
+    $("result").innerHTML = `<p class="error">${escapeHtml(e.message)}</p>`;
+  } finally {
+    button.disabled = false;
+    button.textContent = "Tailor build with AI";
+  }
+}
+
+async function init() {
+  [state.champions, state.items] = await Promise.all([api("/api/champions"), api("/api/items")]);
+  fillSelect($("me"), state.champions[0].name);
+  fillSelect($("vs"), state.champions[1].name);
+  $("me").addEventListener("change", () => onChampionChange(true));
+  $("vs").addEventListener("change", () => onChampionChange(false));
+  $("team").addEventListener("click", (e) => {
+    const chip = e.target.closest(".chip");
+    if (!chip) return;
+    const name = chip.dataset.name;
+    if (!state.team.has(name) && state.team.size >= 4) return; // opponent + 4 others = 5
+    state.team.has(name) ? state.team.delete(name) : state.team.add(name);
+    chip.setAttribute("aria-pressed", state.team.has(name));
+  });
+  $("core").addEventListener("change", (e) => e.target.matches("select") && onSwap(e.target));
+  $("tailor").addEventListener("click", tailor);
+  await onChampionChange(true);
+}
+
+init().catch((e) => { $("result").innerHTML = `<p class="error">${escapeHtml(e.message)}</p>`; });
+</script>
+</body>
+</html>
