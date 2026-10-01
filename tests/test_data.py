@@ -3,10 +3,16 @@ import pytest
 from wildrift import data
 
 
-def test_lists_all_champions():
-    assert set(data.list_champions()) == {
-        "Darius", "Garen", "Renekton", "Irelia", "Fiora", "Swain", "Mordekaiser", "Aatrox",
-    }
+@pytest.fixture(autouse=True)
+def no_saved_profile():
+    data.PROFILE_FILE.unlink(missing_ok=True)
+    yield
+    data.PROFILE_FILE.unlink(missing_ok=True)
+
+
+def test_position_list_sorted_by_tier():
+    tiers = [c["positions"]["baron"] for c in data.list_champions("baron")]
+    assert tiers == sorted(tiers, key=data.TIER_ORDER.get)
 
 
 def test_lookup_is_case_insensitive():
@@ -15,64 +21,75 @@ def test_lookup_is_case_insensitive():
 
 def test_unknown_champion_raises():
     with pytest.raises(data.UnknownChampionError):
-        data.get_build("Teemo")
+        data.get_build("Not A Champion")
 
 
-def test_build_items_exist_in_item_list():
-    items = data.get_items()
-    for name in data.list_champions():
-        build = data.get_build(name)
-        for item in build["core"] + build["situational"] + [build["boots"]]:
-            assert item in items, f"{name} build uses unknown item {item}"
+def test_build_has_core_and_situational():
+    build = data.get_build("Darius")
+    assert len(build["core"]) == 3
+    assert build["patch"]
+    assert all({"when", "replace", "with"} <= set(s) for s in build["situational"])
 
 
-def test_matchup_flags_healing_enemy():
-    matchup = data.get_matchup("Garen", "Aatrox")
-    assert matchup["enemy_heals"] is True
-    assert matchup["enemy_damage_type"] == "AD"
+def test_champion_with_tips_includes_them():
+    assert data.get_champion("Garen")["playing_against"]
 
 
-def test_items_filter_by_tag():
-    anti_heal = data.get_items("grievous_wounds")
-    assert set(anti_heal) == {"Thornmail", "Mortal Reminder"}
+def test_matchup_without_tips_still_works():
+    matchup = data.get_matchup("Darius", "Ahri")
+    assert matchup["has_tips"] is False
+    assert matchup["enemy_tiers"]
 
 
 def test_resolve_item_accepts_nicknames_and_any_case():
     assert data.resolve_item("triforce") == "Trinity Force"
     assert data.resolve_item("steraks") == "Sterak's Gage"
-    assert data.resolve_item("black cleaver") == "Black Cleaver"
+    assert data.resolve_item("STRIDEBREAKER") == "Stridebreaker"
 
 
-def test_swap_core_item_replaces_in_place():
-    build = data.swap_core_item("Darius", "Black Cleaver", "triforce")
-    assert build["core"] == ["Trinity Force", "Sterak's Gage", "Death's Dance"]
-    assert build["situational"][0] == "Black Cleaver"
+def test_swap_replaces_in_core_and_final():
+    build = data.get_build("Darius")
+    old = build["core"][0]
+    swapped = data.swap_core_item("Darius", old, "triforce")
+    assert swapped["core"][0] == "Trinity Force"
+    assert old not in swapped["final"]
+    assert swapped["swaps"] == [{"remove": old, "add": "Trinity Force"}]
 
 
 def test_swap_does_not_change_stored_build():
-    data.swap_core_item("Darius", "Black Cleaver", "triforce")
-    assert data.get_build("Darius")["core"][0] == "Black Cleaver"
-
-
-def test_swap_moves_situational_item_into_core():
-    build = data.swap_core_item("Darius", "Death's Dance", "Guardian Angel")
-    assert "Guardian Angel" in build["core"]
-    assert "Guardian Angel" not in build["situational"]
-
-
-def test_apply_swaps_chains():
-    build = data.apply_swaps("Darius", [("bc", "triforce"), ("dd", "ga")])
-    assert build["core"] == ["Trinity Force", "Sterak's Gage", "Guardian Angel"]
+    before = data.get_build("Darius")["core"]
+    data.swap_core_item("Darius", before[0], "triforce")
+    assert data.get_build("Darius")["core"] == before
 
 
 @pytest.mark.parametrize(
     "remove, add, error",
     [
-        ("Trinity Force", "Black Cleaver", ValueError),  # not in core
-        ("Black Cleaver", "Sterak's Gage", ValueError),  # already core
-        ("Black Cleaver", "Infinity Edge", data.UnknownItemError),
+        ("Trinity Force", "Stridebreaker", ValueError),  # not in core
+        ("Stridebreaker", "Sterak's Gage", ValueError),  # already core
+        ("Stridebreaker", "Not An Item", data.UnknownItemError),
     ],
 )
 def test_swap_rejects_bad_input(remove, add, error):
     with pytest.raises(error):
         data.swap_core_item("Darius", remove, add)
+
+
+def test_items_filter_by_category():
+    boots = data.get_items("boots")
+    assert boots and all("Boots" in i["categories"] for i in boots.values())
+
+
+def test_default_profile_has_baron_pool():
+    assert "Darius" in data.get_profile()["baron"]
+
+
+def test_save_profile_normalises_names():
+    saved = data.save_profile({"baron": ["darius"], "mid": ["ahri"]})
+    assert saved["baron"] == ["Darius"] and saved["mid"] == ["Ahri"]
+    assert data.get_profile()["mid"] == ["Ahri"]
+
+
+def test_save_profile_rejects_unknown_champion():
+    with pytest.raises(data.UnknownChampionError):
+        data.save_profile({"baron": ["Nobody"]})

@@ -1,0 +1,870 @@
+{
+ "Rabadon's Deathcap": {
+  "name": "Rabadon's Deathcap",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/rabadons-deathcap.png"
+ },
+ "Serylda's Grudge": {
+  "name": "Serylda's Grudge",
+  "categories": [
+   "Assassin",
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/seryldas-grudge.png"
+ },
+ "Death's Dance": {
+  "name": "Death's Dance",
+  "categories": [
+   "Defense",
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/deaths-dance.png"
+ },
+ "Thornmail": {
+  "name": "Thornmail",
+  "categories": [
+   "Defense",
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/thornmail.png"
+ },
+ "Ardent Censer": {
+  "name": "Ardent Censer",
+  "categories": [
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/ardent-censer.png"
+ },
+ "Harmonic Echo": {
+  "name": "Harmonic Echo",
+  "categories": [
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/harmonic-echo.png"
+ },
+ "Boots of Mana": {
+  "name": "Boots of Mana",
+  "categories": [
+   "Boots"
+  ],
+  "icon": "/icons/wrf/items/boots-of-mana.png"
+ },
+ "Mikael's Blessing": {
+  "name": "Mikael's Blessing",
+  "categories": [
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/mikaels-blessing.png"
+ },
+ "Whispering Circlet": {
+  "name": "Whispering Circlet",
+  "categories": [
+   "Magic",
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/whispering-circlet.png"
+ },
+ "Echoes of Helia": {
+  "name": "Echoes of Helia",
+  "categories": [
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/echoes-of-helia.png"
+ },
+ "Frozen Heart": {
+  "name": "Frozen Heart",
+  "categories": [
+   "Defense",
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/frozen-heart.png"
+ },
+ "Hollow Radiance": {
+  "name": "Hollow Radiance",
+  "categories": [
+   "Defense"
+  ],
+  "icon": "/icons/wrf/items/hollow-radiance.png"
+ },
+ "Unending Despair": {
+  "name": "Unending Despair",
+  "categories": [
+   "Defense"
+  ],
+  "icon": "/icons/wrf/items/unending-despair.png"
+ },
+ "Mantle of the Twelfth Hour": {
+  "name": "Mantle of the Twelfth Hour",
+  "categories": [
+   "Defense",
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/mantle-of-the-twelfth-hour.png"
+ },
+ "Amaranth's Twinguard": {
+  "name": "Amaranth's Twinguard",
+  "categories": [
+   "Defense"
+  ],
+  "icon": "/icons/wrf/items/amaranths-twinguard.png"
+ },
+ "Mortal Reminder": {
+  "name": "Mortal Reminder",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/mortal-reminder.png"
+ },
+ "Guardian Angel": {
+  "name": "Guardian Angel",
+  "categories": [
+   "Defense",
+   "Assassin",
+   "Marksman",
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/guardian-angel.png"
+ },
+ "Banshee's Veil": {
+  "name": "Banshee's Veil",
+  "categories": [
+   "Magic",
+   "Defense"
+  ],
+  "icon": "/icons/wrf/items/banshees-veil.png"
+ },
+ "Redemption": {
+  "name": "Redemption",
+  "categories": [
+   "Defense",
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/redemption.png"
+ },
+ "Zeke's Convergence": {
+  "name": "Zeke's Convergence",
+  "categories": [
+   "Defense",
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/zekes-convergence.png"
+ },
+ "Magnetic Blaster": {
+  "name": "Magnetic Blaster",
+  "categories": [],
+  "icon": "/icons/wrf/items/magnetic-blaster.png"
+ },
+ "Blade of the Ruined King": {
+  "name": "Blade of the Ruined King",
+  "categories": [
+   "Marksman",
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/blade-of-the-ruined-king.png"
+ },
+ "Serpent's Fang": {
+  "name": "Serpent's Fang",
+  "categories": [
+   "Assassin"
+  ],
+  "icon": "/icons/wrf/items/serpents-fang.png"
+ },
+ "Luden's Echo": {
+  "name": "Luden's Echo",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/ludens-echo.png"
+ },
+ "Infinity Orb": {
+  "name": "Infinity Orb",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/infinity-orb.png"
+ },
+ "Oceanid's Trident": {
+  "name": "Oceanid's Trident",
+  "categories": [
+   "Magic",
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/oceanids-trident.png"
+ },
+ "Cryptbloom": {
+  "name": "Cryptbloom",
+  "categories": [
+   "Magic",
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/cryptbloom.png"
+ },
+ "Void Staff": {
+  "name": "Void Staff",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/void-staff.png"
+ },
+ "Warmog's Armor": {
+  "name": "Warmog's Armor",
+  "categories": [
+   "Defense"
+  ],
+  "icon": "/icons/wrf/items/warmogs-armor.png"
+ },
+ "Knight's Vow": {
+  "name": "Knight's Vow",
+  "categories": [
+   "Defense",
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/knights-vow.png"
+ },
+ "Staff of Flowing Water": {
+  "name": "Staff of Flowing Water",
+  "categories": [
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/staff-of-flowing-water.png"
+ },
+ "Mercury's Treads": {
+  "name": "Mercury's Treads",
+  "categories": [
+   "Boots"
+  ],
+  "icon": "/icons/wrf/items/mercurys-treads.png"
+ },
+ "Plated Steelcaps": {
+  "name": "Plated Steelcaps",
+  "categories": [
+   "Boots"
+  ],
+  "icon": "/icons/wrf/items/plated-steelcaps.png"
+ },
+ "Stormrazor": {
+  "name": "Stormrazor",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/stormrazor.png"
+ },
+ "Hexoptics C44": {
+  "name": "Hexoptics C44",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/hexoptics-c44.png"
+ },
+ "Trinity Force": {
+  "name": "Trinity Force",
+  "categories": [
+   "Marksman",
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/trinity-force.png"
+ },
+ "Zhonya's Hourglass": {
+  "name": "Zhonya's Hourglass",
+  "categories": [
+   "Magic",
+   "Defense"
+  ],
+  "icon": "/icons/wrf/items/zhonyas-hourglass.png"
+ },
+ "Force of Nature": {
+  "name": "Force of Nature",
+  "categories": [
+   "Defense"
+  ],
+  "icon": "/icons/wrf/items/force-of-nature.png"
+ },
+ "Heartsteel": {
+  "name": "Heartsteel",
+  "categories": [
+   "Defense"
+  ],
+  "icon": "/icons/wrf/items/heartsteel.png"
+ },
+ "Bloodthirster": {
+  "name": "Bloodthirster",
+  "categories": [
+   "Marksman",
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/bloodthirster.png"
+ },
+ "Infinity Edge": {
+  "name": "Infinity Edge",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/infinity-edge.png"
+ },
+ "Lord Dominik's Regard": {
+  "name": "Lord Dominik's Regard",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/lord-dominiks-regard.png"
+ },
+ "Goredrinker": {
+  "name": "Goredrinker",
+  "categories": [
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/goredrinker.png"
+ },
+ "Essence Reaver": {
+  "name": "Essence Reaver",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/essence-reaver.png"
+ },
+ "Hullbreaker": {
+  "name": "Hullbreaker",
+  "categories": [],
+  "icon": "/icons/wrf/items/hullbreaker.png"
+ },
+ "Sterak's Gage": {
+  "name": "Sterak's Gage",
+  "categories": [
+   "Defense",
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/steraks-gage.png"
+ },
+ "Kaenic Rookern": {
+  "name": "Kaenic Rookern",
+  "categories": [
+   "Defense"
+  ],
+  "icon": "/icons/wrf/items/kaenic-rookern.png"
+ },
+ "Randuin's Omen": {
+  "name": "Randuin's Omen",
+  "categories": [
+   "Defense"
+  ],
+  "icon": "/icons/wrf/items/randuins-omen.png"
+ },
+ "Guinsoo's Rageblade": {
+  "name": "Guinsoo's Rageblade",
+  "categories": [
+   "Magic",
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/guinsoos-rageblade.png"
+ },
+ "Edge of Night": {
+  "name": "Edge of Night",
+  "categories": [
+   "Assassin"
+  ],
+  "icon": "/icons/wrf/items/edge-of-night.png"
+ },
+ "Blackfire Torch": {
+  "name": "Blackfire Torch",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/blackfire-torch.png"
+ },
+ "Archangel's Staff": {
+  "name": "Archangel's Staff",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/archangels-staff.png"
+ },
+ "Riftmaker": {
+  "name": "Riftmaker",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/riftmaker.png"
+ },
+ "Liandry's Torment": {
+  "name": "Liandry's Torment",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/liandrys-torment.png"
+ },
+ "Radiant Virtue": {
+  "name": "Radiant Virtue",
+  "categories": [
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/radiant-virtue.png"
+ },
+ "Youmuu's Ghostblade": {
+  "name": "Youmuu's Ghostblade",
+  "categories": [
+   "Assassin"
+  ],
+  "icon": "/icons/wrf/items/youmuus-ghostblade.png"
+ },
+ "Terminus": {
+  "name": "Terminus",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/terminus.png"
+ },
+ "Eclipse": {
+  "name": "Eclipse",
+  "categories": [
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/eclipse.png"
+ },
+ "Sundered Sky": {
+  "name": "Sundered Sky",
+  "categories": [
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/sundered-sky.png"
+ },
+ "Spear of Shojin": {
+  "name": "Spear of Shojin",
+  "categories": [
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/spear-of-shojin.png"
+ },
+ "Lich Bane": {
+  "name": "Lich Bane",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/lich-bane.png"
+ },
+ "Dawnshroud": {
+  "name": "Dawnshroud",
+  "categories": [
+   "Defense",
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/dawnshroud.png"
+ },
+ "Maw of Malmortius": {
+  "name": "Maw of Malmortius",
+  "categories": [
+   "Assassin",
+   "Marksman",
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/maw-of-malmortius.png"
+ },
+ "Black Cleaver": {
+  "name": "Black Cleaver",
+  "categories": [
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/black-cleaver.png"
+ },
+ "Manamune": {
+  "name": "Manamune",
+  "categories": [
+   "Assassin",
+   "Marksman",
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/manamune.png"
+ },
+ "The Collector": {
+  "name": "The Collector",
+  "categories": [
+   "Assassin",
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/the-collector.png"
+ },
+ "Statikk Shiv": {
+  "name": "Statikk Shiv",
+  "categories": [
+   "Magic",
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/statikk-shiv.png"
+ },
+ "Dusk and Dawn": {
+  "name": "Dusk and Dawn",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/dusk-and-dawn.png"
+ },
+ "Malignance": {
+  "name": "Malignance",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/malignance.png"
+ },
+ "Hextech Rocketbelt": {
+  "name": "Hextech Rocketbelt",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/hextech-rocketbelt.png"
+ },
+ "Stormsurge": {
+  "name": "Stormsurge",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/stormsurge.png"
+ },
+ "Yordle Trap": {
+  "name": "Yordle Trap",
+  "categories": [
+   "Defense",
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/yordle-trap.png"
+ },
+ "Berserker's Greaves": {
+  "name": "Berserker's Greaves",
+  "categories": [
+   "Boots"
+  ],
+  "icon": "/icons/wrf/items/berserkers-greaves.png"
+ },
+ "Ionian Boots of Lucidity": {
+  "name": "Ionian Boots of Lucidity",
+  "categories": [
+   "Boots"
+  ],
+  "icon": "/icons/wrf/items/ionian-boots-of-lucidity.png"
+ },
+ "Iceborn Gauntlet": {
+  "name": "Iceborn Gauntlet",
+  "categories": [
+   "Defense"
+  ],
+  "icon": "/icons/wrf/items/iceborn-gauntlet.png"
+ },
+ "Yun Tal Wildarrows": {
+  "name": "Yun Tal Wildarrows",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/yun-tal-wildarrows.png"
+ },
+ "Rapid Firecannon": {
+  "name": "Rapid Firecannon",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/rapid-firecannon.png"
+ },
+ "Duskblade of Draktharr": {
+  "name": "Duskblade of Draktharr",
+  "categories": [
+   "Assassin"
+  ],
+  "icon": "/icons/wrf/items/duskblade-of-draktharr.png"
+ },
+ "Sunfire Aegis": {
+  "name": "Sunfire Aegis",
+  "categories": [
+   "Defense"
+  ],
+  "icon": "/icons/wrf/items/sunfire-aegis.png"
+ },
+ "Abyssal Mask": {
+  "name": "Abyssal Mask",
+  "categories": [
+   "Defense",
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/abyssal-mask.png"
+ },
+ "Imperial Mandate": {
+  "name": "Imperial Mandate",
+  "categories": [
+   "Magic",
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/imperial-mandate.png"
+ },
+ "Cosmic Drive": {
+  "name": "Cosmic Drive",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/cosmic-drive.png"
+ },
+ "Rod of Ages": {
+  "name": "Rod of Ages",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/rod-of-ages.png"
+ },
+ "Horizon Focus": {
+  "name": "Horizon Focus",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/horizon-focus.png"
+ },
+ "Wit's End": {
+  "name": "Wit's End",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/wits-end.png"
+ },
+ "Divine Sunderer": {
+  "name": "Divine Sunderer",
+  "categories": [
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/divine-sunderer.png"
+ },
+ "Runaan's Hurricane": {
+  "name": "Runaan's Hurricane",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/runaans-hurricane.png"
+ },
+ "Navori Quickblades": {
+  "name": "Navori Quickblades",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/navori-quickblades.png"
+ },
+ "Dead Man's Plate": {
+  "name": "Dead Man's Plate",
+  "categories": [
+   "Defense"
+  ],
+  "icon": "/icons/wrf/items/dead-mans-plate.png"
+ },
+ "Phantom Dancer": {
+  "name": "Phantom Dancer",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/phantom-dancer.png"
+ },
+ "Overlord's Bloodmail": {
+  "name": "Overlord's Bloodmail",
+  "categories": [
+   "Defense",
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/overlords-bloodmail.png"
+ },
+ "Boots of Dynamism": {
+  "name": "Boots of Dynamism",
+  "categories": [
+   "Boots"
+  ],
+  "icon": "/icons/wrf/items/boots-of-dynamism.png"
+ },
+ "Gluttonous Greaves": {
+  "name": "Gluttonous Greaves",
+  "categories": [
+   "Boots"
+  ],
+  "icon": "/icons/wrf/items/gluttonous-greaves.png"
+ },
+ "Mercurial Scimitar": {
+  "name": "Mercurial Scimitar",
+  "categories": [
+   "Assassin",
+   "Marksman",
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/mercurial-scimitar.png"
+ },
+ "Stridebreaker": {
+  "name": "Stridebreaker",
+  "categories": [
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/stridebreaker.png"
+ },
+ "Galeforce": {
+  "name": "Galeforce",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/galeforce.png"
+ },
+ "Immortal Shieldbow": {
+  "name": "Immortal Shieldbow",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/immortal-shieldbow.png"
+ },
+ "Kraken Slayer": {
+  "name": "Kraken Slayer",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/kraken-slayer.png"
+ },
+ "Bloodletter's Curse": {
+  "name": "Bloodletter's Curse",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/bloodletters-curse.png"
+ },
+ "Rylai's Crystal Scepter": {
+  "name": "Rylai's Crystal Scepter",
+  "categories": [
+   "Magic"
+  ],
+  "icon": "/icons/wrf/items/rylais-crystal-scepter.png"
+ },
+ "Gargoyle Stoneplate": {
+  "name": "Gargoyle Stoneplate",
+  "categories": [
+   "Defense"
+  ],
+  "icon": "/icons/wrf/items/gargoyle-stoneplate.png"
+ },
+ "Nashor's Tooth": {
+  "name": "Nashor's Tooth",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/nashors-tooth.png"
+ },
+ "Fiendhunter Bolts": {
+  "name": "Fiendhunter Bolts",
+  "categories": [
+   "Marksman"
+  ],
+  "icon": "/icons/wrf/items/fiendhunter-bolts.png"
+ },
+ "Chempunk Chainsword": {
+  "name": "Chempunk Chainsword",
+  "categories": [
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/chempunk-chainsword.png"
+ },
+ "Morellonomicon": {
+  "name": "Morellonomicon",
+  "categories": [
+   "Magic",
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/morellonomicon.png"
+ },
+ "Winter's Approach": {
+  "name": "Winter's Approach",
+  "categories": [
+   "Defense"
+  ],
+  "icon": "/icons/wrf/items/winters-approach.png"
+ },
+ "Soul Transfer": {
+  "name": "Soul Transfer",
+  "categories": [],
+  "icon": "/icons/wrf/items/soul-transfer.png"
+ },
+ "Titanic Hydra": {
+  "name": "Titanic Hydra",
+  "categories": [
+   "Defense",
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/titanic-hydra.png"
+ },
+ "Experimental Hexplate": {
+  "name": "Experimental Hexplate",
+  "categories": [
+   "Fighter"
+  ],
+  "icon": "/icons/wrf/items/experimental-hexplate.png"
+ },
+ "Locket of the Iron Solari": {
+  "name": "Locket of the Iron Solari",
+  "categories": [
+   "Defense",
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/locket-of-the-iron-solari.png"
+ },
+ "Shurelya's Battlesong": {
+  "name": "Shurelya's Battlesong",
+  "categories": [
+   "Support"
+  ],
+  "icon": "/icons/wrf/items/shurelyas-battlesong.png"
+ },
+ "Amplifying Tome": {
+  "name": "Amplifying Tome",
+  "categories": [],
+  "icon": "/icons/wrf/items/amplifying-tome.png"
+ },
+ "Spectral Sickle": {
+  "name": "Spectral Sickle",
+  "categories": [],
+  "icon": "/icons/wrf/items/spectral-sickle.png"
+ },
+ "Black Mist Scythe": {
+  "name": "Black Mist Scythe",
+  "categories": [],
+  "icon": "/icons/wrf/items/black-mist-scythe.png"
+ },
+ "Ruby Crystal": {
+  "name": "Ruby Crystal",
+  "categories": [],
+  "icon": "/icons/wrf/items/ruby-crystal.png"
+ },
+ "Long Sword": {
+  "name": "Long Sword",
+  "categories": [],
+  "icon": "/icons/wrf/items/long-sword.png"
+ },
+ "Muramana": {
+  "name": "Muramana",
+  "categories": [],
+  "icon": "/icons/wrf/items/muramana.png"
+ },
+ "Seraph's Embrace": {
+  "name": "Seraph's Embrace",
+  "categories": [],
+  "icon": "/icons/wrf/items/seraphs-embrace.png"
+ },
+ "Tear of the Goddess": {
+  "name": "Tear of the Goddess",
+  "categories": [],
+  "icon": "/icons/wrf/items/tear-of-the-goddess.png"
+ },
+ "Diadem of Songs": {
+  "name": "Diadem of Songs",
+  "categories": [],
+  "icon": "/icons/wrf/items/diadem-of-songs.png"
+ },
+ "Relic Shield": {
+  "name": "Relic Shield",
+  "categories": [],
+  "icon": "/icons/wrf/items/relic-shield.png"
+ },
+ "Bulwark of the Mountain": {
+  "name": "Bulwark of the Mountain",
+  "categories": [],
+  "icon": "/icons/wrf/items/bulwark-of-the-mountain.png"
+ },
+ "Fimbulwinter": {
+  "name": "Fimbulwinter",
+  "categories": [],
+  "icon": "/icons/wrf/items/fimbulwinter.png"
+ }
+}

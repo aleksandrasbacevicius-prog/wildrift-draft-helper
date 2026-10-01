@@ -2,3 +2,8 @@
 .env
 __pycache__/
 .pytest_cache/
+# Fetched from WildRiftFire.com at runtime, not redistributed
+data/wildriftfire/
+static/icons/wrf/
+# Your personal champion pool
+data/profile.json

@@ -1,0 +1,580 @@
+{
+ "Darius": {
+  "name": "Darius",
+  "guide": "darius",
+  "positions": {
+   "baron": "A",
+   "jungle": "B"
+  },
+  "build": {
+   "starting": [
+    "Ruby Crystal"
+   ],
+   "core": [
+    "Stridebreaker",
+    "Sterak's Gage",
+    "Amaranth's Twinguard"
+   ],
+   "boots": [
+    "Plated Steelcaps"
+   ],
+   "final": [
+    "Plated Steelcaps",
+    "Stridebreaker",
+    "Sterak's Gage",
+    "Amaranth's Twinguard",
+    "Force of Nature",
+    "Randuin's Omen"
+   ],
+   "situational": [
+    {
+     "when": "vs AP / CC",
+     "replace": "Plated Steelcaps",
+     "with": "Mercury's Treads"
+    },
+    {
+     "when": "vs Healing",
+     "replace": "Randuin's Omen",
+     "with": "Mortal Reminder"
+    },
+    {
+     "when": "vs Attack Speed",
+     "replace": "Randuin's Omen",
+     "with": "Frozen Heart"
+    }
+   ],
+   "spells": [
+    "Flash",
+    "Ghost"
+   ],
+   "runes": [
+    "Conqueror",
+    "Unshakeable",
+    "Second Wind",
+    "Perseverance",
+    "Nimbus Cloak"
+   ]
+  },
+  "icon": "/icons/wrf/champions/darius.png"
+ },
+ "Garen": {
+  "name": "Garen",
+  "guide": "garen",
+  "positions": {
+   "baron": "B"
+  },
+  "build": {
+   "starting": [
+    "Ruby Crystal"
+   ],
+   "core": [
+    "Black Cleaver",
+    "Dead Man's Plate",
+    "Spear of Shojin"
+   ],
+   "boots": [
+    "Plated Steelcaps"
+   ],
+   "final": [
+    "Plated Steelcaps",
+    "Black Cleaver",
+    "Dead Man's Plate",
+    "Spear of Shojin",
+    "Force of Nature",
+    "Thornmail"
+   ],
+   "situational": [
+    {
+     "when": "vs AP / CC",
+     "replace": "Plated Steelcaps",
+     "with": "Mercury's Treads"
+    },
+    {
+     "when": "vs Crowd Control",
+     "replace": "Overgrowth",
+     "with": "Perseverance"
+    }
+   ],
+   "spells": [
+    "Flash",
+    "Ignite"
+   ],
+   "runes": [
+    "Grasp of the Undying",
+    "Demolish",
+    "Second Wind",
+    "Overgrowth",
+    "Nimbus Cloak"
+   ]
+  },
+  "icon": "/icons/wrf/champions/garen.png"
+ },
+ "Mordekaiser": {
+  "name": "Mordekaiser",
+  "guide": "mordekaiser",
+  "positions": {
+   "baron": "S"
+  },
+  "build": {
+   "starting": [
+    "Amplifying Tome"
+   ],
+   "core": [
+    "Riftmaker",
+    "Hextech Rocketbelt",
+    "Liandry's Torment"
+   ],
+   "boots": [
+    "Boots of Mana"
+   ],
+   "final": [
+    "Boots of Mana",
+    "Riftmaker",
+    "Hextech Rocketbelt",
+    "Liandry's Torment",
+    "Bloodletter's Curse",
+    "Rabadon's Deathcap"
+   ],
+   "situational": [
+    {
+     "when": "vs Shielding",
+     "replace": "Rabadon's Deathcap",
+     "with": "Oceanid's Trident"
+    },
+    {
+     "when": "vs Crowd Control",
+     "replace": "Rabadon's Deathcap",
+     "with": "Banshee's Veil"
+    },
+    {
+     "when": "vs Crowd Control",
+     "replace": "Overgrowth",
+     "with": "Perseverance"
+    }
+   ],
+   "spells": [
+    "Flash",
+    "Ignite"
+   ],
+   "runes": [
+    "Conqueror",
+    "Unshakeable",
+    "Second Wind",
+    "Overgrowth",
+    "Transcendence"
+   ]
+  },
+  "icon": "/icons/wrf/champions/mordekaiser.png"
+ },
+ "Aatrox": {
+  "name": "Aatrox",
+  "guide": "aatrox",
+  "positions": {
+   "baron": "A",
+   "jungle": "A"
+  },
+  "build": {
+   "starting": [
+    "Ruby Crystal"
+   ],
+   "core": [
+    "Eclipse",
+    "Death's Dance",
+    "Serylda's Grudge"
+   ],
+   "boots": [
+    "Plated Steelcaps",
+    "Stridebreaker"
+   ],
+   "final": [
+    "Plated Steelcaps",
+    "Eclipse",
+    "Death's Dance",
+    "Serylda's Grudge",
+    "Spear of Shojin",
+    "Guardian Angel",
+    "Stridebreaker"
+   ],
+   "situational": [
+    {
+     "when": "vs AP / CC",
+     "replace": "Plated Steelcaps",
+     "with": "Mercury's Treads"
+    },
+    {
+     "when": "vs Shielding",
+     "replace": "Spear of Shojin",
+     "with": "Serpent's Fang"
+    },
+    {
+     "when": "vs Crowd Control",
+     "replace": "Guardian Angel",
+     "with": "Mercurial Scimitar"
+    },
+    {
+     "when": "vs Ability Power",
+     "replace": "Guardian Angel",
+     "with": "Maw of Malmortius"
+    },
+    {
+     "when": "vs Burst Damage",
+     "replace": "Second Wind",
+     "with": "Bone Plating"
+    }
+   ],
+   "spells": [
+    "Flash",
+    "Ignite"
+   ],
+   "runes": [
+    "Conqueror",
+    "Courage of the Colossus",
+    "Second Wind",
+    "Perseverance",
+    "Sudden Impact"
+   ]
+  },
+  "icon": "/icons/wrf/champions/aatrox.png"
+ },
+ "Ahri": {
+  "name": "Ahri",
+  "guide": "ahri",
+  "positions": {
+   "mid": "S"
+  },
+  "build": {
+   "starting": [
+    "Amplifying Tome"
+   ],
+   "core": [
+    "Luden's Echo",
+    "Lich Bane",
+    "Rabadon's Deathcap"
+   ],
+   "boots": [
+    "Boots of Mana"
+   ],
+   "final": [
+    "Boots of Mana",
+    "Luden's Echo",
+    "Lich Bane",
+    "Rabadon's Deathcap",
+    "Infinity Orb",
+    "Zhonya's Hourglass"
+   ],
+   "situational": [
+    {
+     "when": "vs Shielding",
+     "replace": "Zhonya's Hourglass",
+     "with": "Oceanid's Trident"
+    },
+    {
+     "when": "vs Crowd Control",
+     "replace": "Zhonya's Hourglass",
+     "with": "Banshee's Veil"
+    },
+    {
+     "when": "vs Tanks",
+     "replace": "Zhonya's Hourglass",
+     "with": "Void Staff"
+    }
+   ],
+   "spells": [
+    "Flash",
+    "Ignite"
+   ],
+   "runes": [
+    "Electrocute",
+    "Empowered Attack",
+    "Chain Assault",
+    "Eyeball Collector",
+    "Bone Plating"
+   ]
+  },
+  "icon": "/icons/wrf/champions/ahri.png"
+ },
+ "Syndra": {
+  "name": "Syndra",
+  "guide": "syndra",
+  "positions": {
+   "mid": "S+"
+  },
+  "build": {
+   "starting": [
+    "Amplifying Tome"
+   ],
+   "core": [
+    "Stormsurge",
+    "Infinity Orb",
+    "Rabadon's Deathcap"
+   ],
+   "boots": [
+    "Boots of Mana"
+   ],
+   "final": [
+    "Boots of Mana",
+    "Stormsurge",
+    "Infinity Orb",
+    "Rabadon's Deathcap",
+    "Cryptbloom",
+    "Zhonya's Hourglass"
+   ],
+   "situational": [
+    {
+     "when": "vs Shielding",
+     "replace": "Zhonya's Hourglass",
+     "with": "Oceanid's Trident"
+    },
+    {
+     "when": "vs Crowd Control",
+     "replace": "Zhonya's Hourglass",
+     "with": "Banshee's Veil"
+    },
+    {
+     "when": "vs Tanks",
+     "replace": "Zhonya's Hourglass",
+     "with": "Liandry's Torment"
+    },
+    {
+     "when": "vs Burst Damage",
+     "replace": "Cut Down",
+     "with": "Bone Plating"
+    }
+   ],
+   "spells": [
+    "Flash",
+    "Ignite"
+   ],
+   "runes": [
+    "Electrocute",
+    "Hextech Flashtraption",
+    "Absolute Focus",
+    "Scorch",
+    "Cut Down"
+   ]
+  },
+  "icon": "/icons/wrf/champions/syndra.png"
+ },
+ "Lee Sin": {
+  "name": "Lee Sin",
+  "guide": "lee-sin",
+  "positions": {
+   "jungle": "A"
+  },
+  "build": {
+   "starting": [
+    "Long Sword"
+   ],
+   "core": [
+    "Youmuu's Ghostblade",
+    "Trinity Force",
+    "Serylda's Grudge"
+   ],
+   "boots": [
+    "Gluttonous Greaves"
+   ],
+   "final": [
+    "Gluttonous Greaves",
+    "Youmuu's Ghostblade",
+    "Trinity Force",
+    "Serylda's Grudge",
+    "Serpent's Fang",
+    "Guardian Angel"
+   ],
+   "situational": [
+    {
+     "when": "vs Squishies",
+     "replace": "Cut Down",
+     "with": "Coup de Grace"
+    }
+   ],
+   "spells": [
+    "Flash",
+    "Smite"
+   ],
+   "runes": [
+    "Conqueror",
+    "Battle Zeal",
+    "Cut Down",
+    "Legend: Alacrity",
+    "Absolute Focus"
+   ]
+  },
+  "icon": "/icons/wrf/champions/lee-sin.png"
+ },
+ "Jinx": {
+  "name": "Jinx",
+  "guide": "jinx",
+  "positions": {
+   "dragon": "A"
+  },
+  "build": {
+   "starting": [
+    "Long Sword"
+   ],
+   "core": [
+    "The Collector",
+    "Stormrazor",
+    "Runaan's Hurricane"
+   ],
+   "boots": [
+    "Berserker's Greaves",
+    "Galeforce"
+   ],
+   "final": [
+    "Berserker's Greaves",
+    "The Collector",
+    "Stormrazor",
+    "Runaan's Hurricane",
+    "Lord Dominik's Regard",
+    "Bloodthirster",
+    "Galeforce"
+   ],
+   "situational": [
+    {
+     "when": "vs Healing",
+     "replace": "Lord Dominik's Regard",
+     "with": "Mortal Reminder"
+    },
+    {
+     "when": "vs Crowd Control",
+     "replace": "Bloodthirster",
+     "with": "Mercurial Scimitar"
+    },
+    {
+     "when": "vs Burst Damage",
+     "replace": "Bloodthirster",
+     "with": "Guardian Angel"
+    },
+    {
+     "when": "vs Tanks",
+     "replace": "Bloodthirster",
+     "with": "Blade of the Ruined King"
+    },
+    {
+     "when": "vs Squishies",
+     "replace": "Cut Down",
+     "with": "Coup de Grace"
+    }
+   ],
+   "spells": [
+    "Flash",
+    "Ghost"
+   ],
+   "runes": [
+    "Lethal Tempo",
+    "Brutal",
+    "Cut Down",
+    "Legend: Bloodline",
+    "Bone Plating"
+   ]
+  },
+  "icon": "/icons/wrf/champions/jinx.png"
+ },
+ "Thresh": {
+  "name": "Thresh",
+  "guide": "thresh",
+  "positions": {
+   "support": "S"
+  },
+  "build": {
+   "starting": [
+    "Relic Shield"
+   ],
+   "core": [
+    "Zeke's Convergence",
+    "Yordle Trap",
+    "Knight's Vow"
+   ],
+   "boots": [
+    "Plated Steelcaps"
+   ],
+   "final": [
+    "Bulwark of the Mountain",
+    "Plated Steelcaps",
+    "Zeke's Convergence",
+    "Yordle Trap",
+    "Knight's Vow",
+    "Thornmail"
+   ],
+   "situational": [
+    {
+     "when": "vs Critical Strike Damage",
+     "replace": "Thornmail",
+     "with": "Randuin's Omen"
+    },
+    {
+     "when": "vs Attack Speed",
+     "replace": "Thornmail",
+     "with": "Frozen Heart"
+    },
+    {
+     "when": "vs AP / CC",
+     "replace": "Plated Steelcaps",
+     "with": "Mercury's Treads"
+    }
+   ],
+   "spells": [
+    "Flash",
+    "Ignite"
+   ],
+   "runes": [
+    "Ice Overlord",
+    "Courage of the Colossus",
+    "Bone Plating",
+    "Perseverance",
+    "Hextech Flashtraption"
+   ]
+  },
+  "icon": "/icons/wrf/champions/thresh.png"
+ },
+ "Swain": {
+  "name": "Swain",
+  "guide": "swain",
+  "positions": {
+   "mid": "B",
+   "support": "C"
+  },
+  "build": {
+   "starting": [
+    "Amplifying Tome"
+   ],
+   "core": [
+    "Malignance",
+    "Rylai's Crystal Scepter",
+    "Abyssal Mask"
+   ],
+   "boots": [
+    "Boots of Mana"
+   ],
+   "final": [
+    "Boots of Mana",
+    "Malignance",
+    "Rylai's Crystal Scepter",
+    "Abyssal Mask",
+    "Zhonya's Hourglass",
+    "Bloodletter's Curse"
+   ],
+   "situational": [],
+   "spells": [
+    "Flash",
+    "Ghost",
+    "Flash",
+    "Heal"
+   ],
+   "runes": [
+    "Conqueror",
+    "Axiom Arcanist",
+    "Transcendence",
+    "Nimbus Cloak",
+    "Bone Plating",
+    "Ice Overlord",
+    "Courage of the Colossus",
+    "Bone Plating",
+    "Perseverance",
+    "Manaflow Band"
+   ]
+  },
+  "icon": "/icons/wrf/champions/swain.png"
+ }
+}

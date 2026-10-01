@@ -10,14 +10,15 @@
   :root {
     --bg: #f4f5f7; --card: #ffffff; --text: #16181d; --muted: #5f6672;
     --line: #e2e5ea; --accent: #c8932f; --accent-text: #1a1406;
-    --ad: #c2410c; --ap: #6d28d9; --warn-bg: #fff4e0; --warn-text: #7a4b00;
+    --ad: #c2410c; --ap: #6d28d9; --lane-bg: #2a303b;
+    --t-splus: #e5484d; --t-s: #f76b15; --t-a: #ca8a04; --t-b: #2f9e44; --t-c: #3b82f6;
     --radius: 14px;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #0e1116; --card: #171b22; --text: #e9ecf1; --muted: #9aa3b0;
       --line: #262c36; --accent: #e0b25a; --accent-text: #1a1406;
-      --ad: #fb923c; --ap: #a78bfa; --warn-bg: #2b2112; --warn-text: #f3c77a;
+      --ad: #fb923c; --ap: #a78bfa; --lane-bg: #222833;
     }
   }
   * { box-sizing: border-box; }
@@ -27,9 +28,22 @@
     padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
   }
   main { max-width: 560px; margin: 0 auto; padding: 16px; }
-  h1 { font-size: 1.4rem; margin: 4px 0 16px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 4px 0 12px; }
+  h1 { font-size: 1.4rem; margin: 0; }
+  .patch { font-size: .8rem; font-weight: 700; color: var(--accent); }
   h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; }
+
+  /* Lane selector, modelled on WildRiftFire's role picker */
+  .lanes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 12px; }
+  .lane {
+    display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 2px;
+    border: 1px solid var(--line); border-radius: 12px; background: var(--card); color: var(--muted);
+    font-size: .72rem; font-weight: 600; cursor: pointer;
+  }
+  .lane img { width: 26px; height: 26px; padding: 3px; border-radius: 8px; background: var(--lane-bg); }
+  .lane[aria-pressed="true"] { border-color: var(--accent); color: var(--text); box-shadow: inset 0 0 0 1px var(--accent); }
+
   .picker { display: flex; align-items: center; gap: 12px; }
   .picker + .picker { margin-top: 12px; }
   .portrait { width: 56px; height: 56px; border-radius: 12px; background: var(--line); flex: none; object-fit: cover; }
@@ -40,49 +54,73 @@
     background: var(--bg); color: var(--text); appearance: none;
   }
   .grow { flex: 1; min-width: 0; }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip {
-    border: 2px solid transparent; border-radius: 12px; padding: 0; background: none; cursor: pointer;
-    opacity: .45; transition: opacity .15s, border-color .15s;
-  }
-  .chip img { width: 44px; height: 44px; border-radius: 10px; display: block; }
-  .chip[aria-pressed="true"] { opacity: 1; border-color: var(--accent); }
-  .items { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .item { text-align: center; font-size: .78rem; }
-  .item img, .item .badge { width: 52px; height: 52px; border-radius: 10px; display: block; margin: 0 auto 6px; }
-  .item .badge { background: var(--line); display: grid; place-items: center; font-weight: 700; }
+  .link { background: none; border: 0; color: var(--accent); font-size: .85rem; font-weight: 600; padding: 4px 0; cursor: pointer; }
+
+  .tier { display: inline-block; min-width: 26px; text-align: center; font-size: .72rem; font-weight: 800; color: #fff; border-radius: 6px; padding: 1px 5px; }
+  .tier.S\+ { background: var(--t-splus); } .tier.S { background: var(--t-s); } .tier.A { background: var(--t-a); }
+  .tier.B { background: var(--t-b); } .tier.C, .tier.D { background: var(--t-c); }
+
+  .enemies { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .enemies label { font-size: .75rem; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+  .enemies label img { width: 16px; height: 16px; border-radius: 4px; background: var(--lane-bg); padding: 2px; }
+  .enemies select { padding: 8px 10px; }
+
+  /* Core items: the main focus */
+  .core { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .item { position: relative; text-align: center; font-size: .8rem; font-weight: 600; }
+  .item img, .item .badge { width: 64px; height: 64px; border-radius: 12px; display: block; margin: 0 auto 6px; }
+  .badge { background: var(--line); display: grid; place-items: center; font-weight: 700; }
   .item.swapped img { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .item { position: relative; }
   /* Invisible native picker over the whole item: tap the item to swap it (wheel picker on iPhone). */
   .item select { position: absolute; inset: 0; opacity: 0; cursor: pointer; padding: 0; }
-  .swap { font-size: .72rem; color: var(--accent); margin-top: 2px; }
-  .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
-  .mini { display: flex; align-items: center; gap: 6px; font-size: .82rem; background: var(--bg); border-radius: 10px; padding: 4px 8px 4px 4px; }
-  .mini img { width: 28px; height: 28px; border-radius: 7px; }
-  .label { font-size: .8rem; color: var(--muted); width: 100%; margin-top: 4px; }
+  .swap { font-size: .7rem; font-weight: 400; color: var(--accent); margin-top: 2px; }
+
+  .sub { margin-top: 14px; }
+  .sub h3 { font-size: .75rem; color: var(--muted); font-weight: 600; margin: 0 0 6px; }
+  .strip { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .strip img, .strip .badge { width: 36px; height: 36px; border-radius: 8px; }
+  .strip .badge { font-size: .7rem; }
+  .sit { display: flex; align-items: center; gap: 8px; font-size: .82rem; padding: 6px 0; border-top: 1px solid var(--line); }
+  .sit:first-of-type { border-top: 0; }
+  .sit .when { flex: 1; color: var(--muted); }
+  .sit img, .sit .badge { width: 30px; height: 30px; border-radius: 7px; }
+  .meta-line { font-size: .78rem; color: var(--muted); margin-top: 12px; }
+
   .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
   .tag { font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); }
   .tag.AD { color: var(--ad); border-color: currentColor; }
   .tag.AP { color: var(--ap); border-color: currentColor; }
-  ul { margin: 0; padding-left: 20px; }
+  ul, ol { margin: 0; padding-left: 20px; }
   li + li { margin-top: 4px; }
-  .note { background: var(--warn-bg); color: var(--warn-text); border-radius: 10px; padding: 8px 10px; font-size: .82rem; margin-top: 10px; }
+  .muted { color: var(--muted); font-size: .85rem; }
+
   button.primary {
     width: 100%; font-size: 1rem; font-weight: 700; padding: 14px; border: 0; border-radius: 12px;
     background: var(--accent); color: var(--accent-text); cursor: pointer;
   }
   button.primary:disabled { opacity: .6; cursor: wait; }
   .hint { font-size: .78rem; color: var(--muted); text-align: center; margin-top: 6px; }
-  #result { white-space: normal; }
   #result p { margin: 0 0 8px; }
   .error { color: var(--ad); }
+
+  /* Pool editor */
+  .pool-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; max-height: 340px; overflow-y: auto; margin-top: 8px; }
+  .pool-pick { border: 2px solid transparent; border-radius: 12px; background: none; padding: 2px; color: var(--text); font-size: .68rem; cursor: pointer; opacity: .5; }
+  .pool-pick img { width: 48px; height: 48px; border-radius: 10px; display: block; margin: 0 auto 2px; }
+  .pool-pick[aria-pressed="true"] { opacity: 1; border-color: var(--accent); }
+
   footer { font-size: .72rem; color: var(--muted); text-align: center; padding: 8px 16px 24px; }
-  .hidden { display: none; }
+  .hidden { display: none !important; }
 </style>
 </head>
 <body>
 <main>
-  <h1>Draft Helper</h1>
+  <header>
+    <h1>Draft Helper</h1>
+    <span id="patch" class="patch"></span>
+  </header>
+
+  <nav id="lanes" class="lanes" aria-label="Position"></nav>
 
   <section class="card">
     <div class="picker">
@@ -93,19 +131,26 @@
       <img id="vsIcon" class="portrait" alt="">
       <div class="grow"><label for="vs">Lane opponent</label><select id="vs"></select></div>
     </div>
+    <button id="editPool" class="link">Edit my pool</button>
+    <div id="poolEditor" class="hidden">
+      <p class="muted">Tap champions to add or remove them from your <span id="poolLane"></span> pool. Sorted by tier.</p>
+      <div id="poolList" class="pool-list"></div>
+      <button id="savePool" class="primary" style="margin-top:10px">Save pool</button>
+    </div>
   </section>
 
   <section class="card">
-    <h2>Rest of enemy team <span style="text-transform:none;letter-spacing:0">(optional, up to 4)</span></h2>
-    <div id="team" class="chips"></div>
+    <h2>Rest of enemy team <span style="text-transform:none;letter-spacing:0">(optional)</span></h2>
+    <div id="enemies" class="enemies"></div>
   </section>
 
   <section class="card">
-    <h2>Build</h2>
-    <div id="core" class="items"></div>
-    <div id="boots" class="row"></div>
-    <div id="situational" class="row"></div>
-    <div id="buildNote" class="note hidden">Placeholder build, not the current server build.</div>
+    <h2>Core build</h2>
+    <div id="core" class="core"></div>
+    <div class="sub"><h3>Boots</h3><div id="boots" class="strip"></div></div>
+    <div class="sub"><h3>Full build</h3><div id="final" class="strip"></div></div>
+    <div class="sub" id="sitBlock"><h3>Situational swaps</h3><div id="situational"></div></div>
+    <div class="sub"><h3>Starting item · Spells · Runes</h3><div id="extras" class="muted"></div></div>
   </section>
 
   <section class="card">
@@ -121,12 +166,19 @@
   </section>
 </main>
 <footer>
-  Fan project, not endorsed by Riot Games. Icons from Riot's Data Dragon (League of Legends PC art).
+  <div id="dataLine"></div>
+  <button id="checkUpdate" class="link">Check for a new patch</button>
+  <div>Builds and tier list from WildRiftFire.com. Fan project, not endorsed by Riot Games.</div>
 </footer>
 
 <script>
 const $ = (id) => document.getElementById(id);
-const state = { champions: [], items: [], build: null, original: [], team: new Set() };
+const LANES = { baron: "Baron", jungle: "Jungle", mid: "Mid", dragon: "Dragon", support: "Support" };
+const state = {
+  position: "baron", all: [], byPosition: {}, items: [], profile: {},
+  build: null, original: [], poolDraft: new Set(),
+};
+try { state.position = localStorage.getItem("position") || "baron"; } catch {}
 
 async function api(path, options) {
   const res = await fetch(path, options);
@@ -135,21 +187,17 @@ async function api(path, options) {
   return body;
 }
 
-function iconOrBadge(src, name, size) {
-  if (src) return `<img src="${src}" alt="" width="${size}" height="${size}">`;
-  return `<span class="badge">${name.slice(0, 2)}</span>`;
-}
-
-function escapeHtml(s) {
-  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
+const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const laneIcon = (p) => `/icons/wrf/lanes/${p}.png`;
+const tierBadge = (t) => (t ? `<span class="tier ${t}">${t}</span>` : "");
+const champ = (name) => state.all.find((c) => c.name === name);
+const icon = (entry) => (entry.icon ? `<img src="${entry.icon}" alt="" title="${escapeHtml(entry.name)}">` : `<span class="badge" title="${escapeHtml(entry.name)}">${escapeHtml(entry.name.slice(0, 2))}</span>`);
 
 // Small Markdown subset for the agent's reply: headings, bold, bullet and numbered lists.
 function renderMarkdown(md) {
-  const lines = escapeHtml(md).split("\n");
   let html = "", list = null;
   const close = () => { if (list) { html += `</${list}>`; list = null; } };
-  for (const raw of lines) {
+  for (const raw of escapeHtml(md).split("\n")) {
     const line = raw.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
     const bullet = line.match(/^\s*[-*]\s+(.*)/), numbered = line.match(/^\s*\d+[.)]\s+(.*)/);
     const heading = line.match(/^#{1,6}\s+(.*)/);
@@ -167,39 +215,81 @@ function renderMarkdown(md) {
   return html;
 }
 
-function fillSelect(select, value) {
-  select.innerHTML = state.champions.map((c) => `<option>${c.name}</option>`).join("");
-  select.value = value;
+function renderLanes() {
+  $("lanes").innerHTML = Object.entries(LANES).map(([p, label]) =>
+    `<button class="lane" data-pos="${p}" aria-pressed="${p === state.position}"><img src="${laneIcon(p)}" alt="">${label}</button>`).join("");
 }
 
-function champ(name) { return state.champions.find((c) => c.name === name); }
+function option(c, position, selected) {
+  const tier = c.positions[position];
+  return `<option value="${escapeHtml(c.name)}" ${c.name === selected ? "selected" : ""}>${tier ? tier + " · " : ""}${escapeHtml(c.name)}</option>`;
+}
 
-function renderTeam() {
-  const me = $("me").value, vs = $("vs").value;
-  [me, vs].forEach((n) => state.team.delete(n));
-  $("team").innerHTML = state.champions
-    .filter((c) => c.name !== me && c.name !== vs)
-    .map((c) => `<button class="chip" aria-pressed="${state.team.has(c.name)}" data-name="${c.name}" title="${c.name}">
-        <img src="${c.icon}" alt="${c.name}"></button>`)
-    .join("");
+function fillMe(selected) {
+  const pos = state.position, pool = state.profile[pos] || [];
+  const ranked = state.byPosition[pos] || [];
+  const mine = pool.map(champ).filter(Boolean);
+  const others = ranked.filter((c) => !pool.includes(c.name));
+  selected = selected && (pool.includes(selected) || ranked.some((c) => c.name === selected)) ? selected : (mine[0] || ranked[0]).name;
+  $("me").innerHTML =
+    (mine.length ? `<optgroup label="My pool">${mine.map((c) => option(c, pos, selected)).join("")}</optgroup>` : "") +
+    `<optgroup label="${LANES[pos]} tier list">${others.map((c) => option(c, pos, selected)).join("")}</optgroup>`;
+  $("me").value = selected;
+}
+
+function fillVs(selected) {
+  const ranked = state.byPosition[state.position] || [];
+  const me = $("me").value;
+  const choices = ranked.filter((c) => c.name !== me);
+  selected = choices.some((c) => c.name === selected) ? selected : choices[0].name;
+  $("vs").innerHTML = choices.map((c) => option(c, state.position, selected)).join("");
+  $("vs").value = selected;
+}
+
+function renderEnemies() {
+  const previous = Object.fromEntries([...$("enemies").querySelectorAll("select")].map((s) => [s.dataset.pos, s.value]));
+  $("enemies").innerHTML = Object.keys(LANES).filter((p) => p !== state.position).map((p) => {
+    const options = (state.byPosition[p] || []).map((c) => option(c, p, previous[p])).join("");
+    return `<div><label><img src="${laneIcon(p)}" alt="">${LANES[p]}</label>
+      <select data-pos="${p}"><option value="">None</option>${options}</select></div>`;
+  }).join("");
 }
 
 function renderBuild() {
   const b = state.build;
-  const options = (selected) => state.items
-    .filter((i) => !i.tags.includes("boots"))
-    .map((i) => `<option ${i.name === selected ? "selected" : ""}>${i.name}</option>`).join("");
-  $("core").innerHTML = b.core.map((item, slot) => `
-    <div class="item ${item.name !== state.original[slot] ? "swapped" : ""}">
-      ${iconOrBadge(item.icon, item.name, 52)}
-      <div>${item.name}</div>
-      <div class="swap">${item.name !== state.original[slot] ? `was ${state.original[slot]}` : "tap to swap"}</div>
-      <select data-slot="${slot}" aria-label="Swap core item ${slot + 1}">${options(item.name)}</select>
-    </div>`).join("");
-  $("boots").innerHTML = `<span class="label">Boots</span><span class="mini">${iconOrBadge(b.boots.icon, b.boots.name, 28)}${b.boots.name}</span>`;
-  $("situational").innerHTML = `<span class="label">Situational</span>` +
-    b.situational.map((i) => `<span class="mini">${iconOrBadge(i.icon, i.name, 28)}${i.name}</span>`).join("");
-  $("buildNote").classList.toggle("hidden", b.verified !== false);
+  const itemOptions = (selected) => itemGroupOrder().map((group) => {
+    const items = state.items.filter((i) => group === "Other"
+      ? !i.categories.some((c) => ITEM_GROUPS.includes(c)) && !i.categories.includes("Boots")
+      : i.categories.includes(group));
+    // An item can sit in several groups; only the first copy carries "selected".
+    const options = items.map((i) => {
+      const isSelected = i.name === selected && !selectedShown;
+      if (isSelected) selectedShown = true;
+      return `<option ${isSelected ? "selected" : ""}>${escapeHtml(i.name)}</option>`;
+    }).join("");
+    return items.length ? `<optgroup label="${group}">${options}</optgroup>` : "";
+  }).join("");
+  let selectedShown;
+  $("core").innerHTML = b.core.map((item, slot) => {
+    const swapped = item.name !== state.original[slot];
+    return `<div class="item ${swapped ? "swapped" : ""}">
+      ${icon(item)}<div>${escapeHtml(item.name)}</div>
+      <div class="swap">${swapped ? `was ${escapeHtml(state.original[slot])}` : "tap to swap"}</div>
+      <select data-slot="${slot}" aria-label="Swap core item ${slot + 1}">${itemOptions(item.name)}</select>
+    </div>`;
+  }).join("");
+  $("boots").innerHTML = b.boots.map((i) => `${icon(i)}<span class="muted">${escapeHtml(i.name)}</span>`).join("");
+  // The full build follows your core swaps.
+  const swappedFor = Object.fromEntries(state.original.map((name, slot) => [name, b.core[slot]]));
+  $("final").innerHTML = b.final.map((i) => swappedFor[i.name] || i).map(icon).join("");
+  $("sitBlock").classList.toggle("hidden", !b.situational.length);
+  $("situational").innerHTML = b.situational.map((s) =>
+    `<div class="sit"><span class="when">${escapeHtml(s.when)}</span>${icon(s.replace)}<span>→</span>${icon(s.with)}</div>`).join("");
+  $("extras").innerHTML = [
+    b.starting.map((i) => i.name).join(", "),
+    b.spells.join(" + "),
+    b.runes.join(", "),
+  ].filter(Boolean).map(escapeHtml).join(" · ");
 }
 
 async function loadBuild() {
@@ -212,16 +302,15 @@ async function loadBuild() {
 async function loadMatchup() {
   const me = $("me").value, vs = $("vs").value;
   $("matchupTitle").textContent = `Playing against ${vs}`;
-  if (me === vs) {
-    $("matchupTags").innerHTML = "";
-    $("matchupTips").innerHTML = "<li>Mirror matchup.</li>";
-    return;
-  }
   const m = await api(`/api/matchup?me=${encodeURIComponent(me)}&vs=${encodeURIComponent(vs)}`);
+  const tier = m.enemy_tiers[state.position];
   $("matchupTags").innerHTML =
-    `<span class="tag ${m.enemy_damage_type}">${m.enemy_damage_type} damage</span>` +
+    (tier ? `<span class="tag">${LANES[state.position]} ${tierBadge(tier)}</span>` : "") +
+    (m.enemy_damage_type ? `<span class="tag ${m.enemy_damage_type}">${m.enemy_damage_type} damage</span>` : "") +
     (m.enemy_heals ? `<span class="tag">Heals: consider anti-heal</span>` : "");
-  $("matchupTips").innerHTML = m.how_to_play_against_enemy.map((t) => `<li>${t}</li>`).join("");
+  $("matchupTips").innerHTML = m.has_tips
+    ? m.how_to_play_against_enemy.map((t) => `<li>${escapeHtml(t)}</li>`).join("")
+    : `<li class="muted">No hand-written tips for ${escapeHtml(vs)} yet. The AI button can still help.</li>`;
 }
 
 function updatePortraits() {
@@ -229,11 +318,21 @@ function updatePortraits() {
   $("vsIcon").src = champ($("vs").value).icon;
 }
 
-async function onChampionChange(changedMe) {
+async function refreshView({ build = true } = {}) {
   updatePortraits();
-  renderTeam();
   $("result").innerHTML = "";
-  await Promise.all([changedMe ? loadBuild() : null, loadMatchup()]);
+  await Promise.all([build ? loadBuild() : null, loadMatchup()]);
+}
+
+async function setPosition(pos) {
+  state.position = pos;
+  try { localStorage.setItem("position", pos); } catch {}
+  renderLanes();
+  closePoolEditor();
+  fillMe();
+  fillVs();
+  renderEnemies();
+  await refreshView();
 }
 
 function onSwap(select) {
@@ -244,10 +343,41 @@ function onSwap(select) {
     alert(`${name} is already in your core build.`);
     return;
   }
-  const item = state.items.find((i) => i.name === name);
-  core[slot] = { name, icon: item.icon };
+  core[slot] = state.items.find((i) => i.name === name);
   $("result").innerHTML = "";
   renderBuild();
+}
+
+function openPoolEditor() {
+  const pos = state.position;
+  state.poolDraft = new Set(state.profile[pos] || []);
+  $("poolLane").textContent = LANES[pos];
+  $("poolList").innerHTML = (state.byPosition[pos] || []).map((c) =>
+    `<button class="pool-pick" data-name="${escapeHtml(c.name)}" aria-pressed="${state.poolDraft.has(c.name)}">
+      <img src="${c.icon}" alt="">${tierBadge(c.positions[pos])} ${escapeHtml(c.name)}</button>`).join("");
+  $("poolEditor").classList.remove("hidden");
+  $("editPool").classList.add("hidden");
+}
+
+function closePoolEditor() {
+  $("poolEditor").classList.add("hidden");
+  $("editPool").classList.remove("hidden");
+}
+
+async function savePool() {
+  const pos = state.position;
+  // Keep the existing order, append new picks in tier order.
+  const kept = (state.profile[pos] || []).filter((n) => state.poolDraft.has(n));
+  const added = (state.byPosition[pos] || []).map((c) => c.name).filter((n) => state.poolDraft.has(n) && !kept.includes(n));
+  state.profile = await api("/api/profile", {
+    method: "PUT", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...state.profile, [pos]: [...kept, ...added] }),
+  });
+  closePoolEditor();
+  const current = $("me").value;
+  fillMe(current);
+  fillVs($("vs").value);
+  if ($("me").value !== current) await refreshView();
 }
 
 async function tailor() {
@@ -255,7 +385,7 @@ async function tailor() {
   const swaps = state.build.core
     .map((item, slot) => ({ remove: state.original[slot], add: item.name }))
     .filter((s) => s.remove !== s.add);
-  const enemies = [$("vs").value, ...state.team];
+  const others = [...$("enemies").querySelectorAll("select")].map((s) => s.value).filter(Boolean);
   button.disabled = true;
   button.textContent = "Thinking…";
   $("result").innerHTML = "";
@@ -263,7 +393,7 @@ async function tailor() {
     const { result } = await api("/api/builds/tailor", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ champion: $("me").value, enemies, swaps }),
+      body: JSON.stringify({ champion: $("me").value, enemies: [$("vs").value, ...others], swaps, position: state.position }),
     });
     $("result").innerHTML = renderMarkdown(result);
   } catch (e) {
@@ -274,23 +404,52 @@ async function tailor() {
   }
 }
 
+async function showMeta() {
+  const m = await api("/api/meta");
+  $("patch").textContent = m.patch ? `Patch ${m.patch}` : "";
+  const fetched = m.fetched ? `Data fetched ${m.fetched.slice(0, 10)}` : "No data yet";
+  const busy = m.update.state === "checking" || m.update.state === "updating";
+  $("dataLine").textContent = m.update.message || fetched;
+  return { busy, hasData: Boolean(m.patch) };
+}
+
+async function checkForUpdate() {
+  await api("/api/refresh", { method: "POST" });
+  const poll = setInterval(async () => {
+    const { busy } = await showMeta();
+    if (!busy) { clearInterval(poll); location.reload(); }
+  }, 3000);
+}
+
 async function init() {
-  [state.champions, state.items] = await Promise.all([api("/api/champions"), api("/api/items")]);
-  fillSelect($("me"), state.champions[0].name);
-  fillSelect($("vs"), state.champions[1].name);
-  $("me").addEventListener("change", () => onChampionChange(true));
-  $("vs").addEventListener("change", () => onChampionChange(false));
-  $("team").addEventListener("click", (e) => {
-    const chip = e.target.closest(".chip");
-    if (!chip) return;
-    const name = chip.dataset.name;
-    if (!state.team.has(name) && state.team.size >= 4) return; // opponent + 4 others = 5
-    state.team.has(name) ? state.team.delete(name) : state.team.add(name);
-    chip.setAttribute("aria-pressed", state.team.has(name));
-  });
+  const { busy, hasData } = await showMeta();
+  if (!hasData) {
+    $("result").innerHTML = `<p class="muted">Downloading champion data for the first time. This takes a few minutes…</p>`;
+    if (busy) setTimeout(init, 5000);
+    return;
+  }
+  let positions;
+  [state.all, state.items, state.profile, ...positions] = await Promise.all([
+    api("/api/champions"), api("/api/items"), api("/api/profile"),
+    ...Object.keys(LANES).map((p) => api(`/api/champions?position=${p}`)),
+  ]);
+  Object.keys(LANES).forEach((p, i) => (state.byPosition[p] = positions[i]));
+
+  $("lanes").addEventListener("click", (e) => { const b = e.target.closest(".lane"); if (b) setPosition(b.dataset.pos); });
+  $("me").addEventListener("change", () => { fillVs($("vs").value); refreshView(); });
+  $("vs").addEventListener("change", () => refreshView({ build: false }));
   $("core").addEventListener("change", (e) => e.target.matches("select") && onSwap(e.target));
+  $("editPool").addEventListener("click", openPoolEditor);
+  $("poolList").addEventListener("click", (e) => {
+    const b = e.target.closest(".pool-pick"); if (!b) return;
+    const n = b.dataset.name;
+    state.poolDraft.has(n) ? state.poolDraft.delete(n) : state.poolDraft.add(n);
+    b.setAttribute("aria-pressed", state.poolDraft.has(n));
+  });
+  $("savePool").addEventListener("click", savePool);
   $("tailor").addEventListener("click", tailor);
-  await onChampionChange(true);
+  $("checkUpdate").addEventListener("click", checkForUpdate);
+  await setPosition(state.position in LANES ? state.position : "baron");
 }
 
 init().catch((e) => { $("result").innerHTML = `<p class="error">${escapeHtml(e.message)}</p>`; });

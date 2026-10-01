@@ -2,7 +2,7 @@
 
 Usage:
     python -m wildrift.agent Darius --enemies Garen Swain Irelia Fiora Mordekaiser
-    python -m wildrift.agent Darius --enemies Garen Swain --swap "Black Cleaver=triforce"
+    python -m wildrift.agent Darius --enemies Garen Swain --swap "Stridebreaker=triforce"
 """
 
 import argparse
@@ -23,14 +23,15 @@ MODEL_ID = "claude-haiku-4-5"  # cheapest current model; this task doesn't need 
 
 SYSTEM_PROMPT = """You help a Wild Rift player adjust their build during champion select.
 
-Use the tools to fetch the player's standard build and the enemy champions' info.
-Then decide whether the standard build fits this enemy team. Consider damage types
+Use the tools to fetch the player's current build for this patch and the enemy champions' info.
+The build includes situational swaps (e.g. "vs Healing: replace X with Y"). Decide which of them
+apply to this enemy team, and whether anything else should change. Consider damage types
 (mostly AD vs AP), healing (anti-heal), crowd control (tenacity) and tankiness.
 
 Rules:
+- Keep the core items unless there's a strong reason. The core is the priority.
 - Only recommend items that appear in get_items. Don't invent items.
-- If a champion isn't in the dataset, say so and reason from general knowledge, labelled as such.
-- If the build data is marked verified: false, mention once that it's placeholder data.
+- Matchup tips only exist for some champions. Without them, reason from general knowledge and say so.
 - Keep it short: final build in order, then at most 4 one-line reasons for any changes,
   then 2-3 lane tips against the enemy laner (the first enemy listed)."""
 
@@ -50,16 +51,22 @@ def _mcp_client() -> MCPClient:
     return client
 
 
-def tailor_build(my_champion: str, enemies: list[str], swaps: list[tuple[str, str]] | None = None) -> str:
+def tailor_build(
+    my_champion: str, enemies: list[str], swaps: list[tuple[str, str]] | None = None, position: str | None = None
+) -> str:
     """Return a tailored build. Repeat requests for the same draft are served from cache.
 
     swaps: (remove, add) core-item swaps the player has locked in, e.g. [("Black Cleaver", "triforce")].
     They are validated locally first, so a bad item name fails before any API call.
     """
     swaps = swaps or []
+    for name in [my_champion, *enemies]:
+        data.get_champion(name)  # fail fast on unknown names, before any API call
     locked_build = data.apply_swaps(my_champion, swaps) if swaps else None
 
     key = (
+        data.meta()["patch"],
+        position or "",
         my_champion.lower(),
         enemies[0].lower() if enemies else "",
         tuple(sorted(e.lower() for e in enemies)),
@@ -73,9 +80,10 @@ def tailor_build(my_champion: str, enemies: list[str], swaps: list[tuple[str, st
         raise RuntimeError("ANTHROPIC_API_KEY is not set. Add it to .env in the project root.")
 
     model = AnthropicModel(model_id=MODEL_ID, max_tokens=1024)
+    role = f" in the {position} position" if position else ""
     prompt = (
-        f"I'm playing {my_champion}. Enemy team: {', '.join(enemies)}. "
-        f"My lane opponent is {enemies[0]}." if enemies else f"I'm playing {my_champion}."
+        f"I'm playing {my_champion}{role}. Enemy team: {', '.join(enemies)}. "
+        f"My lane opponent is {enemies[0]}." if enemies else f"I'm playing {my_champion}{role}."
     )
     if locked_build:
         changes = "; ".join(
@@ -103,12 +111,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Tailor a Wild Rift build to the enemy team.")
     parser.add_argument("champion")
     parser.add_argument("--enemies", nargs="+", required=True, help="Enemy champions, lane opponent first")
+    parser.add_argument("--position", choices=data.POSITIONS)
     parser.add_argument(
         "--swap",
         action="append",
         default=[],
         metavar="OLD=NEW",
-        help='Swap a core item, e.g. --swap "Black Cleaver=triforce". Repeatable.',
+        help='Swap a core item, e.g. --swap "Stridebreaker=triforce". Repeatable.',
     )
     args = parser.parse_args()
 
@@ -120,8 +129,8 @@ def main() -> None:
         swaps.append((old, new))
 
     try:
-        print(tailor_build(args.champion, args.enemies, swaps))
-    except (data.UnknownChampionError, data.UnknownItemError, ValueError) as e:
+        print(tailor_build(args.champion, args.enemies, swaps, args.position))
+    except (data.UnknownChampionError, data.UnknownItemError, data.NoDataError, ValueError) as e:
         sys.exit(f"Error: {e.args[0]}")
 
 

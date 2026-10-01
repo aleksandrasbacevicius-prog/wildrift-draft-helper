@@ -9,7 +9,7 @@ from wildrift import data
 
 server = MCPServer(
     name="wildrift-draft",
-    instructions="Wild Rift champion, build and matchup data. Builds are placeholders unless marked verified.",
+    instructions="Wild Rift tier list, builds and items for the current patch (from WildRiftFire.com), plus matchup tips.",
 )
 
 
@@ -21,44 +21,44 @@ def _safe(fn, *args):
 
 
 @server.tool()
-def list_champions() -> list[str]:
-    """List the champions this dataset covers."""
-    return data.list_champions()
+def list_champions(position: str | None = None) -> list[dict]:
+    """List champions with their tier (S+ best, then S, A, B, C) per position.
+    Position is one of baron, jungle, mid, dragon, support. Omit it to list everyone."""
+    return [{"name": c["name"], "tiers": c["positions"]} for c in data.list_champions(position)]
 
 
 @server.tool()
 def get_champion(name: str) -> dict:
-    """Get a champion's role, damage type, class, strengths, weaknesses and tips for playing against them."""
+    """Get a champion's tier per position and, where available, strengths, weaknesses and tips for playing against them."""
     return _safe(data.get_champion, name)
 
 
 @server.tool()
 def get_build(name: str) -> dict:
-    """Get the standard (server) build for a champion: core items, boots and situational items.
-    Check the 'verified' field. False means it is a placeholder."""
+    """Get the champion's current build: starting item, core items, boots, final build,
+    situational swaps (e.g. 'vs Healing: replace X with Y'), summoner spells and runes."""
     return _safe(data.get_build, name)
 
 
 @server.tool()
 def get_matchup(my_champion: str, enemy: str) -> dict:
-    """Get lane matchup info: your strengths, the enemy's strengths and weaknesses,
-    how to play against them, their damage type and whether they heal."""
+    """Get lane matchup info: the enemy's tiers, strengths, weaknesses, how to play against them,
+    damage type and whether they heal. Tips exist only for some champions (see has_tips)."""
     return _safe(data.get_matchup, my_champion, enemy)
 
 
 @server.tool()
 def swap_core_item(champion: str, remove: str, add: str) -> dict:
     """Return the champion's build with one core item replaced by another, e.g.
-    remove='Black Cleaver', add='Trinity Force'. Accepts nicknames like 'triforce'.
-    The removed item moves to the situational list."""
+    remove='Stridebreaker', add='Trinity Force'. Accepts nicknames like 'triforce'."""
     return _safe(data.swap_core_item, champion, remove, add)
 
 
 @server.tool()
-def get_items(tag: str | None = None) -> dict[str, list[str]]:
-    """List items and their tags. Filter by a tag such as 'armor', 'magic_resist',
-    'grievous_wounds', 'tenacity' or 'anti_tank'. Omit the tag to get all items."""
-    return data.get_items(tag)
+def get_items(category: str | None = None) -> list[str]:
+    """List item names. Filter by category: Fighter, Assassin, Marksman, Magic, Defense,
+    Support, Boots or Physical. Omit the category to list all items."""
+    return list(data.get_items(category))
 
 
 if __name__ == "__main__":
