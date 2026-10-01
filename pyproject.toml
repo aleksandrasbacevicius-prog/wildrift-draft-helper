@@ -1,0 +1,27 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["e2e: browser tests with Playwright (run with: pytest -m e2e)"]
+addopts = "-m 'not e2e'"
+
+[tool.coverage.run]
+source = ["wildrift"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 90
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "SIM"]
+ignore = [
+    "E501",  # line length is handled by `ruff format`; long regex patterns are clearer unbroken
+    "S101",  # assert is fine in tests
+    "S310",  # urllib.urlopen: URLs are checked against ALLOWED_HOSTS before opening
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "S108"]  # test tokens and temp paths

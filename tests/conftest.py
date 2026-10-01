@@ -17,11 +17,9 @@ os.environ["APP_TOKENS"] = ""  # tests run as "this computer" unless a test sets
 
 @pytest.fixture(autouse=True)
 def reset_limits(monkeypatch):
-    from wildrift import security
-
     import shutil
 
-    from wildrift import data
+    from wildrift import data, security
 
     security.write_rate_limit.calls.clear()
     security.ai_usage.path.unlink(missing_ok=True)

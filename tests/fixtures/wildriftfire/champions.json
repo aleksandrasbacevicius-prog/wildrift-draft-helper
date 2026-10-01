@@ -576,5 +576,182 @@
    ]
   },
   "icon": "/icons/wrf/champions/swain.png"
+ },
+ "Caitlyn": {
+  "name": "Caitlyn",
+  "guide": "caitlyn",
+  "positions": {
+   "dragon": "S"
+  },
+  "build": {
+   "starting": [
+    "Long Sword"
+   ],
+   "core": [
+    "Stormrazor",
+    "Hexoptics C44",
+    "Infinity Edge"
+   ],
+   "boots": [
+    "Berserker's Greaves",
+    "Galeforce"
+   ],
+   "final": [
+    "Berserker's Greaves",
+    "Stormrazor",
+    "Hexoptics C44",
+    "Infinity Edge",
+    "Lord Dominik's Regard",
+    "Bloodthirster",
+    "Galeforce"
+   ],
+   "situational": [
+    {
+     "when": "vs Healing",
+     "replace": "Lord Dominik's Regard",
+     "with": "Mortal Reminder"
+    },
+    {
+     "when": "vs Crowd Control",
+     "replace": "Bloodthirster",
+     "with": "Mercurial Scimitar"
+    },
+    {
+     "when": "vs Burst Damage",
+     "replace": "Bloodthirster",
+     "with": "Guardian Angel"
+    },
+    {
+     "when": "vs Tanks",
+     "replace": "Bloodthirster",
+     "with": "Blade of the Ruined King"
+    },
+    {
+     "when": "vs Squishies",
+     "replace": "Cut Down",
+     "with": "Coup de Grace"
+    }
+   ],
+   "spells": [
+    "Flash",
+    "Ghost"
+   ],
+   "runes": [
+    "Lethal Tempo",
+    "Brutal",
+    "Cut Down",
+    "Legend: Alacrity",
+    "Bone Plating"
+   ]
+  },
+  "icon": "/icons/wrf/champions/caitlyn.png"
+ },
+ "Ezreal": {
+  "name": "Ezreal",
+  "guide": "ezreal",
+  "positions": {
+   "dragon": "S"
+  },
+  "build": {
+   "starting": [
+    "Long Sword"
+   ],
+   "core": [
+    "Manamune",
+    "Trinity Force",
+    "Serylda's Grudge"
+   ],
+   "boots": [
+    "Gluttonous Greaves"
+   ],
+   "final": [
+    "Muramana",
+    "Gluttonous Greaves",
+    "Trinity Force",
+    "Serylda's Grudge",
+    "Spear of Shojin",
+    "Guardian Angel"
+   ],
+   "situational": [
+    {
+     "when": "vs Ability Power",
+     "replace": "Guardian Angel",
+     "with": "Maw of Malmortius"
+    },
+    {
+     "when": "vs Squishies",
+     "replace": "Cut Down",
+     "with": "Coup de Grace"
+    }
+   ],
+   "spells": [
+    "Flash",
+    "Barrier"
+   ],
+   "runes": [
+    "Conqueror",
+    "Brutal",
+    "Cut Down",
+    "Legend: Bloodline",
+    "Absolute Focus"
+   ]
+  },
+  "icon": "/icons/wrf/champions/ezreal.png"
+ },
+ "Nami": {
+  "name": "Nami",
+  "guide": "nami",
+  "positions": {
+   "support": "S"
+  },
+  "build": {
+   "starting": [
+    "Spectral Sickle"
+   ],
+   "core": [
+    "Echoes of Helia",
+    "Harmonic Echo",
+    "Ardent Censer"
+   ],
+   "boots": [
+    "Ionian Boots of Lucidity"
+   ],
+   "final": [
+    "Black Mist Scythe",
+    "Ionian Boots of Lucidity",
+    "Echoes of Helia",
+    "Harmonic Echo",
+    "Ardent Censer",
+    "Redemption"
+   ],
+   "situational": [
+    {
+     "when": "vs Crowd Control",
+     "replace": "Redemption",
+     "with": "Mikael's Blessing"
+    }
+   ],
+   "spells": [
+    "Flash",
+    "Heal"
+   ],
+   "runes": [
+    "Aery",
+    "Manaflow Band",
+    "Transcendence",
+    "Scorch",
+    "Bone Plating"
+   ]
+  },
+  "icon": "/icons/wrf/champions/nami.png"
+ },
+ "Yuumi": {
+  "name": "Yuumi",
+  "guide": "yuumi",
+  "positions": {
+   "support": "C"
+  },
+  "icon": "/icons/wrf/champions/yuumi.png",
+  "build": null
  }
 }

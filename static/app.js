@@ -16,27 +16,50 @@ const state = {
 };
 try { state.position = localStorage.getItem("position") || "baron"; } catch {}
 
-// Access token for protected actions (AI builds, saving the pool, patch checks). Kept on this device only.
+// Access token for protected actions (AI builds, saving builds and pools, patch checks). Kept on this
+// device only; falls back to memory when the browser blocks storage (e.g. some private modes).
+let memoryToken = "";
 const tokenStore = {
-  get() { try { return localStorage.getItem("accessToken") || ""; } catch { return ""; } },
-  set(t) { try { t ? localStorage.setItem("accessToken", t) : localStorage.removeItem("accessToken"); } catch {} },
+  get() { try { return localStorage.getItem("accessToken") || memoryToken; } catch { return memoryToken; } },
+  set(t) {
+    memoryToken = t;
+    try { t ? localStorage.setItem("accessToken", t) : localStorage.removeItem("accessToken"); } catch {}
+    updateTokenLink();
+  },
 };
+let promptedThisVisit = false; // ask for the token at most once per page load; the footer link asks again
 
-async function api(path, options = {}, retried = false) {
-  const headers = { ...(options.headers || {}) };
-  const token = tokenStore.get();
-  if (token) headers.Authorization = `Bearer ${token}`;
-  const res = await fetch(path, { ...options, headers });
+function askForToken() {
+  promptedThisVisit = true;
+  const entered = window.prompt("Enter your access token.\nOnly the part after your name, e.g. after \"chocoloco:\"");
+  // Accept a pasted "name:token" too, by keeping only the token part.
+  const token = (entered || "").trim().replace(/^[a-z0-9_-]+:/i, "");
+  if (token) tokenStore.set(token);
+  return Boolean(token);
+}
+
+function updateTokenLink() {
+  const link = document.getElementById("signOut");
+  if (link) link.textContent = tokenStore.get() ? "Forget access token" : "Enter access token";
+}
+
+async function api(path, options = {}, quiet = false) {
+  const send = () => {
+    const headers = { ...(options.headers || {}) };
+    const token = tokenStore.get();
+    if (token) headers.Authorization = `Bearer ${token}`;
+    return fetch(path, { ...options, headers });
+  };
+  let res = await send();
+  if (res.status === 401 && !quiet && !promptedThisVisit && askForToken()) res = await send();
   const body = await res.json().catch(() => ({}));
-  if (res.status === 401 && !retried) {
-    const entered = window.prompt("Enter the access token for this app (APP_TOKEN in .env):");
-    if (entered) {
-      tokenStore.set(entered.trim());
-      $("signOut").classList.remove("hidden");
-      return api(path, options, true);
-    }
+  if (res.status === 401) {
+    const hadToken = Boolean(tokenStore.get());
+    tokenStore.set("");
+    throw new Error(hadToken
+      ? "That access token wasn't accepted. Use \"Enter access token\" at the bottom of the page to try again."
+      : "Access token needed. Use \"Enter access token\" at the bottom of the page.");
   }
-  if (res.status === 401) tokenStore.set("");
   if (!res.ok) throw new Error(body.detail || `Request failed (${res.status})`);
   return body;
 }
@@ -84,7 +107,7 @@ function fillMe(selected) {
   const ranked = state.byPosition[pos] || [];
   const mine = pool.map(champ).filter(Boolean);
   const others = ranked.filter((c) => !pool.includes(c.name));
-  selected = selected && (pool.includes(selected) || ranked.some((c) => c.name === selected)) ? selected : (mine[0] || ranked[0]).name;
+  selected = selected && (pool.includes(selected) || ranked.some((c) => c.name === selected)) ? selected : (mine[0] || ranked[0] || state.all[0]).name;
   $("me").innerHTML =
     (mine.length ? `<optgroup label="My pool">${mine.map((c) => option(c, pos, selected)).join("")}</optgroup>` : "") +
     `<optgroup label="${LANES[pos]} tier list">${others.map((c) => option(c, pos, selected)).join("")}</optgroup>`;
@@ -94,7 +117,9 @@ function fillMe(selected) {
 function fillVs(selected) {
   const ranked = state.byPosition[state.position] || [];
   const me = $("me").value;
-  const choices = ranked.filter((c) => c.name !== me);
+  // Fall back to every champion if this lane's tier list has nobody else in it.
+  let choices = ranked.filter((c) => c.name !== me);
+  if (!choices.length) choices = state.all.filter((c) => c.name !== me);
   selected = choices.some((c) => c.name === selected) ? selected : choices[0].name;
   $("vs").innerHTML = choices.map((c) => option(c, state.position, selected)).join("");
   $("vs").value = selected;
@@ -285,7 +310,18 @@ function updatePortraits() {
 async function refreshView({ build = true } = {}) {
   updatePortraits();
   $("result").innerHTML = "";
-  await Promise.all([build ? loadBuild() : null, loadMatchup()]);
+  // One champion's missing build or matchup shouldn't break the rest of the page.
+  const [buildResult, matchupResult] = await Promise.allSettled([build ? loadBuild() : null, loadMatchup()]);
+  if (buildResult.status === "rejected") showBuildError(buildResult.reason);
+  if (matchupResult.status === "rejected") $("matchupTips").innerHTML = `<li class="muted">${escapeHtml(matchupResult.reason.message)}</li>`;
+}
+
+function showBuildError(error) {
+  state.build = null;
+  $("core").innerHTML = `<p class="muted">${escapeHtml(error.message)}. Try another champion.</p>`;
+  ["boots", "final", "situational", "runes", "spells"].forEach((id) => ($(id).innerHTML = ""));
+  $("buildState").textContent = "";
+  $("resetBuild").classList.add("hidden");
 }
 
 async function setPosition(pos) {
@@ -339,6 +375,7 @@ async function savePool() {
 
 async function tailor() {
   const button = $("tailor");
+  if (!state.build) return;
   const swaps = state.build.core
     .map((item, slot) => ({ remove: state.original[slot], add: item.name }))
     .filter((s) => s.remove !== s.add);
@@ -447,8 +484,12 @@ async function init() {
   $("savePool").addEventListener("click", savePool);
   $("tailor").addEventListener("click", tailor);
   $("checkUpdate").addEventListener("click", checkForUpdate);
-  $("signOut").classList.toggle("hidden", !tokenStore.get());
-  $("signOut").addEventListener("click", () => { tokenStore.set(""); location.reload(); });
+  updateTokenLink();
+  $("signOut").addEventListener("click", () => {
+    if (tokenStore.get()) tokenStore.set("");
+    else askForToken();
+    location.reload();
+  });
   loadUsage();
   await setPosition(state.position in LANES ? state.position : "baron");
 }

@@ -10,6 +10,7 @@ Requests are spaced out so a full refresh takes a few minutes.
 import argparse
 import html
 import json
+import os
 import re
 import time
 import urllib.request
@@ -18,7 +19,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA_DIR = ROOT / "data" / "wildriftfire"
+DATA_DIR = Path(os.getenv("WILDRIFT_DATA_DIR", ROOT / "data" / "wildriftfire"))
 ICON_DIR = ROOT / "static" / "icons" / "wrf"
 SITE = "https://www.wildriftfire.com"
 HEADERS = {"User-Agent": "wildrift-draft-helper (personal, non-commercial)"}
@@ -67,7 +68,7 @@ def parse_tier_list(page: str) -> dict:
     main = page[page.find("wf-tier-list__tiers__main") : page.find("wf-tier-list__tiers__sidebar")]
     parts = re.split(r'<div class="tier ([a-z]+)">', main)
     champions: dict[str, dict] = {}
-    for tier_class, body in zip(parts[1::2], parts[2::2]):
+    for tier_class, body in zip(parts[1::2], parts[2::2], strict=True):
         for m in re.finditer(
             r'href="/guide/([^"]+)"[^>]*data-role="([^"]+)".*?<div class="item-holder">\s*<img src="([^"]+)".*?<span>([^<]+)</span>',
             body,
@@ -94,7 +95,9 @@ def parse_guide(page: str) -> dict:
 
     situational = []
     sit = page[page.find("wf-champion__data__situational") : page.find("skills-counters-block")]
-    for label, body in re.findall(r'<span class="situation"[^>]*>([^<]+)</span>(.*?)(?=<span class="situation"|$)', sit, re.S):
+    for label, body in re.findall(
+        r'<span class="situation"[^>]*>([^<]+)</span>(.*?)(?=<span class="situation"|$)', sit, re.S
+    ):
         items = _items_in(body)
         if len(items) >= 2:
             situational.append({"when": html.unescape(label).strip(), "replace": items[0], "with": items[1]})
@@ -109,7 +112,9 @@ def parse_guide(page: str) -> dict:
 def parse_item_list(page: str) -> dict:
     items = {}
     for categories, img, name in re.findall(
-        r'class="ico-holder[^"]*"\s+data-sort="([^"]*)".*?<img src="(/images/items/[^"]+)">.*?<span>([^<]+)</span>', page, re.S
+        r'class="ico-holder[^"]*"\s+data-sort="([^"]*)".*?<img src="(/images/items/[^"]+)">.*?<span>([^<]+)</span>',
+        page,
+        re.S,
     ):
         name = html.unescape(name).strip()
         items[name] = {"name": name, "categories": [c for c in categories.split(",") if c], "icon_url": SITE + img}
@@ -121,8 +126,10 @@ def parse_rune_list(page: str) -> dict:
     main = page[page.find("wf-tier-list__tiers__main") : page.find("wf-tier-list__tiers__sidebar")]
     parts = re.split(r'<div class="tier ([a-z]+)">', main)
     runes = {}
-    for tier_class, body in zip(parts[1::2], parts[2::2]):
-        for sort, name in re.findall(r'class="ico-holder[^"]*"\s+data-sort="([^"]*)".*?<span>([^<]+)</span>', body, re.S):
+    for tier_class, body in zip(parts[1::2], parts[2::2], strict=True):
+        for sort, name in re.findall(
+            r'class="ico-holder[^"]*"\s+data-sort="([^"]*)".*?<span>([^<]+)</span>', body, re.S
+        ):
             name = html.unescape(name).strip()
             words = sort.split()
             kind = "keystone" if "Keystone" in words else "minor"
@@ -192,6 +199,8 @@ def refresh(log=print) -> dict:
         time.sleep(REQUEST_DELAY)
         try:
             champ["build"] = parse_guide(get(f"{SITE}/guide/{champ['guide']}"))
+            if not champ["build"]["core"]:
+                raise ValueError("no core items found on the page")
         except Exception as e:  # one broken page shouldn't stop the refresh
             log(f"  {champ['name']}: build failed ({e})")
             champ["build"] = None
@@ -238,10 +247,12 @@ def refresh(log=print) -> dict:
             log(f"  icon for spell {spell} failed ({e})")
 
     meta = {"patch": patch, "fetched": datetime.now().isoformat(timespec="seconds"), "source": SITE}
-    (DATA_DIR / "champions.json").write_text(json.dumps(champions, indent=1, ensure_ascii=False), encoding="utf-8")
-    (DATA_DIR / "items.json").write_text(json.dumps(items, indent=1, ensure_ascii=False), encoding="utf-8")
-    (DATA_DIR / "runes.json").write_text(json.dumps(runes, indent=1, ensure_ascii=False), encoding="utf-8")
-    (DATA_DIR / "meta.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
+    # Write each file to a temp name first, then swap it in, so the app never reads a half-written file.
+    # meta.json goes last: it marks the refresh as complete.
+    for name, content in (("champions", champions), ("items", items), ("runes", runes), ("meta", meta)):
+        tmp = DATA_DIR / f"{name}.json.tmp"
+        tmp.write_text(json.dumps(content, indent=1, ensure_ascii=False), encoding="utf-8")
+        tmp.replace(DATA_DIR / f"{name}.json")
     log(f"Saved patch {patch} data to {DATA_DIR}")
     return meta
 

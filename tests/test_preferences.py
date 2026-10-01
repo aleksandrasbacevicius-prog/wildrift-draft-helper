@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -71,7 +73,9 @@ def test_preferences_api_validation():
     build = darius()
     bad = {"core": build["core"], "runes": ["Not A Rune", *build["runes"][1:]]}
     assert client.put("/api/preferences/Darius", json=bad).status_code == 404
-    assert client.put("/api/preferences/Nobody", json={"core": build["core"], "runes": build["runes"]}).status_code == 404
+    assert (
+        client.put("/api/preferences/Nobody", json={"core": build["core"], "runes": build["runes"]}).status_code == 404
+    )
 
 
 def test_runes_endpoint_lists_keystones_first():
@@ -83,3 +87,22 @@ def test_tailor_rejects_invalid_rune_page():
     runes = darius()["runes"]
     body = {"champion": "Darius", "enemies": ["Garen"], "runes": [runes[1], runes[0], *runes[2:]]}
     assert client.post("/api/builds/tailor", json=body).status_code == 400
+
+
+def test_stale_saved_build_is_ignored():
+    build = darius()
+    data.save_preferences("alex", "Darius", build["core"], build["runes"])
+    path = data.PREFS_DIR / "alex.json"
+    saved = json.loads(path.read_text(encoding="utf-8"))
+    saved["Darius"]["core"][0] = "Item Removed In A Patch"
+    path.write_text(json.dumps(saved), encoding="utf-8")
+    assert data.get_preferences("alex", "Darius") is None
+    saved["Darius"]["core"][0] = build["core"][0]
+    saved["Darius"]["runes"][0] = "Rune Removed In A Patch"
+    path.write_text(json.dumps(saved), encoding="utf-8")
+    assert data.get_preferences("alex", "Darius") is None
+
+
+def test_boots_cannot_be_swapped_into_core():
+    with pytest.raises(ValueError, match="boots"):
+        data.swap_core_item("Darius", darius()["core"][0], "Plated Steelcaps")

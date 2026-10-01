@@ -101,13 +101,12 @@ def tailor_build(
     model = AnthropicModel(model_id=MODEL_ID, max_tokens=1024)
     role = f" in the {position} position" if position else ""
     prompt = (
-        f"I'm playing {my_champion}{role}. Enemy team: {', '.join(enemies)}. "
-        f"My lane opponent is {enemies[0]}." if enemies else f"I'm playing {my_champion}{role}."
+        f"I'm playing {my_champion}{role}. Enemy team: {', '.join(enemies)}. My lane opponent is {enemies[0]}."
+        if enemies
+        else f"I'm playing {my_champion}{role}."
     )
     if locked_build:
-        changes = "; ".join(
-            f"I replaced {data.resolve_item(old)} with {data.resolve_item(new)}" for old, new in swaps
-        )
+        changes = "; ".join(f"I replaced {data.resolve_item(old)} with {data.resolve_item(new)}" for old, new in swaps)
         prompt += (
             f"\n{changes}. My build is now: {json.dumps(locked_build)}. "
             "Keep my chosen core items. Don't call get_build. Tailor the boots and remaining "

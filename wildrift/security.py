@@ -10,6 +10,7 @@
 
 import hmac
 import json
+import logging
 import os
 import re
 import threading
@@ -26,16 +27,23 @@ load_dotenv(ROOT / ".env")
 USAGE_FILE = Path(os.getenv("WILDRIFT_USAGE_FILE", ROOT / "data" / "ai_usage.json"))
 LOCAL_HOSTS = {"127.0.0.1", "::1", "localhost", "testclient"}  # "testclient" is the test suite's fake host
 USER_NAME = re.compile(r"^[a-z0-9_-]{1,32}$")
+log = logging.getLogger(__name__)
+_warned: set[str] = set()
 
 
 def _tokens() -> dict[str, str]:
     """token -> user name, from APP_TOKENS ("alex:abc123,sam:def456")."""
+    raw = os.getenv("APP_TOKENS", "").strip()
+    raw = raw.removeprefix("APP_TOKENS=")  # a common paste mistake; the value is still clear
     tokens = {}
-    for pair in os.getenv("APP_TOKENS", "").split(","):
-        name, _, token = pair.strip().partition(":")
-        name = name.strip().lower()
-        if name and len(token.strip()) >= 12 and USER_NAME.match(name):
-            tokens[token.strip()] = name
+    for pair in filter(None, (p.strip() for p in raw.split(","))):
+        name, _, token = pair.partition(":")
+        name, token = name.strip().lower(), token.strip()
+        if USER_NAME.match(name) and len(token) >= 12:
+            tokens[token] = name
+        elif name not in _warned:  # say which entry is wrong, never the token itself
+            _warned.add(name)
+            log.warning("Ignoring APP_TOKENS entry for %r: use name:token with a token of 12+ characters", name[:32])
     return tokens
 
 
@@ -141,8 +149,21 @@ class UsageLimit:
                     detail=f"The app's shared AI budget is used up for now. Try again in {self._hours_until_free(everyone)}h.",
                 )
             usage[user] = mine + [time.time()]
-            self.path.parent.mkdir(parents=True, exist_ok=True)
-            self.path.write_text(json.dumps(usage), encoding="utf-8")
+            self._save(usage)
+
+    def refund(self, user: str) -> None:
+        """Give back the most recent call, e.g. when the AI service failed and nothing was delivered."""
+        with self.lock:
+            usage = self._load()
+            if usage.get(user):
+                usage[user] = usage[user][:-1]
+                self._save(usage)
+
+    def _save(self, usage: dict) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = self.path.with_suffix(".tmp")
+        tmp.write_text(json.dumps(usage), encoding="utf-8")
+        tmp.replace(self.path)  # atomic, so a crash never leaves a half-written file
 
 
 ai_usage = UsageLimit(

@@ -11,3 +11,8 @@ data/profiles/
 data/builds/
 # AI usage counter (custom build limit)
 data/ai_usage.json
+# Test and coverage output
+.coverage
+htmlcov/
+test-results/
+*.tmp

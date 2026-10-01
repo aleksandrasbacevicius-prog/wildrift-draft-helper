@@ -89,6 +89,6 @@ def test_profiles_are_per_user():
     assert "Darius" in data.get_profile("sam")["baron"]
 
 
-def test_save_profile_rejects_unknown_champion():
-    with pytest.raises(data.UnknownChampionError):
-        data.save_profile("alex", {"baron": ["Nobody"]})
+def test_save_profile_drops_unknown_champions():
+    saved = data.save_profile("alex", {"baron": ["Nobody", "Darius"], "mid": ["Ahri"]})
+    assert saved["baron"] == ["Darius"] and saved["mid"] == ["Ahri"]

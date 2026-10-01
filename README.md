@@ -20,7 +20,7 @@ Website ── FastAPI ──> data layer ──> WildRiftFire data (refreshed w
 ```powershell
 py -3.11 -m venv .venv
 .venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 copy .env.example .env   # then put your Anthropic API key in .env
 python -m wildrift.wildriftfire   # first download, about 3-4 minutes
 ```
@@ -66,12 +66,21 @@ Downloaded data and icons are not committed to git (`data/wildriftfire/`, `stati
 ## Tests
 
 ```powershell
-python -m pytest -q
+pip install -r requirements-dev.txt
+python -m playwright install chromium   # once, for the browser tests
 ```
+
+| Command | What it runs |
+|---|---|
+| `python -m pytest --cov=wildrift` | Unit and API tests with coverage (fails under 90%). The AI model and the network are faked, so this is free and offline. |
+| `python -m pytest -m e2e` | Browser tests at iPhone size: lanes, item and rune swaps, saved builds, the token prompt asking only once |
+| `ruff check . && ruff format --check .` | Lint and formatting |
+| `pip-audit -r requirements.txt` | Known vulnerabilities in dependencies |
+
+GitHub Actions runs all of these on every push, plus a Docker build (`.github/workflows/ci.yml`).
 
 ## Roadmap
 
-- GitHub Actions: run the tests and build the image
 - AWS: ECS Fargate behind an ALB, plus a scheduled Lambda for the patch check
 - Persistent storage for pools and usage counters (e.g. a small database)
 

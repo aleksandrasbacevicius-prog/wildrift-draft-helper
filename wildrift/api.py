@@ -1,14 +1,15 @@
 """REST API and website for the draft helper.
 
-    uvicorn wildrift.api:app --reload                    # this computer only
-    uvicorn wildrift.api:app --host 0.0.0.0 --port 8000  # reachable from your phone on the same Wi-Fi
+uvicorn wildrift.api:app --reload                    # this computer only
+uvicorn wildrift.api:app --host 0.0.0.0 --port 8000  # reachable from your phone on the same Wi-Fi
 """
 
+import logging
+import os
 import threading
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
-
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Request
@@ -58,7 +59,8 @@ def _daily_checks() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    threading.Thread(target=_daily_checks, daemon=True).start()
+    if os.getenv("WILDRIFT_AUTO_UPDATE", "1") != "0":  # tests and CI turn this off
+        threading.Thread(target=_daily_checks, daemon=True).start()
     yield
 
 
@@ -148,7 +150,7 @@ def get_build(name: str) -> dict:
     try:
         return _with_item_icons(data.get_build(name))
     except data.UnknownChampionError as e:
-        raise HTTPException(status_code=404, detail=e.args[0])
+        raise HTTPException(status_code=404, detail=e.args[0]) from e
     except data.NoDataError:
         _no_data()
 
@@ -158,7 +160,7 @@ def get_matchup(me: str, vs: str) -> dict:
     try:
         return data.get_matchup(me, vs)
     except data.UnknownChampionError as e:
-        raise HTTPException(status_code=404, detail=e.args[0])
+        raise HTTPException(status_code=404, detail=e.args[0]) from e
     except data.NoDataError:
         _no_data()
 
@@ -189,7 +191,7 @@ def get_preferences(champion: str, request: Request) -> dict:
     try:
         return {"saved": data.get_preferences(identify(request), champion)}
     except data.UnknownChampionError as e:
-        raise HTTPException(status_code=404, detail=e.args[0])
+        raise HTTPException(status_code=404, detail=e.args[0]) from e
 
 
 @app.put("/api/preferences/{champion}")
@@ -197,9 +199,9 @@ def save_preferences(champion: str, body: Preferences, user: str = Depends(write
     try:
         return {"saved": data.save_preferences(user, champion, body.core, body.runes)}
     except (data.UnknownChampionError, data.UnknownItemError, data.UnknownRuneError) as e:
-        raise HTTPException(status_code=404, detail=e.args[0])
+        raise HTTPException(status_code=404, detail=e.args[0]) from e
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @app.delete("/api/preferences/{champion}")
@@ -207,7 +209,7 @@ def reset_preferences(champion: str, user: str = Depends(write_rate_limit)) -> d
     try:
         data.reset_preferences(user, champion)
     except data.UnknownChampionError as e:
-        raise HTTPException(status_code=404, detail=e.args[0])
+        raise HTTPException(status_code=404, detail=e.args[0]) from e
     return {"saved": None}
 
 
@@ -226,10 +228,7 @@ class Profile(BaseModel):
 
 @app.put("/api/profile")
 def save_profile(body: Profile, user: str = Depends(write_rate_limit)) -> dict:
-    try:
-        return data.save_profile(user, body.model_dump())
-    except data.UnknownChampionError as e:
-        raise HTTPException(status_code=404, detail=e.args[0])
+    return data.save_profile(user, body.model_dump())
 
 
 class Swap(BaseModel):
@@ -260,13 +259,21 @@ def tailor(request: TailorRequest, user: str = Depends(write_rate_limit)) -> dic
             on_api_call=lambda: ai_usage.consume(user),
         )
     except (data.UnknownChampionError, data.UnknownItemError, data.UnknownRuneError) as e:
-        raise HTTPException(status_code=404, detail=e.args[0])
+        raise HTTPException(status_code=404, detail=e.args[0]) from e
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except data.NoDataError:
         _no_data()
     except RuntimeError as e:  # missing API key
-        raise HTTPException(status_code=503, detail=str(e))
+        raise HTTPException(status_code=503, detail=str(e)) from e
+    except HTTPException:
+        raise  # usage limit reached
+    except Exception as e:  # the AI service failed (network, overload, ...): don't charge for it
+        ai_usage.refund(user)
+        logging.getLogger(__name__).exception("AI build failed")
+        raise HTTPException(
+            status_code=502, detail="The AI service didn't answer. Try again; this one wasn't counted."
+        ) from e
     return {"result": result, "ai_usage": ai_usage.status(user)}
 
 

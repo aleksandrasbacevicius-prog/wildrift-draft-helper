@@ -1,6 +1,6 @@
 """Generate access tokens, one per person, as an APP_TOKENS line.
 
-    python -m wildrift.tokens alex sam jonas
+python -m wildrift.tokens alex sam jonas
 """
 
 import secrets

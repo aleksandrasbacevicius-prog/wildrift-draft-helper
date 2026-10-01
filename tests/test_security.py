@@ -126,3 +126,25 @@ def test_fetcher_refuses_other_hosts():
     for url in ("http://www.wildriftfire.com/x", "https://example.com/x.png", "file:///etc/passwd"):
         with pytest.raises(ValueError):
             wildriftfire._open(url, 1000)
+
+
+def test_app_tokens_prefix_is_tolerated(monkeypatch):
+    monkeypatch.setenv("APP_TOKENS", "APP_TOKENS=chocoloco:choco-token-12345,sam:sam-token-1234567")
+    assert sorted(security._tokens().values()) == ["chocoloco", "sam"]
+
+
+def test_bad_token_entries_are_logged_without_the_token(monkeypatch, caplog):
+    security._warned.clear()
+    monkeypatch.setenv("APP_TOKENS", "ok:long-enough-token-1,Bad Name:secret-value-123456")
+    with caplog.at_level("WARNING"):
+        assert list(security._tokens().values()) == ["ok"]
+    assert "bad name" in caplog.text and "secret-value" not in caplog.text
+
+
+def test_refund_gives_a_build_back(tmp_path):
+    usage = security.UsageLimit(limit=5, global_limit=30, window_hours=48, path=tmp_path / "usage.json")
+    usage.consume("alex")
+    usage.refund("alex")
+    assert usage.status("alex")["remaining"] == 5
+    usage.refund("nobody")  # nothing to refund is fine
+    assert not list(tmp_path.glob("*.tmp"))  # atomic writes leave no temp files behind

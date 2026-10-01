@@ -98,7 +98,12 @@ def list_champions(position: str | None = None) -> list[dict]:
 
 def get_champion(name: str) -> dict:
     champ = _find(name)
-    return {"name": champ["name"], "icon": champ["icon"], "positions": champ["positions"], **_tips().get(champ["name"], {})}
+    return {
+        "name": champ["name"],
+        "icon": champ["icon"],
+        "positions": champ["positions"],
+        **_tips().get(champ["name"], {}),
+    }
 
 
 def get_build(name: str) -> dict:
@@ -212,6 +217,8 @@ def apply_swaps(champion: str, swaps: list[tuple[str, str]]) -> dict:
 
 def _swap(build: dict, remove: str, add: str) -> dict:
     old, new = resolve_item(remove), resolve_item(add)
+    if "Boots" in _wrf()["items"].get(new, {}).get("categories", []):
+        raise ValueError(f"{new} is boots and can't be a core item")
     if old not in build["core"]:
         raise ValueError(f"{old} is not a core item for {build['name']}. Core: {', '.join(build['core'])}")
     if new in build["core"]:
@@ -236,10 +243,20 @@ def get_profile(user: str | None = None) -> dict[str, list[str]]:
     return {p: profile.get(p, []) for p in POSITIONS}
 
 
+def _known_name(name: str) -> str | None:
+    try:
+        return _find(name)["name"]
+    except UnknownChampionError:
+        return None
+
+
 def save_profile(user: str, profile: dict[str, list[str]]) -> dict[str, list[str]]:
+    """Save a user's pool. Names not in the current champion list are dropped (e.g. a champion
+    that left the tier list after a patch), so one stale name never blocks saving."""
     clean = {}
     for position in POSITIONS:
-        clean[position] = list(dict.fromkeys(_find(name)["name"] for name in profile.get(position, [])))
+        names = (_known_name(n) for n in profile.get(position, []))
+        clean[position] = list(dict.fromkeys(n for n in names if n))
     PROFILE_DIR.mkdir(parents=True, exist_ok=True)
     _profile_file(user).write_text(json.dumps(clean, indent=1), encoding="utf-8")
     return clean
@@ -258,7 +275,17 @@ def get_preferences(user: str | None, champion: str) -> dict | None:
     """A user's saved core items and runes for a champion, or None."""
     if not user:
         return None
-    return _all_prefs(user).get(_find(champion)["name"])
+    saved = _all_prefs(user).get(_find(champion)["name"])
+    if not saved:
+        return None
+    # A patch can remove items or runes or change the build's shape; then the saved build is dropped.
+    try:
+        build = get_build(champion)
+        items_ok = all(i in _wrf()["items"] for i in saved["core"]) and len(saved["core"]) == len(build["core"])
+        validate_runes(champion, saved["runes"])
+    except (UnknownChampionError, UnknownRuneError, ValueError, KeyError):
+        return None
+    return saved if items_ok else None
 
 
 def save_preferences(user: str, champion: str, core: list[str], runes: list[str]) -> dict:
