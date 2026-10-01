@@ -28,6 +28,20 @@ REQUEST_DELAY = 1.0  # seconds between page requests
 ALLOWED_HOSTS = {"www.wildriftfire.com", "wildriftfire.com", "www.mobafire.com", "mobafire.com", "wr-meta.com"}
 # Item stats and descriptions come from WR-META's public item list (its robots.txt allows /items/).
 ITEM_DETAILS_URL = "https://wr-meta.com/items/"
+# WR-META champion pages add a second, independent counter list per lane (only the free "Extreme" band).
+WRMETA_HOME = "https://wr-meta.com/"
+WRMETA_LANES = {
+    "solo": "baron",
+    "baron": "baron",
+    "jungle": "jungle",
+    "mid": "mid",
+    "adc": "dragon",
+    "dragon": "dragon",
+    "duo": "dragon",
+    "bot": "dragon",
+    "support": "support",
+}
+COUNTER_SOURCES = ("WildRiftFire", "WR-META")
 MAX_PAGE_BYTES = 3 * 1024 * 1024
 MAX_IMAGE_BYTES = 512 * 1024
 MAX_AGE_DAYS = 7  # tier lists move within a patch, so refresh weekly anyway
@@ -148,8 +162,11 @@ BLOCK_KINDS = {
 }
 
 
-def parse_guides(page: str) -> dict[str, dict]:
-    """Every lane's build on a champion page, keyed by position. The page's recommended lane comes first."""
+def parse_guides(page: str, default_position: str | None = None) -> dict[str, dict]:
+    """Every lane's build on a champion page, keyed by position. The page's recommended lane comes first.
+
+    Pages with a single build have no lane selector; that build belongs to the page's "Recommended Role",
+    or failing that to `default_position` (the champion's lane in the tier list)."""
     # Which guide id belongs to which lane, from the lane selector ("Solo Build", "Jungle Build", ...)
     lanes = {}
     for guide_id, lane in re.findall(
@@ -166,9 +183,14 @@ def parse_guides(page: str) -> dict[str, dict]:
             end = markers[i + 1].start() if i + 1 < len(markers) else len(page)
             blocks.setdefault(m.group(2), {})[kind] = page[m.start() : end]
 
+    recommended = re.search(
+        r'Recommended Role</span>\s*<span class="data">\s*<img src="/images/lanes/white-([a-z]+)\.png">', page
+    )
+    fallback = LANE_IMAGES.get(recommended.group(1)) if recommended else default_position
+
     builds = {}
     for guide_id, parts in blocks.items():
-        position = lanes.get(guide_id, f"guide-{guide_id}")
+        position = lanes.get(guide_id) or fallback or f"guide-{guide_id}"
         builds.setdefault(position, _parse_build(parts))
     return builds
 
@@ -223,6 +245,89 @@ def parse_item_details(page: str) -> dict[str, dict]:
             "tip": _text(tip.group(1)) if tip else "",
         }
     return details
+
+
+def name_key(name: str) -> str:
+    """Match champion names across sites: "Kha'Zix", "kha-zix" and "Nunu &amp; Willump" all line up."""
+    return re.sub(r"[^a-z0-9]", "", html.unescape(name).lower().replace("-amp-", "").replace("&", ""))
+
+
+def parse_wrmeta_champion_links(page: str) -> dict[str, str]:
+    """Champion page URLs on WR-META, keyed by name_key."""
+    links = {}
+    for url, slug_ in re.findall(r"(https://wr-meta\.com/\d+-([a-z0-9-]+)\.html)", page):
+        links.setdefault(name_key(slug_), url)
+    return links
+
+
+def parse_wrmeta_counters(page: str) -> dict[str, list[str]]:
+    """Per lane, the champions in WR-META's free "Extreme threats" band (as name keys, strongest first)."""
+    counters = {}
+    for m in re.finditer(r'<h2><i class="demo-icon ([a-z]+)-[a-z]+icon-"></i>[^<]*?Counters</h2>', page):
+        lane = WRMETA_LANES.get(m.group(1))
+        section = page[m.end() :]
+        first_tab = section.find('<div class="tabs-b2">')
+        if not lane or first_tab < 0:
+            continue
+        tab = section[first_tab + 1 :]
+        tab = tab[: tab.find('<div class="tabs-b2">')]
+        if "lock-block" in tab:  # premium-only content: not used
+            continue
+        names = [
+            name_key(n)
+            for n in re.findall(
+                r'class="counter-champion">\s*<a href="https://wr-meta\.com/\d+-([a-z0-9-]+)\.html"', tab
+            )
+        ]
+        if names:
+            counters.setdefault(lane, names)
+    return counters
+
+
+def combine_counters(lists: dict[str, list[str]], names: dict[str, str]) -> list[dict]:
+    """Average each champion's rank-based score across the sources that rate this lane.
+
+    Rank 1 in a list scores 1.0, rank 2 0.9, and so on. A source that has a list but doesn't mention a
+    champion gives them 0, so a champion several sources agree on ranks above one only a single source lists.
+    `names` maps name keys back to display names; unknown champions are skipped.
+    """
+    rated = {source: ranked for source, ranked in lists.items() if ranked}
+    scores: dict[str, dict] = {}
+    for source, ranked in rated.items():
+        for rank, key in enumerate(ranked):
+            if key not in names:
+                continue
+            entry = scores.setdefault(key, {"name": names[key], "score": 0.0, "sources": []})
+            entry["score"] += max(0.1, 1 - rank * 0.1)
+            entry["sources"].append(source)
+    for entry in scores.values():
+        entry["score"] = round(entry["score"] / len(rated), 3)
+    return sorted(scores.values(), key=lambda e: (-e["score"], e["name"]))
+
+
+def add_wrmeta_counters(champions: dict, log=print) -> None:
+    """Fetch WR-META's counter lists and merge them with WildRiftFire's into build["counters"] per lane."""
+    names = {name_key(n): n for n in champions}
+    try:
+        links = parse_wrmeta_champion_links(get(WRMETA_HOME))
+    except Exception as e:
+        links = {}
+        log(f"WR-META counters unavailable ({e}); using WildRiftFire only")
+    fetched = 0
+    for name, champ in champions.items():
+        wrmeta = {}
+        url = links.get(name_key(name))
+        if url:
+            time.sleep(REQUEST_DELAY)
+            try:
+                wrmeta = parse_wrmeta_counters(get(url))
+                fetched += 1
+            except Exception as e:
+                log(f"  {name}: WR-META counters failed ({e})")
+        for position, build in (champ.get("builds") or {}).items():
+            wrf = [name_key(c["name"]) for c in build.get("countered_by", [])]
+            build["counters"] = combine_counters({"WildRiftFire": wrf, "WR-META": wrmeta.get(position, [])}, names)
+    log(f"Counters combined from WildRiftFire and WR-META ({fetched} WR-META pages)")
 
 
 def add_item_details(items: dict, log=print) -> None:
@@ -318,7 +423,13 @@ def refresh(log=print) -> dict:
     for i, champ in enumerate(champions.values(), 1):
         time.sleep(REQUEST_DELAY)
         try:
-            builds = {pos: b for pos, b in parse_guides(get(f"{SITE}/guide/{champ['guide']}")).items() if b["core"]}
+            builds = {
+                pos: b
+                for pos, b in parse_guides(
+                    get(f"{SITE}/guide/{champ['guide']}"), next(iter(champ["positions"]), None)
+                ).items()
+                if b["core"]
+            }
             if not builds:
                 raise ValueError("no core items found on the page")
             champ["builds"] = builds
@@ -371,6 +482,12 @@ def refresh(log=print) -> dict:
 
     meta = {"patch": patch, "fetched": datetime.now().isoformat(timespec="seconds"), "source": SITE}
     add_item_details(items, log)
+    add_wrmeta_counters(champions, log)
+    unplaced = sorted(
+        n for n, c in champions.items() for pos in (c.get("builds") or {}) if pos not in LANE_IMAGES.values()
+    )
+    if unplaced:
+        log(f"Warning: builds without a known lane for {', '.join(unplaced)}")
 
     # Write each file to a temp name first, then swap it in, so the app never reads a half-written file.
     # meta.json goes last: it marks the refresh as complete.

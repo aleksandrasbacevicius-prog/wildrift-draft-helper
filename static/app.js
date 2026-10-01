@@ -129,14 +129,17 @@ function fillMe(selected) {
 // "Counters to <opponent>": tappable icons under the opponent picker, your pool highlighted.
 function renderCounterStrip() {
   const vs = $("vs").value, pool = state.profile[state.position] || [];
-  const counters = [...state.counters].sort((a, b) => pool.includes(b.name) - pool.includes(a.name));
+  // Your pool first; otherwise keep the server's order (strongest agreement between sources first).
+  const counters = [...state.counters].sort((a, b) => pool.includes(b.name) - pool.includes(a.name)).slice(0, 8);
   $("counterStrip").classList.toggle("hidden", !counters.length);
   $("counterStrip").innerHTML = counters.length
     ? `<div class="strip-label">Counters to ${escapeHtml(vs)} <span class="plain">(tap to play)</span></div>
+       <div class="strip-source">From WildRiftFire and WR-META. "Both sites" = they agree.</div>
        <div class="counter-row">${counters.map((c) => `
          <button class="counter-pick ${pool.includes(c.name) ? "mine" : ""} ${c.name === $("me").value ? "chosen" : ""}" data-champ="${escapeHtml(c.name)}">
            <img src="${c.icon}" alt="" draggable="false"><span>${escapeHtml(c.name)}</span>
            ${tierBadge(c.positions[state.position])}${pool.includes(c.name) ? '<span class="pool-mark">your pool</span>' : ""}
+           ${(c.sources || []).length > 1 ? '<span class="agree-mark">both sites</span>' : ""}
          </button>`).join("")}</div>`
     : "";
 }
@@ -145,7 +148,9 @@ function renderCounterStrip() {
 function renderVerdict(m) {
   const me = $("me").value, vs = $("vs").value, pool = state.profile[state.position] || [];
   let html = "";
-  if (m.you_counter_enemy) {
+  if (m.counters_each_other) {
+    html = `<div class="verdict-line even">≈ Even matchup: sources list ${escapeHtml(me)} and ${escapeHtml(vs)} as countering each other</div>`;
+  } else if (m.you_counter_enemy) {
     html = `<div class="verdict-line good">✓ ${escapeHtml(me)} counters ${escapeHtml(vs)}</div>`;
   } else if (m.enemy_counters_you) {
     const options = [...state.counters]

@@ -201,6 +201,8 @@ def offline_site(tmp_path, monkeypatch):
         "/guide/darius": GUIDE,
         "/guide/chogath": "<html>broken page</html>",
         w.ITEM_DETAILS_URL: WRMETA_ITEMS,
+        w.WRMETA_HOME: '<a href="https://wr-meta.com/49-darius.html">',
+        "https://wr-meta.com/49-darius.html": WRMETA_CHAMPION,
     }
     requested, icons = [], []
 
@@ -234,9 +236,12 @@ def test_refresh_end_to_end(offline_site):
     downloaded = {str(path.relative_to(path.parents[1])).replace("\\", "/") for _, path in icons}
     assert {"champions/darius.png", "items/ruby-crystal.png", "runes/conqueror.png", "spells/flash.png"} <= downloaded
     assert {"lanes/baron.png", "lanes/dragon.png"} <= downloaded
-    assert all(url.startswith((w.SITE, w.ITEM_DETAILS_URL)) for url in requested)
+    assert all(url.startswith((w.SITE, "https://wr-meta.com/")) for url in requested)
     assert items["Stridebreaker"]["details"]["gold"] == 3100
     assert items["Sterak's Gage"]["details"]["summary"] == "Shield when low"
+    assert "https://wr-meta.com/49-darius.html" in requested  # second counter source was read
+    # Counters who aren't in this tiny champion list (Dr. Mundo, Malphite, Vayne) are skipped, not invented.
+    assert champions["Darius"]["builds"]["baron"]["counters"] == []
 
 
 def test_parse_item_details():
@@ -337,3 +342,95 @@ def test_download_icon_only_saves_images(tmp_path, monkeypatch):
     monkeypatch.setattr(w.urllib.request, "urlopen", lambda *a, **k: FakeResponse(b"\x89PNG"))
     w._download_icon("https://www.wildriftfire.com/x.png", tmp_path / "icons" / "x.png")
     assert (tmp_path / "icons" / "x.png").read_bytes() == b"\x89PNG"
+
+
+WRMETA_CHAMPION = """
+<h2><i class="demo-icon solo-lineicon-"></i>Solo Baron DARIUS Counters</h2>
+<div class="tabs-sel2"><span>Extreme</span><span>Major</span></div>
+<div class="tabs-b2">
+  <div class="counter-champion"> <a href="https://wr-meta.com/3-vayne.html"><div class="top-title">VAYNE</div></a> </div>
+  <div class="counter-champion"> <a href="https://wr-meta.com/7-dr-mundo.html"><div class="top-title">DR. MUNDO</div></a> </div>
+</div>
+<div class="tabs-b2"><div class="lock-block">Only for Premium members</div></div>
+<h2><i class="demo-icon support-duoicon-"></i>Support DARIUS Counters</h2>
+<div class="tabs-b2"><div class="lock-block">Only for Premium members</div></div>
+<div class="tabs-b2"></div>
+"""
+
+
+def test_name_key_matches_across_sites():
+    assert w.name_key("Kha'Zix") == w.name_key("kha-zix")
+    assert w.name_key("Nunu & Willump") == w.name_key("nunu-amp-willump")
+    assert w.name_key("Dr. Mundo") == w.name_key("dr-mundo")
+
+
+def test_parse_wrmeta_counters_uses_only_free_lists():
+    counters = w.parse_wrmeta_counters(WRMETA_CHAMPION)
+    assert counters == {"baron": ["vayne", "drmundo"]}  # the premium-locked support list is skipped
+
+
+def test_combine_counters_averages_across_sources():
+    names = {"drmundo": "Dr. Mundo", "vayne": "Vayne", "malphite": "Malphite"}
+    combined = w.combine_counters({"WildRiftFire": ["drmundo", "malphite"], "WR-META": ["vayne", "drmundo"]}, names)
+    assert combined[0] == {
+        "name": "Dr. Mundo",
+        "score": 0.95,
+        "sources": ["WildRiftFire", "WR-META"],
+    }  # (1.0 + 0.9) / 2
+    assert [c["name"] for c in combined] == ["Dr. Mundo", "Vayne", "Malphite"]
+    assert combined[1]["score"] == 0.5 and combined[2]["score"] == 0.45
+
+
+def test_combine_counters_with_one_source_and_unknown_names():
+    combined = w.combine_counters({"WildRiftFire": ["drmundo", "ghost"], "WR-META": []}, {"drmundo": "Dr. Mundo"})
+    assert combined == [{"name": "Dr. Mundo", "score": 1.0, "sources": ["WildRiftFire"]}]  # only rated sources count
+
+
+def test_add_wrmeta_counters_offline(monkeypatch):
+    pages = {
+        w.WRMETA_HOME: '<a href="https://wr-meta.com/49-darius.html">',
+        "https://wr-meta.com/49-darius.html": WRMETA_CHAMPION,
+    }
+    monkeypatch.setattr(w, "get", lambda url: pages[url])
+    monkeypatch.setattr(w, "REQUEST_DELAY", 0)
+    champions = {
+        "Darius": {"builds": {"baron": {"countered_by": [{"name": "Malphite", "position": "baron"}]}}},
+        "Malphite": {},
+        "Vayne": {},
+        "Dr. Mundo": {},
+    }
+    w.add_wrmeta_counters(champions, log=lambda _: None)
+    counters = champions["Darius"]["builds"]["baron"]["counters"]
+    assert [c["name"] for c in counters] == ["Malphite", "Vayne", "Dr. Mundo"]
+
+
+def test_add_wrmeta_counters_survives_site_down(monkeypatch):
+    def down(url):
+        raise OSError("down")
+
+    monkeypatch.setattr(w, "get", down)
+    champions = {
+        "Darius": {"builds": {"baron": {"countered_by": [{"name": "Malphite", "position": "baron"}]}}},
+        "Malphite": {},
+    }
+    w.add_wrmeta_counters(champions, log=lambda _: None)
+    assert champions["Darius"]["builds"]["baron"]["counters"][0]["sources"] == ["WildRiftFire"]
+
+
+SINGLE_BUILD_GUIDE = """
+<div class="additional-info"><div><span class="title">Recommended Role</span> <span class="data">
+  <img src="/images/lanes/white-support.png">Support </span></div></div>
+<div class="wf-champion__data__items data-block" data-guide-id="112">
+  <div class="section core"><div class="name">Zeke&#039;s Convergence</div></div>
+</div>
+"""
+
+
+def test_single_build_page_uses_recommended_role():
+    assert list(w.parse_guides(SINGLE_BUILD_GUIDE)) == ["support"]
+
+
+def test_single_build_page_falls_back_to_tier_list_lane():
+    page = SINGLE_BUILD_GUIDE.replace("Recommended Role", "Something Else")
+    assert list(w.parse_guides(page, default_position="support")) == ["support"]
+    assert list(w.parse_guides(page)) == ["guide-112"]  # last resort, never seen with real pages

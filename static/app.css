@@ -186,3 +186,7 @@ img { -webkit-touch-callout: none; }
 .verdict-line.bad { background: color-mix(in srgb, var(--t-splus) 18%, transparent); color: var(--t-splus); }
 .verdict-try { font-size: .82rem; color: var(--muted); margin: 6px 2px 0; }
 #whoami { font-weight: 600; margin-bottom: 2px; }
+
+.strip-source { font-size: .68rem; color: var(--muted); margin: -2px 0 6px; }
+.agree-mark { font-size: .6rem; font-weight: 700; color: var(--t-b); }
+.verdict-line.even { background: color-mix(in srgb, var(--t-a) 18%, transparent); color: var(--t-a); }

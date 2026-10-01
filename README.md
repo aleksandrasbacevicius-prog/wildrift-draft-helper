@@ -39,6 +39,15 @@ From the command line:
 python -m wildrift.agent Darius --position baron --enemies Garen Ahri --swap "Stridebreaker=triforce"
 ```
 
+## Counter data
+
+Counters are combined from two independent sources for each lane:
+
+- **WildRiftFire**: 3 "countered by" picks per lane on each champion guide.
+- **WR-META**: the free "Extreme threats" list per lane on each champion page. Its premium-locked lists aren't used.
+
+Each source ranks its picks (1st = 1.0, 2nd = 0.9, ...), and a champion's score is the **average across the sources that rate that lane**. A champion both sites name ranks above one only a single site names, and the app marks those "both sites". Tencent's Chinese server stats were considered, but its CDN's robots.txt blocks AI crawlers, so they're not used.
+
 ## Security
 
 - **Access tokens, one per person** (`APP_TOKENS` in `.env`, generate with `python -m wildrift.tokens alex sam`). They're needed for the AI button, saving your pool and patch checks. Browsing builds and tiers stays open. With no tokens set, those actions only work from this computer.

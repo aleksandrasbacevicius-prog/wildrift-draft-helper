@@ -162,17 +162,25 @@ def test_counter_strip_under_the_opponent(phone, open_server):
 
 def test_tapping_a_counter_plays_it_and_shows_the_verdict(phone, open_server):
     load(phone, open_server)
-    phone.locator("#vs").select_option("Darius")
-    phone.locator('.counter-pick[data-champ="Malphite"]').click()
-    expect(phone.locator("#me")).to_have_value("Malphite")
-    expect(phone.locator("#verdict")).to_contain_text("Malphite counters Darius")
+    phone.locator("#vs").select_option("Malphite")
+    phone.locator('.counter-pick[data-champ="Mordekaiser"]').click()
+    expect(phone.locator("#me")).to_have_value("Mordekaiser")
+    expect(phone.locator("#verdict .good")).to_contain_text("Mordekaiser counters Malphite")
 
 
 def test_verdict_warns_and_suggests_counters(phone, open_server):
     load(phone, open_server)
+    phone.locator("#vs").select_option("Mordekaiser")
+    phone.locator("#me").select_option("Malphite")
+    expect(phone.locator("#verdict .bad")).to_contain_text("Mordekaiser counters Malphite")
+    expect(phone.locator("#verdict")).to_contain_text("Try:")
+
+
+def test_mutual_counters_show_as_even(phone, open_server):
+    load(phone, open_server)
     phone.locator("#vs").select_option("Malphite")
     phone.locator("#me").select_option("Darius")
-    expect(phone.locator("#verdict .bad")).to_contain_text("Malphite counters Darius")
+    expect(phone.locator("#verdict .even")).to_contain_text("Even matchup")
 
 
 def test_personal_link_signs_in_without_typing(phone, secured_server):

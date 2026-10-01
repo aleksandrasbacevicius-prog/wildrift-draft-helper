@@ -19,6 +19,8 @@ PREFS_DIR = Path(os.getenv("WILDRIFT_PREFS_DIR", DATA_DIR / "builds"))
 
 POSITIONS = ["baron", "jungle", "mid", "dragon", "support"]
 TIER_ORDER = {"S+": 0, "S": 1, "A": 2, "B": 3, "C": 4, "D": 5}
+# Counter scores closer than this count as an even matchup (when each side is listed against the other).
+EVEN_MARGIN = 0.15
 
 
 class UnknownChampionError(KeyError):
@@ -136,7 +138,7 @@ def strong_against(enemy: str, position: str | None = None) -> list[dict]:
     """Champions listed as countering `enemy` in that lane, with their tiers, best tier first.
     Only champions in the current champion list are returned."""
     try:
-        counters = get_build(enemy, position)["countered_by"]
+        counters = _counters_of(get_build(enemy, position))
     except UnknownChampionError:
         return []
     result = []
@@ -144,9 +146,23 @@ def strong_against(enemy: str, position: str | None = None) -> list[dict]:
         name = _known_name(entry["name"])
         if name:
             champ = _find(name)
-            result.append({"name": name, "icon": champ["icon"], "positions": champ["positions"]})
+            result.append(
+                {
+                    "name": name,
+                    "icon": champ["icon"],
+                    "positions": champ["positions"],
+                    "score": entry.get("score"),
+                    "sources": entry.get("sources", []),
+                }
+            )
+    # Strongest agreement first; the lane tier breaks ties.
     lane = position or ""
-    return sorted(result, key=lambda c: TIER_ORDER.get(c["positions"].get(lane, ""), 9))
+    return sorted(result, key=lambda c: (-(c["score"] or 0), TIER_ORDER.get(c["positions"].get(lane, ""), 9)))
+
+
+def _counters_of(build: dict) -> list[dict]:
+    """The combined multi-source counter list, or WildRiftFire's own list for older data."""
+    return build.get("counters") or build.get("countered_by", [])
 
 
 def get_matchup(my_champion: str, enemy: str, position: str | None = None) -> dict:
@@ -154,9 +170,21 @@ def get_matchup(my_champion: str, enemy: str, position: str | None = None) -> di
 
     def counter_names(name: str) -> list[str]:
         try:
-            return _names(get_build(name, position)["countered_by"])
+            return _names(_counters_of(get_build(name, position)))
         except UnknownChampionError:
             return []
+
+    def counter_score(counter: str, of: str) -> float:
+        """How strongly the sources list `counter` as a counter to `of` (0 when not listed)."""
+        try:
+            entries = _counters_of(get_build(of, position))
+        except UnknownChampionError:
+            return 0.0
+        return next((e.get("score") or 1.0 for e in entries if e["name"] == counter), 0.0)
+
+    # Sources sometimes list each champion as countering the other; then the scores decide.
+    mine_vs, theirs_vs = counter_score(mine["name"], theirs["name"]), counter_score(theirs["name"], mine["name"])
+    gap = mine_vs - theirs_vs
 
     try:
         my_synergies = get_build(my_champion, position)["synergies"]
@@ -164,8 +192,11 @@ def get_matchup(my_champion: str, enemy: str, position: str | None = None) -> di
         my_synergies = []
     return {
         "enemy_countered_by": counter_names(theirs["name"]),
-        "you_counter_enemy": mine["name"] in counter_names(theirs["name"]),
-        "enemy_counters_you": theirs["name"] in counter_names(mine["name"]),
+        "you_counter_enemy": gap > EVEN_MARGIN,
+        "enemy_counters_you": gap < -EVEN_MARGIN,
+        "counters_each_other": bool(mine_vs and theirs_vs) and abs(gap) <= EVEN_MARGIN,
+        "your_counter_score": mine_vs,
+        "enemy_counter_score": theirs_vs,
         "your_synergies": my_synergies,
         "you": mine["name"],
         "enemy": theirs["name"],

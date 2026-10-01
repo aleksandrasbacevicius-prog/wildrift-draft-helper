@@ -92,3 +92,8 @@ def test_profiles_are_per_user():
 def test_save_profile_drops_unknown_champions():
     saved = data.save_profile("alex", {"baron": ["Nobody", "Darius"], "mid": ["Ahri"]})
     assert saved["baron"] == ["Darius"] and saved["mid"] == ["Ahri"]
+
+
+def test_every_build_is_filed_under_a_real_lane():
+    for champ in data._wrf()["champions"].values():
+        assert set(champ.get("builds") or {}) <= set(data.POSITIONS), champ["name"]

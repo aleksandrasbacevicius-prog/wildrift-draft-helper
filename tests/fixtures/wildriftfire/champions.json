@@ -82,6 +82,57 @@
       "name": "Thresh",
       "position": "support"
      }
+    ],
+    "counters": [
+     {
+      "name": "Dr. Mundo",
+      "score": 0.5,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Vayne",
+      "score": 0.5,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Jax",
+      "score": 0.45,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Malphite",
+      "score": 0.45,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Kennen",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Ornn",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Jayce",
+      "score": 0.35,
+      "sources": [
+       "WR-META"
+      ]
+     }
     ]
    },
    "jungle": {
@@ -164,6 +215,57 @@
       "name": "Karma",
       "position": "support"
      }
+    ],
+    "counters": [
+     {
+      "name": "Ekko",
+      "score": 0.5,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Kindred",
+      "score": 0.5,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Olaf",
+      "score": 0.45,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Rammus",
+      "score": 0.45,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Gwen",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Vi",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Pantheon",
+      "score": 0.35,
+      "sources": [
+       "WR-META"
+      ]
+     }
     ]
    }
   },
@@ -242,6 +344,57 @@
      "name": "Thresh",
      "position": "support"
     }
+   ],
+   "counters": [
+    {
+     "name": "Dr. Mundo",
+     "score": 0.5,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Vayne",
+     "score": 0.5,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Jax",
+     "score": 0.45,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Malphite",
+     "score": 0.45,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Kennen",
+     "score": 0.4,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Ornn",
+     "score": 0.4,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Jayce",
+     "score": 0.35,
+     "sources": [
+      "WR-META"
+     ]
+    }
    ]
   },
   "icon": "/icons/wrf/champions/darius.png"
@@ -253,7 +406,7 @@
    "baron": "B"
   },
   "builds": {
-   "guide-47": {
+   "baron": {
     "starting": [
      "Ruby Crystal"
     ],
@@ -317,6 +470,51 @@
      {
       "name": "Wukong",
       "position": "jungle"
+     }
+    ],
+    "counters": [
+     {
+      "name": "Vayne",
+      "score": 1.0,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Kayle",
+      "score": 0.45,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Rumble",
+      "score": 0.45,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Camille",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Teemo",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Akshan",
+      "score": 0.35,
+      "sources": [
+       "WR-META"
+      ]
      }
     ]
    }
@@ -386,6 +584,51 @@
      "name": "Wukong",
      "position": "jungle"
     }
+   ],
+   "counters": [
+    {
+     "name": "Vayne",
+     "score": 1.0,
+     "sources": [
+      "WildRiftFire",
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Kayle",
+     "score": 0.45,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Rumble",
+     "score": 0.45,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Camille",
+     "score": 0.4,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Teemo",
+     "score": 0.4,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Akshan",
+     "score": 0.35,
+     "sources": [
+      "WR-META"
+     ]
+    }
    ]
   },
   "icon": "/icons/wrf/champions/garen.png"
@@ -397,7 +640,7 @@
    "baron": "S"
   },
   "builds": {
-   "guide-227": {
+   "baron": {
     "starting": [
      "Amplifying Tome"
     ],
@@ -461,6 +704,58 @@
      {
       "name": "Zilean",
       "position": "support"
+     }
+    ],
+    "counters": [
+     {
+      "name": "Fiora",
+      "score": 0.95,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Vayne",
+      "score": 0.5,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Irelia",
+      "score": 0.45,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Olaf",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Rumble",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Jax",
+      "score": 0.35,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Garen",
+      "score": 0.3,
+      "sources": [
+       "WR-META"
+      ]
      }
     ]
    }
@@ -529,6 +824,58 @@
     {
      "name": "Zilean",
      "position": "support"
+    }
+   ],
+   "counters": [
+    {
+     "name": "Fiora",
+     "score": 0.95,
+     "sources": [
+      "WildRiftFire",
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Vayne",
+     "score": 0.5,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Irelia",
+     "score": 0.45,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Olaf",
+     "score": 0.4,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Rumble",
+     "score": 0.4,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Jax",
+     "score": 0.35,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Garen",
+     "score": 0.3,
+     "sources": [
+      "WR-META"
+     ]
     }
    ]
   },
@@ -609,6 +956,64 @@
       "name": "Leona",
       "position": "support"
      }
+    ],
+    "counters": [
+     {
+      "name": "Fiora",
+      "score": 0.5,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Vayne",
+      "score": 0.5,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Malphite",
+      "score": 0.45,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Warwick",
+      "score": 0.45,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Ambessa",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Singed",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Camille",
+      "score": 0.35,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Jax",
+      "score": 0.3,
+      "sources": [
+       "WR-META"
+      ]
+     }
     ]
    },
    "jungle": {
@@ -688,6 +1093,29 @@
       "name": "Leona",
       "position": "support"
      }
+    ],
+    "counters": [
+     {
+      "name": "Rammus",
+      "score": 1.0,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Ekko",
+      "score": 0.9,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Hecarim",
+      "score": 0.8,
+      "sources": [
+       "WildRiftFire"
+      ]
+     }
     ]
    }
   },
@@ -758,6 +1186,64 @@
      "name": "Leona",
      "position": "support"
     }
+   ],
+   "counters": [
+    {
+     "name": "Fiora",
+     "score": 0.5,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Vayne",
+     "score": 0.5,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Malphite",
+     "score": 0.45,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Warwick",
+     "score": 0.45,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Ambessa",
+     "score": 0.4,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Singed",
+     "score": 0.4,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Camille",
+     "score": 0.35,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Jax",
+     "score": 0.3,
+     "sources": [
+      "WR-META"
+     ]
+    }
    ]
   },
   "icon": "/icons/wrf/champions/aatrox.png"
@@ -769,7 +1255,7 @@
    "mid": "S"
   },
   "builds": {
-   "guide-25": {
+   "mid": {
     "starting": [
      "Amplifying Tome"
     ],
@@ -843,6 +1329,50 @@
      {
       "name": "Thresh",
       "position": "support"
+     }
+    ],
+    "counters": [
+     {
+      "name": "Annie",
+      "score": 0.5,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Twisted Fate",
+      "score": 0.5,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Akshan",
+      "score": 0.45,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Syndra",
+      "score": 0.45,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Aurelion Sol",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Zed",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
      }
     ]
    }
@@ -922,6 +1452,50 @@
      "name": "Thresh",
      "position": "support"
     }
+   ],
+   "counters": [
+    {
+     "name": "Annie",
+     "score": 0.5,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Twisted Fate",
+     "score": 0.5,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Akshan",
+     "score": 0.45,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Syndra",
+     "score": 0.45,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Aurelion Sol",
+     "score": 0.4,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Zed",
+     "score": 0.4,
+     "sources": [
+      "WR-META"
+     ]
+    }
    ]
   },
   "icon": "/icons/wrf/champions/ahri.png"
@@ -933,7 +1507,7 @@
    "mid": "S+"
   },
   "builds": {
-   "guide-215": {
+   "mid": {
     "starting": [
      "Amplifying Tome"
     ],
@@ -997,6 +1571,74 @@
      {
       "name": "Nocturne",
       "position": "jungle"
+     }
+    ],
+    "counters": [
+     {
+      "name": "Irelia",
+      "score": 1.0,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Yasuo",
+      "score": 0.75,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Kassadin",
+      "score": 0.6,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Gragas",
+      "score": 0.45,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Diana",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Fizz",
+      "score": 0.35,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Ekko",
+      "score": 0.25,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Viktor",
+      "score": 0.15,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Vel'Koz",
+      "score": 0.1,
+      "sources": [
+       "WR-META"
+      ]
      }
     ]
    }
@@ -1066,6 +1708,74 @@
      "name": "Nocturne",
      "position": "jungle"
     }
+   ],
+   "counters": [
+    {
+     "name": "Irelia",
+     "score": 1.0,
+     "sources": [
+      "WildRiftFire",
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Yasuo",
+     "score": 0.75,
+     "sources": [
+      "WildRiftFire",
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Kassadin",
+     "score": 0.6,
+     "sources": [
+      "WildRiftFire",
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Gragas",
+     "score": 0.45,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Diana",
+     "score": 0.4,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Fizz",
+     "score": 0.35,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Ekko",
+     "score": 0.25,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Viktor",
+     "score": 0.15,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Vel'Koz",
+     "score": 0.1,
+     "sources": [
+      "WR-META"
+     ]
+    }
    ]
   },
   "icon": "/icons/wrf/champions/syndra.png"
@@ -1077,7 +1787,7 @@
    "jungle": "A"
   },
   "builds": {
-   "guide-58": {
+   "jungle": {
     "starting": [
      "Long Sword"
     ],
@@ -1141,6 +1851,58 @@
      {
       "name": "Ahri",
       "position": "mid"
+     }
+    ],
+    "counters": [
+     {
+      "name": "Lillia",
+      "score": 0.95,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Rammus",
+      "score": 0.5,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Nunu & Willump",
+      "score": 0.45,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Nocturne",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Olaf",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Xin Zhao",
+      "score": 0.35,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Kha'Zix",
+      "score": 0.3,
+      "sources": [
+       "WR-META"
+      ]
      }
     ]
    }
@@ -1210,6 +1972,58 @@
      "name": "Ahri",
      "position": "mid"
     }
+   ],
+   "counters": [
+    {
+     "name": "Lillia",
+     "score": 0.95,
+     "sources": [
+      "WildRiftFire",
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Rammus",
+     "score": 0.5,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Nunu & Willump",
+     "score": 0.45,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Nocturne",
+     "score": 0.4,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Olaf",
+     "score": 0.4,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Xin Zhao",
+     "score": 0.35,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Kha'Zix",
+     "score": 0.3,
+     "sources": [
+      "WR-META"
+     ]
+    }
    ]
   },
   "icon": "/icons/wrf/champions/lee-sin.png"
@@ -1221,7 +2035,7 @@
    "dragon": "A"
   },
   "builds": {
-   "guide-54": {
+   "dragon": {
     "starting": [
      "Long Sword"
     ],
@@ -1287,6 +2101,71 @@
      {
       "name": "Milio",
       "position": "support"
+     }
+    ],
+    "counters": [
+     {
+      "name": "Ashe",
+      "score": 0.5,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Jhin",
+      "score": 0.5,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Amumu",
+      "score": 0.45,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Miss Fortune",
+      "score": 0.45,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Kog'Maw",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Vayne",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Twitch",
+      "score": 0.35,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Leona",
+      "score": 0.3,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Rakan",
+      "score": 0.25,
+      "sources": [
+       "WR-META"
+      ]
      }
     ]
    }
@@ -1358,6 +2237,71 @@
      "name": "Milio",
      "position": "support"
     }
+   ],
+   "counters": [
+    {
+     "name": "Ashe",
+     "score": 0.5,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Jhin",
+     "score": 0.5,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Amumu",
+     "score": 0.45,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Miss Fortune",
+     "score": 0.45,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Kog'Maw",
+     "score": 0.4,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Vayne",
+     "score": 0.4,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Twitch",
+     "score": 0.35,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Leona",
+     "score": 0.3,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Rakan",
+     "score": 0.25,
+     "sources": [
+      "WR-META"
+     ]
+    }
    ]
   },
   "icon": "/icons/wrf/champions/jinx.png"
@@ -1369,7 +2313,7 @@
    "support": "S"
   },
   "builds": {
-   "guide-112": {
+   "support": {
     "starting": [
      "Relic Shield"
     ],
@@ -1443,6 +2387,79 @@
      {
       "name": "Draven",
       "position": "dragon"
+     }
+    ],
+    "counters": [
+     {
+      "name": "Zyra",
+      "score": 0.9,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Maokai",
+      "score": 0.5,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Brand",
+      "score": 0.45,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Nami",
+      "score": 0.45,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Lux",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Pyke",
+      "score": 0.35,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Morgana",
+      "score": 0.3,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Poppy",
+      "score": 0.25,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Draven",
+      "score": 0.2,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Sivir",
+      "score": 0.15,
+      "sources": [
+       "WR-META"
+      ]
      }
     ]
    }
@@ -1522,6 +2539,79 @@
      "name": "Draven",
      "position": "dragon"
     }
+   ],
+   "counters": [
+    {
+     "name": "Zyra",
+     "score": 0.9,
+     "sources": [
+      "WildRiftFire",
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Maokai",
+     "score": 0.5,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Brand",
+     "score": 0.45,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Nami",
+     "score": 0.45,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Lux",
+     "score": 0.4,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Pyke",
+     "score": 0.35,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Morgana",
+     "score": 0.3,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Poppy",
+     "score": 0.25,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Draven",
+     "score": 0.2,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Sivir",
+     "score": 0.15,
+     "sources": [
+      "WR-META"
+     ]
+    }
    ]
   },
   "icon": "/icons/wrf/champions/thresh.png"
@@ -1593,6 +2683,79 @@
       "name": "Amumu",
       "position": "jungle"
      }
+    ],
+    "counters": [
+     {
+      "name": "Brand",
+      "score": 0.7,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Pantheon",
+      "score": 0.5,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Kassadin",
+      "score": 0.45,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Syndra",
+      "score": 0.45,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Orianna",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Tristana",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Fizz",
+      "score": 0.35,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Gragas",
+      "score": 0.3,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Zoe",
+      "score": 0.25,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Aurelion Sol",
+      "score": 0.15,
+      "sources": [
+       "WR-META"
+      ]
+     }
     ]
    },
    "support": {
@@ -1660,6 +2823,86 @@
       "name": "Ashe",
       "position": "dragon"
      }
+    ],
+    "counters": [
+     {
+      "name": "Brand",
+      "score": 1.0,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Janna",
+      "score": 0.45,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Zyra",
+      "score": 0.45,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Lux",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Zilean",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Maokai",
+      "score": 0.35,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Nami",
+      "score": 0.3,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Senna",
+      "score": 0.25,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Kalista",
+      "score": 0.2,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Vayne",
+      "score": 0.15,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Yasuo",
+      "score": 0.1,
+      "sources": [
+       "WR-META"
+      ]
+     }
     ]
    }
   },
@@ -1722,6 +2965,79 @@
      "name": "Amumu",
      "position": "jungle"
     }
+   ],
+   "counters": [
+    {
+     "name": "Brand",
+     "score": 0.7,
+     "sources": [
+      "WildRiftFire",
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Pantheon",
+     "score": 0.5,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Kassadin",
+     "score": 0.45,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Syndra",
+     "score": 0.45,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Orianna",
+     "score": 0.4,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Tristana",
+     "score": 0.4,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Fizz",
+     "score": 0.35,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Gragas",
+     "score": 0.3,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Zoe",
+     "score": 0.25,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Aurelion Sol",
+     "score": 0.15,
+     "sources": [
+      "WR-META"
+     ]
+    }
    ]
   },
   "icon": "/icons/wrf/champions/swain.png"
@@ -1733,7 +3049,7 @@
    "dragon": "S"
   },
   "builds": {
-   "guide-122": {
+   "dragon": {
     "starting": [
      "Long Sword"
     ],
@@ -1799,6 +3115,64 @@
      {
       "name": "Bard",
       "position": "support"
+     }
+    ],
+    "counters": [
+     {
+      "name": "Kog'Maw",
+      "score": 0.5,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Sivir",
+      "score": 0.5,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Ezreal",
+      "score": 0.45,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Leona",
+      "score": 0.45,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Miss Fortune",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Tristana",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Lucian",
+      "score": 0.35,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Nautilus",
+      "score": 0.3,
+      "sources": [
+       "WR-META"
+      ]
      }
     ]
    }
@@ -1870,6 +3244,64 @@
      "name": "Bard",
      "position": "support"
     }
+   ],
+   "counters": [
+    {
+     "name": "Kog'Maw",
+     "score": 0.5,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Sivir",
+     "score": 0.5,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Ezreal",
+     "score": 0.45,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Leona",
+     "score": 0.45,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Miss Fortune",
+     "score": 0.4,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Tristana",
+     "score": 0.4,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Lucian",
+     "score": 0.35,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Nautilus",
+     "score": 0.3,
+     "sources": [
+      "WR-META"
+     ]
+    }
    ]
   },
   "icon": "/icons/wrf/champions/caitlyn.png"
@@ -1881,7 +3313,7 @@
    "dragon": "S"
   },
   "builds": {
-   "guide-44": {
+   "dragon": {
     "starting": [
      "Long Sword"
     ],
@@ -1950,6 +3382,58 @@
      {
       "name": "Yuumi",
       "position": "support"
+     }
+    ],
+    "counters": [
+     {
+      "name": "Samira",
+      "score": 0.75,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Kai'Sa",
+      "score": 0.5,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Kalista",
+      "score": 0.5,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Tristana",
+      "score": 0.45,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Ashe",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Pyke",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Lux",
+      "score": 0.35,
+      "sources": [
+       "WR-META"
+      ]
      }
     ]
    }
@@ -2024,6 +3508,58 @@
      "name": "Yuumi",
      "position": "support"
     }
+   ],
+   "counters": [
+    {
+     "name": "Samira",
+     "score": 0.75,
+     "sources": [
+      "WildRiftFire",
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Kai'Sa",
+     "score": 0.5,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Kalista",
+     "score": 0.5,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Tristana",
+     "score": 0.45,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Ashe",
+     "score": 0.4,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Pyke",
+     "score": 0.4,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Lux",
+     "score": 0.35,
+     "sources": [
+      "WR-META"
+     ]
+    }
    ]
   },
   "icon": "/icons/wrf/champions/ezreal.png"
@@ -2035,7 +3571,7 @@
    "support": "S"
   },
   "builds": {
-   "guide-64": {
+   "support": {
     "starting": [
      "Spectral Sickle"
     ],
@@ -2099,6 +3635,52 @@
      {
       "name": "Ezreal",
       "position": "dragon"
+     }
+    ],
+    "counters": [
+     {
+      "name": "Blitzcrank",
+      "score": 0.85,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Pyke",
+      "score": 0.85,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Maokai",
+      "score": 0.5,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Nautilus",
+      "score": 0.45,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Braum",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Thresh",
+      "score": 0.3,
+      "sources": [
+       "WR-META"
+      ]
      }
     ]
    }
@@ -2167,6 +3749,52 @@
     {
      "name": "Ezreal",
      "position": "dragon"
+    }
+   ],
+   "counters": [
+    {
+     "name": "Blitzcrank",
+     "score": 0.85,
+     "sources": [
+      "WildRiftFire",
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Pyke",
+     "score": 0.85,
+     "sources": [
+      "WildRiftFire",
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Maokai",
+     "score": 0.5,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Nautilus",
+     "score": 0.45,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Braum",
+     "score": 0.4,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Thresh",
+     "score": 0.3,
+     "sources": [
+      "WR-META"
+     ]
     }
    ]
   },
@@ -2255,6 +3883,59 @@
       "name": "Annie",
       "position": "mid"
      }
+    ],
+    "counters": [
+     {
+      "name": "Mordekaiser",
+      "score": 0.9,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Rumble",
+      "score": 0.75,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Dr. Mundo",
+      "score": 0.5,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Cho'Gath",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Gwen",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Darius",
+      "score": 0.35,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Sion",
+      "score": 0.3,
+      "sources": [
+       "WR-META"
+      ]
+     }
     ]
    },
    "support": {
@@ -2296,7 +3977,86 @@
      "Transcendence"
     ],
     "countered_by": [],
-    "synergies": []
+    "synergies": [],
+    "counters": [
+     {
+      "name": "Maokai",
+      "score": 1.0,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Draven",
+      "score": 0.9,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Morgana",
+      "score": 0.8,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Alistar",
+      "score": 0.7,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Lucian",
+      "score": 0.6,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Vayne",
+      "score": 0.5,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Caitlyn",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Zilean",
+      "score": 0.3,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Samira",
+      "score": 0.2,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Lux",
+      "score": 0.1,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Vel'Koz",
+      "score": 0.1,
+      "sources": [
+       "WR-META"
+      ]
+     }
+    ]
    }
   },
   "build": {
@@ -2363,6 +4123,59 @@
     {
      "name": "Annie",
      "position": "mid"
+    }
+   ],
+   "counters": [
+    {
+     "name": "Mordekaiser",
+     "score": 0.9,
+     "sources": [
+      "WildRiftFire",
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Rumble",
+     "score": 0.75,
+     "sources": [
+      "WildRiftFire",
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Dr. Mundo",
+     "score": 0.5,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Cho'Gath",
+     "score": 0.4,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Gwen",
+     "score": 0.4,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Darius",
+     "score": 0.35,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Sion",
+     "score": 0.3,
+     "sources": [
+      "WR-META"
+     ]
     }
    ]
   },
@@ -2446,6 +4259,51 @@
       "name": "Zilean",
       "position": "support"
      }
+    ],
+    "counters": [
+     {
+      "name": "Gwen",
+      "score": 0.95,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Aatrox",
+      "score": 0.5,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Warwick",
+      "score": 0.45,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Vayne",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Yone",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Darius",
+      "score": 0.35,
+      "sources": [
+       "WR-META"
+      ]
+     }
     ]
    },
    "jungle": {
@@ -2517,6 +4375,29 @@
      {
       "name": "Senna",
       "position": "support"
+     }
+    ],
+    "counters": [
+     {
+      "name": "Ekko",
+      "score": 1.0,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Kayn",
+      "score": 0.9,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Gwen",
+      "score": 0.8,
+      "sources": [
+       "WildRiftFire"
+      ]
      }
     ]
    }
@@ -2590,6 +4471,51 @@
     {
      "name": "Zilean",
      "position": "support"
+    }
+   ],
+   "counters": [
+    {
+     "name": "Gwen",
+     "score": 0.95,
+     "sources": [
+      "WildRiftFire",
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Aatrox",
+     "score": 0.5,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Warwick",
+     "score": 0.45,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Vayne",
+     "score": 0.4,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Yone",
+     "score": 0.4,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Darius",
+     "score": 0.35,
+     "sources": [
+      "WR-META"
+     ]
     }
    ]
   },
@@ -2678,6 +4604,80 @@
       "name": "Nocturne",
       "position": "jungle"
      }
+    ],
+    "counters": [
+     {
+      "name": "Fiora",
+      "score": 0.95,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Camille",
+      "score": 0.8,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Darius",
+      "score": 0.5,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Shen",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Singed",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Aatrox",
+      "score": 0.3,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Gwen",
+      "score": 0.25,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Irelia",
+      "score": 0.2,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Warwick",
+      "score": 0.15,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Vayne",
+      "score": 0.1,
+      "sources": [
+       "WR-META"
+      ]
+     }
     ]
    },
    "support": {
@@ -2754,6 +4754,79 @@
      {
       "name": "Tristana",
       "position": "dragon"
+     }
+    ],
+    "counters": [
+     {
+      "name": "Vayne",
+      "score": 1.0,
+      "sources": [
+       "WildRiftFire",
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Alistar",
+      "score": 0.45,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Braum",
+      "score": 0.45,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Morgana",
+      "score": 0.4,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Varus",
+      "score": 0.4,
+      "sources": [
+       "WildRiftFire"
+      ]
+     },
+     {
+      "name": "Samira",
+      "score": 0.35,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Lulu",
+      "score": 0.3,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Kalista",
+      "score": 0.25,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Zyra",
+      "score": 0.2,
+      "sources": [
+       "WR-META"
+      ]
+     },
+     {
+      "name": "Sivir",
+      "score": 0.1,
+      "sources": [
+       "WR-META"
+      ]
      }
     ]
    }
@@ -2832,6 +4905,80 @@
     {
      "name": "Nocturne",
      "position": "jungle"
+    }
+   ],
+   "counters": [
+    {
+     "name": "Fiora",
+     "score": 0.95,
+     "sources": [
+      "WildRiftFire",
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Camille",
+     "score": 0.8,
+     "sources": [
+      "WildRiftFire",
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Darius",
+     "score": 0.5,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Shen",
+     "score": 0.4,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Singed",
+     "score": 0.4,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Aatrox",
+     "score": 0.3,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Gwen",
+     "score": 0.25,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Irelia",
+     "score": 0.2,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Warwick",
+     "score": 0.15,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Vayne",
+     "score": 0.1,
+     "sources": [
+      "WR-META"
+     ]
     }
    ]
   },
