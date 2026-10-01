@@ -1,0 +1,366 @@
+{
+ "Grasp of the Undying": {
+  "name": "Grasp of the Undying",
+  "kind": "keystone",
+  "tree": "Keystone",
+  "tier": "S",
+  "icon": "/icons/wrf/runes/grasp-of-the-undying.png"
+ },
+ "Conqueror": {
+  "name": "Conqueror",
+  "kind": "keystone",
+  "tree": "Keystone",
+  "tier": "S",
+  "icon": "/icons/wrf/runes/conqueror.png"
+ },
+ "Bone Plating": {
+  "name": "Bone Plating",
+  "kind": "minor",
+  "tree": "Resolve",
+  "tier": "S",
+  "icon": "/icons/wrf/runes/bone-plating.png"
+ },
+ "Second Wind": {
+  "name": "Second Wind",
+  "kind": "minor",
+  "tree": "Resolve",
+  "tier": "S",
+  "icon": "/icons/wrf/runes/second-wind.png"
+ },
+ "Cut Down": {
+  "name": "Cut Down",
+  "kind": "minor",
+  "tree": "Precision",
+  "tier": "S",
+  "icon": "/icons/wrf/runes/cut-down.png"
+ },
+ "Transcendence": {
+  "name": "Transcendence",
+  "kind": "minor",
+  "tree": "Sorcery",
+  "tier": "S",
+  "icon": "/icons/wrf/runes/transcendence.png"
+ },
+ "Absolute Focus": {
+  "name": "Absolute Focus",
+  "kind": "minor",
+  "tree": "Sorcery",
+  "tier": "S",
+  "icon": "/icons/wrf/runes/absolute-focus.png"
+ },
+ "Legend: Bloodline": {
+  "name": "Legend: Bloodline",
+  "kind": "minor",
+  "tree": "Precision",
+  "tier": "A",
+  "icon": "/icons/wrf/runes/legend-bloodline.png"
+ },
+ "Nimbus Cloak": {
+  "name": "Nimbus Cloak",
+  "kind": "minor",
+  "tree": "Sorcery",
+  "tier": "A",
+  "icon": "/icons/wrf/runes/nimbus-cloak.png"
+ },
+ "Legend: Alacrity": {
+  "name": "Legend: Alacrity",
+  "kind": "minor",
+  "tree": "Precision",
+  "tier": "A",
+  "icon": "/icons/wrf/runes/legend-alacrity.png"
+ },
+ "Perseverance": {
+  "name": "Perseverance",
+  "kind": "minor",
+  "tree": "Resolve",
+  "tier": "A",
+  "icon": "/icons/wrf/runes/perseverance.png"
+ },
+ "Ice Overlord": {
+  "name": "Ice Overlord",
+  "kind": "keystone",
+  "tree": "Keystone",
+  "tier": "A",
+  "icon": "/icons/wrf/runes/ice-overlord.png"
+ },
+ "Lethal Tempo": {
+  "name": "Lethal Tempo",
+  "kind": "keystone",
+  "tree": "Keystone",
+  "tier": "A",
+  "icon": "/icons/wrf/runes/lethal-tempo.png"
+ },
+ "Eyeball Collector": {
+  "name": "Eyeball Collector",
+  "kind": "minor",
+  "tree": "Domination",
+  "tier": "A",
+  "icon": "/icons/wrf/runes/eyeball-collector.png"
+ },
+ "Sudden Impact": {
+  "name": "Sudden Impact",
+  "kind": "minor",
+  "tree": "Domination",
+  "tier": "A",
+  "icon": "/icons/wrf/runes/sudden-impact.png"
+ },
+ "Chain Assault": {
+  "name": "Chain Assault",
+  "kind": "minor",
+  "tree": "Domination",
+  "tier": "A",
+  "icon": "/icons/wrf/runes/chain-assault.png"
+ },
+ "Last Stand": {
+  "name": "Last Stand",
+  "kind": "minor",
+  "tree": "Precision",
+  "tier": "A",
+  "icon": "/icons/wrf/runes/last-stand.png"
+ },
+ "Hextech Flashtraption": {
+  "name": "Hextech Flashtraption",
+  "kind": "minor",
+  "tree": "Sorcery",
+  "tier": "A",
+  "icon": "/icons/wrf/runes/hextech-flashtraption.png"
+ },
+ "Phase Rush": {
+  "name": "Phase Rush",
+  "kind": "keystone",
+  "tree": "Keystone",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/phase-rush.png"
+ },
+ "Font of Life": {
+  "name": "Font of Life",
+  "kind": "minor",
+  "tree": "Resolve",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/font-of-life.png"
+ },
+ "Courage of the Colossus": {
+  "name": "Courage of the Colossus",
+  "kind": "minor",
+  "tree": "Resolve",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/courage-of-the-colossus.png"
+ },
+ "Electrocute": {
+  "name": "Electrocute",
+  "kind": "keystone",
+  "tree": "Keystone",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/electrocute.png"
+ },
+ "Aery": {
+  "name": "Aery",
+  "kind": "keystone",
+  "tree": "Keystone",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/aery.png"
+ },
+ "Arcane Comet": {
+  "name": "Arcane Comet",
+  "kind": "keystone",
+  "tree": "Keystone",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/arcane-comet.png"
+ },
+ "Unshakeable": {
+  "name": "Unshakeable",
+  "kind": "minor",
+  "tree": "Resolve",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/unshakeable.png"
+ },
+ "Dark Harvest": {
+  "name": "Dark Harvest",
+  "kind": "keystone",
+  "tree": "Keystone",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/dark-harvest.png"
+ },
+ "Hubris": {
+  "name": "Hubris",
+  "kind": "minor",
+  "tree": "Domination",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/hubris.png"
+ },
+ "Tyrant": {
+  "name": "Tyrant",
+  "kind": "minor",
+  "tree": "Domination",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/tyrant.png"
+ },
+ "Empowered Attack": {
+  "name": "Empowered Attack",
+  "kind": "minor",
+  "tree": "Domination",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/empowered-attack.png"
+ },
+ "Coup de Grace": {
+  "name": "Coup de Grace",
+  "kind": "minor",
+  "tree": "Precision",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/coup-de-grace.png"
+ },
+ "Brutal": {
+  "name": "Brutal",
+  "kind": "minor",
+  "tree": "Precision",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/brutal.png"
+ },
+ "Botanist": {
+  "name": "Botanist",
+  "kind": "minor",
+  "tree": "Sorcery",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/botanist.png"
+ },
+ "Axiom Arcanist": {
+  "name": "Axiom Arcanist",
+  "kind": "minor",
+  "tree": "Sorcery",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/axiom-arcanist.png"
+ },
+ "Scorch": {
+  "name": "Scorch",
+  "kind": "minor",
+  "tree": "Sorcery",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/scorch.png"
+ },
+ "Zombie Ward": {
+  "name": "Zombie Ward",
+  "kind": "minor",
+  "tree": "Domination",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/zombie-ward.png"
+ },
+ "Legend: Haste": {
+  "name": "Legend: Haste",
+  "kind": "minor",
+  "tree": "Precision",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/legend-haste.png"
+ },
+ "Triumph": {
+  "name": "Triumph",
+  "kind": "minor",
+  "tree": "Precision",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/triumph.png"
+ },
+ "Overgrowth": {
+  "name": "Overgrowth",
+  "kind": "minor",
+  "tree": "Resolve",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/overgrowth.png"
+ },
+ "Revitalize": {
+  "name": "Revitalize",
+  "kind": "minor",
+  "tree": "Resolve",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/revitalize.png"
+ },
+ "Demolish": {
+  "name": "Demolish",
+  "kind": "minor",
+  "tree": "Resolve",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/demolish.png"
+ },
+ "Manaflow Band": {
+  "name": "Manaflow Band",
+  "kind": "minor",
+  "tree": "Sorcery",
+  "tier": "B",
+  "icon": "/icons/wrf/runes/manaflow-band.png"
+ },
+ "Celerity": {
+  "name": "Celerity",
+  "kind": "minor",
+  "tree": "Sorcery",
+  "tier": "C",
+  "icon": "/icons/wrf/runes/celerity.png"
+ },
+ "Fleet Footwork": {
+  "name": "Fleet Footwork",
+  "kind": "keystone",
+  "tree": "Keystone",
+  "tier": "C",
+  "icon": "/icons/wrf/runes/fleet-footwork.png"
+ },
+ "Battle Zeal": {
+  "name": "Battle Zeal",
+  "kind": "minor",
+  "tree": "Precision",
+  "tier": "C",
+  "icon": "/icons/wrf/runes/battle-zeal.png"
+ },
+ "First Strike": {
+  "name": "First Strike",
+  "kind": "keystone",
+  "tree": "Keystone",
+  "tier": "C",
+  "icon": "/icons/wrf/runes/first-strike.png"
+ },
+ "Empowerment": {
+  "name": "Empowerment",
+  "kind": "keystone",
+  "tree": "Keystone",
+  "tier": "C",
+  "icon": "/icons/wrf/runes/empowerment.png"
+ },
+ "Cheap Shot": {
+  "name": "Cheap Shot",
+  "kind": "minor",
+  "tree": "Domination",
+  "tier": "C",
+  "icon": "/icons/wrf/runes/cheap-shot.png"
+ },
+ "Nullifying Orb": {
+  "name": "Nullifying Orb",
+  "kind": "minor",
+  "tree": "Resolve",
+  "tier": "C",
+  "icon": "/icons/wrf/runes/nullifying-orb.png"
+ },
+ "Gathering Storm": {
+  "name": "Gathering Storm",
+  "kind": "minor",
+  "tree": "Sorcery",
+  "tier": "C",
+  "icon": "/icons/wrf/runes/gathering-storm.png"
+ },
+ "Ixtali Seedjar": {
+  "name": "Ixtali Seedjar",
+  "kind": "minor",
+  "tree": "Sorcery",
+  "tier": "D",
+  "icon": "/icons/wrf/runes/ixtali-seedjar.png"
+ },
+ "Guardian": {
+  "name": "Guardian",
+  "kind": "keystone",
+  "tree": "Keystone",
+  "tier": "D",
+  "icon": "/icons/wrf/runes/guardian.png"
+ },
+ "Relentless Hunter": {
+  "name": "Relentless Hunter",
+  "kind": "minor",
+  "tree": "Domination",
+  "tier": "D",
+  "icon": "/icons/wrf/runes/relentless-hunter.png"
+ }
+}

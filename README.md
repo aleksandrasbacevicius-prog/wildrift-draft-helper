@@ -1,6 +1,6 @@
 # Wild Rift Draft Helper
 
-Champion-select helper for Wild Rift. Pick your lane, your champion and your opponent, and see the current core build, full build, situational swaps and the tier list. An AI agent can then tailor the build to the enemy team.
+Champion-select helper for Wild Rift. Pick your lane, your champion and your opponent, and see the current core build, full build, runes, situational swaps and the tier list. Swap core items and runes, and your choices are saved per champion. An AI agent can then tailor the build to the enemy team.
 
 ```
 Website ── FastAPI ──> data layer ──> WildRiftFire data (refreshed when the patch changes)
@@ -13,7 +13,7 @@ Website ── FastAPI ──> data layer ──> WildRiftFire data (refreshed w
 - **`wildrift/agent.py`**: a Strands agent that calls those tools to tailor a build. Only this part costs API credits, and repeat drafts are cached.
 - **`wildrift/api.py`** and **`static/index.html`**: a REST API and a phone-first website.
 - **`data/tips.json`**: hand-written matchup tips (currently for 8 Baron champions).
-- **`data/profile.default.json`**: the default champion pool per position. Edit it in the app with "Edit my pool". Your changes are saved to `data/profile.json`.
+- **`data/profile.default.json`**: the default champion pool per position. Edit it in the app with "Edit my pool". Each person's pool is saved to `data/profiles/<name>.json`, and their item and rune choices to `data/builds/<name>.json`.
 
 ## Setup
 
@@ -39,6 +39,24 @@ From the command line:
 python -m wildrift.agent Darius --position baron --enemies Garen Ahri --swap "Stridebreaker=triforce"
 ```
 
+## Security
+
+- **Access tokens, one per person** (`APP_TOKENS` in `.env`, generate with `python -m wildrift.tokens alex sam`). They're needed for the AI button, saving your pool and patch checks. Browsing builds and tiers stays open. With no tokens set, those actions only work from this computer.
+- **AI limit:** 5 custom builds per person per 48h, plus a total of 30 across everyone, to protect the API credit. Repeat drafts come from the cache and are free. The agent is also capped at 8 tool calls per request.
+- **Input limits:** names, list lengths and request sizes are capped, and there's a per-person rate limit.
+- **Browser hardening:** a strict Content-Security-Policy (no inline scripts), plus nosniff, no-referrer and no framing.
+- **Data fetcher:** only HTTPS requests to WildRiftFire/MobaFire, with size limits, and only images are saved as icons.
+- Also set a monthly spend limit in the Anthropic Console as the final backstop.
+
+## Deploy to Render
+
+1. Create tokens for everyone: `python -m wildrift.tokens alex sam jonas`.
+2. On [render.com](https://render.com), choose **New > Blueprint** and pick this GitHub repo. `render.yaml` sets up a free Docker web service.
+3. When asked, fill in `ANTHROPIC_API_KEY` and `APP_TOKENS` (the `APP_TOKENS=...` line without the prefix).
+4. The build downloads the current patch's data into the image, which takes about 5 minutes. Then share the `onrender.com` link, and send each friend their own token privately.
+
+Free tier notes: the service sleeps after 15 minutes idle and takes about 30 seconds to wake. Its disk is temporary, so pools and AI usage counters reset when it restarts or redeploys, while the Anthropic Console spend limit still applies.
+
 ## Patch updates
 
 The data is stamped with the patch it came from, which the site shows at the top. While the server runs, it checks WildRiftFire once a day. If the patch has changed, or the data is a week old, it downloads everything again. You can also press "Check for a new patch" in the footer, or run `python -m wildrift.wildriftfire`.
@@ -53,8 +71,8 @@ python -m pytest -q
 
 ## Roadmap
 
-- Docker image
 - GitHub Actions: run the tests and build the image
 - AWS: ECS Fargate behind an ALB, plus a scheduled Lambda for the patch check
+- Persistent storage for pools and usage counters (e.g. a small database)
 
 Builds and tier list from WildRiftFire.com. Fan project, not endorsed by Riot Games.

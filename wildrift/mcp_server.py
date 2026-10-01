@@ -55,6 +55,14 @@ def swap_core_item(champion: str, remove: str, add: str) -> dict:
 
 
 @server.tool()
+def get_runes(tree: str | None = None) -> list[dict]:
+    """List runes with kind (keystone or minor), tree and tier (S best). Filter by tree:
+    Keystone, Domination, Precision, Resolve or Sorcery."""
+    runes = data.get_runes().values()
+    return [r for r in runes if tree is None or r["tree"].lower() == tree.lower()]
+
+
+@server.tool()
 def get_items(category: str | None = None) -> list[str]:
     """List item names. Filter by category: Fighter, Assassin, Marksman, Magic, Defense,
     Support, Boots or Physical. Omit the category to list all items."""

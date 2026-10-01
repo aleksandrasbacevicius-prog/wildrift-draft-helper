@@ -7,13 +7,6 @@ from wildrift.api import app
 client = TestClient(app)  # no `with`, so the daily patch check doesn't start
 
 
-@pytest.fixture(autouse=True)
-def no_saved_profile():
-    data.PROFILE_FILE.unlink(missing_ok=True)
-    yield
-    data.PROFILE_FILE.unlink(missing_ok=True)
-
-
 def test_meta_has_patch():
     meta = client.get("/api/meta").json()
     assert meta["patch"] and meta["positions"] == data.POSITIONS

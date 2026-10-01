@@ -3,13 +3,6 @@ import pytest
 from wildrift import data
 
 
-@pytest.fixture(autouse=True)
-def no_saved_profile():
-    data.PROFILE_FILE.unlink(missing_ok=True)
-    yield
-    data.PROFILE_FILE.unlink(missing_ok=True)
-
-
 def test_position_list_sorted_by_tier():
     tiers = [c["positions"]["baron"] for c in data.list_champions("baron")]
     assert tiers == sorted(tiers, key=data.TIER_ORDER.get)
@@ -85,11 +78,17 @@ def test_default_profile_has_baron_pool():
 
 
 def test_save_profile_normalises_names():
-    saved = data.save_profile({"baron": ["darius"], "mid": ["ahri"]})
+    saved = data.save_profile("alex", {"baron": ["darius", "Darius"], "mid": ["ahri"]})
     assert saved["baron"] == ["Darius"] and saved["mid"] == ["Ahri"]
-    assert data.get_profile()["mid"] == ["Ahri"]
+    assert data.get_profile("alex")["mid"] == ["Ahri"]
+
+
+def test_profiles_are_per_user():
+    data.save_profile("alex", {"mid": ["Ahri"]})
+    assert data.get_profile("sam")["mid"] == []  # new user gets the default pool
+    assert "Darius" in data.get_profile("sam")["baron"]
 
 
 def test_save_profile_rejects_unknown_champion():
     with pytest.raises(data.UnknownChampionError):
-        data.save_profile({"baron": ["Nobody"]})
+        data.save_profile("alex", {"baron": ["Nobody"]})

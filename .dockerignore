@@ -1,0 +1,12 @@
+.git
+.venv
+.env
+.vscode
+__pycache__
+.pytest_cache
+tests
+data/wildriftfire
+data/profiles
+data/ai_usage.json
+static/icons/wrf
+data/builds

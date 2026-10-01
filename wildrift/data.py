@@ -14,7 +14,8 @@ from wildrift.wildriftfire import slug
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 WRF_DIR = Path(os.getenv("WILDRIFT_DATA_DIR", DATA_DIR / "wildriftfire"))
-PROFILE_FILE = Path(os.getenv("WILDRIFT_PROFILE", DATA_DIR / "profile.json"))
+PROFILE_DIR = Path(os.getenv("WILDRIFT_PROFILE_DIR", DATA_DIR / "profiles"))
+PREFS_DIR = Path(os.getenv("WILDRIFT_PREFS_DIR", DATA_DIR / "builds"))
 
 POSITIONS = ["baron", "jungle", "mid", "dragon", "support"]
 TIER_ORDER = {"S+": 0, "S": 1, "A": 2, "B": 3, "C": 4, "D": 5}
@@ -25,6 +26,10 @@ class UnknownChampionError(KeyError):
 
 
 class UnknownItemError(KeyError):
+    pass
+
+
+class UnknownRuneError(KeyError):
     pass
 
 
@@ -43,6 +48,7 @@ def _wrf() -> dict:
     return {
         "champions": _read(WRF_DIR / "champions.json"),
         "items": _read(WRF_DIR / "items.json"),
+        "runes": _read(WRF_DIR / "runes.json") if (WRF_DIR / "runes.json").exists() else {},
         "meta": _read(WRF_DIR / "meta.json"),
     }
 
@@ -126,14 +132,25 @@ def get_items(category: str | None = None) -> dict[str, dict]:
     return {n: i for n, i in items.items() if wanted in (c.lower() for c in i["categories"])}
 
 
+def _local_icon(kind: str, name: str) -> str | None:
+    path = ROOT / "static" / "icons" / "wrf" / kind / f"{slug(name)}.png"
+    return f"/icons/wrf/{kind}/{slug(name)}.png" if path.exists() else None
+
+
 def item_icon(name: str) -> str | None:
     """Icon path for an item, or for a rune (situational swaps can swap runes too)."""
     item = _wrf()["items"].get(name)
     if item:
         return item["icon"]
-    rune_slug = slug(name)
-    rune = ROOT / "static" / "icons" / "wrf" / "runes" / f"{rune_slug}.png"
-    return f"/icons/wrf/runes/{rune_slug}.png" if rune.exists() else None
+    return _local_icon("runes", name)
+
+
+def rune_icon(name: str) -> str | None:
+    return _local_icon("runes", name)
+
+
+def spell_icon(name: str) -> str | None:
+    return _local_icon("spells", name)
 
 
 def resolve_item(name: str) -> str:
@@ -147,6 +164,37 @@ def resolve_item(name: str) -> str:
     if alias and alias in items:
         return alias
     raise UnknownItemError(f"'{name}' is not a known item")
+
+
+def get_runes() -> dict[str, dict]:
+    """Every rune: kind (keystone/minor), tree and tier."""
+    return _wrf()["runes"]
+
+
+def resolve_rune(name: str) -> str:
+    wanted = name.strip().lower()
+    for rune in _wrf()["runes"]:
+        if rune.lower() == wanted:
+            return rune
+    raise UnknownRuneError(f"'{name}' is not a known rune")
+
+
+def validate_runes(champion: str, runes: list[str]) -> list[str]:
+    """Check a rune page: same number of runes as the build, keystone first, minors after, no repeats.
+    Row rules inside each tree aren't known, so those aren't checked."""
+    expected = len(get_build(champion)["runes"])
+    names = [resolve_rune(r) for r in runes]
+    if len(names) != expected:
+        raise ValueError(f"Expected {expected} runes, got {len(names)}")
+    if len(set(names)) != len(names):
+        raise ValueError("A rune can only be picked once")
+    catalog = _wrf()["runes"]
+    if catalog[names[0]]["kind"] != "keystone":
+        raise ValueError(f"{names[0]} is not a keystone")
+    for name in names[1:]:
+        if catalog[name]["kind"] != "minor":
+            raise ValueError(f"{name} is a keystone; only the first slot can hold one")
+    return names
 
 
 def swap_core_item(champion: str, remove: str, add: str) -> dict:
@@ -176,15 +224,60 @@ def _swap(build: dict, remove: str, add: str) -> dict:
     }
 
 
-def get_profile() -> dict[str, list[str]]:
-    path = PROFILE_FILE if PROFILE_FILE.exists() else DATA_DIR / "profile.default.json"
-    profile = _read(path)
+def _profile_file(user: str) -> Path:
+    # User names are validated in security.py (lowercase letters, digits, - and _), so this stays in PROFILE_DIR.
+    return PROFILE_DIR / f"{user}.json"
+
+
+def get_profile(user: str | None = None) -> dict[str, list[str]]:
+    """A user's champion pool per position, or the default pool for anonymous visitors and new users."""
+    path = _profile_file(user) if user else None
+    profile = _read(path if path and path.exists() else DATA_DIR / "profile.default.json")
     return {p: profile.get(p, []) for p in POSITIONS}
 
 
-def save_profile(profile: dict[str, list[str]]) -> dict[str, list[str]]:
+def save_profile(user: str, profile: dict[str, list[str]]) -> dict[str, list[str]]:
     clean = {}
     for position in POSITIONS:
-        clean[position] = [_find(name)["name"] for name in profile.get(position, [])]
-    PROFILE_FILE.write_text(json.dumps(clean, indent=1), encoding="utf-8")
+        clean[position] = list(dict.fromkeys(_find(name)["name"] for name in profile.get(position, [])))
+    PROFILE_DIR.mkdir(parents=True, exist_ok=True)
+    _profile_file(user).write_text(json.dumps(clean, indent=1), encoding="utf-8")
     return clean
+
+
+def _prefs_file(user: str) -> Path:
+    return PREFS_DIR / f"{user}.json"  # user names are validated in security.py
+
+
+def _all_prefs(user: str) -> dict:
+    path = _prefs_file(user)
+    return _read(path) if path.exists() else {}
+
+
+def get_preferences(user: str | None, champion: str) -> dict | None:
+    """A user's saved core items and runes for a champion, or None."""
+    if not user:
+        return None
+    return _all_prefs(user).get(_find(champion)["name"])
+
+
+def save_preferences(user: str, champion: str, core: list[str], runes: list[str]) -> dict:
+    """Save a user's own core items and runes for a champion (validated like swaps)."""
+    build = get_build(champion)
+    core_items = [resolve_item(i) for i in core]
+    if len(core_items) != len(build["core"]) or len(set(core_items)) != len(core_items):
+        raise ValueError(f"Core needs {len(build['core'])} different items")
+    boots = [i for i in core_items if "Boots" in _wrf()["items"][i]["categories"]]
+    if boots:
+        raise ValueError(f"Boots can't be core items: {', '.join(boots)}")
+    prefs = _all_prefs(user)
+    prefs[build["name"]] = {"core": core_items, "runes": validate_runes(build["name"], runes)}
+    PREFS_DIR.mkdir(parents=True, exist_ok=True)
+    _prefs_file(user).write_text(json.dumps(prefs, indent=1), encoding="utf-8")
+    return prefs[build["name"]]
+
+
+def reset_preferences(user: str, champion: str) -> None:
+    prefs = _all_prefs(user)
+    if prefs.pop(_find(champion)["name"], None) is not None:
+        _prefs_file(user).write_text(json.dumps(prefs, indent=1), encoding="utf-8")

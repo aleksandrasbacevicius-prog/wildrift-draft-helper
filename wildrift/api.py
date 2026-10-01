@@ -9,14 +9,22 @@ import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from typing import Annotated
+
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, StringConstraints
 
 from wildrift import data, wildriftfire
+from wildrift.security import ai_usage, identify, require_access, write_rate_limit
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 CHECK_EVERY_SECONDS = 24 * 60 * 60
+MAX_BODY_BYTES = 16 * 1024
+REFRESH_COOLDOWN_SECONDS = 15 * 60
+protected = [Depends(write_rate_limit)]  # valid token (or this computer) + per-user rate limit
+Name = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=40)]
 
 update_status = {"state": "idle", "message": ""}
 _update_lock = threading.Lock()
@@ -54,7 +62,29 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Wild Rift Draft Helper", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="Wild Rift Draft Helper", version="0.3.0", lifespan=lifespan)
+
+# Content Security Policy: only this site's own scripts, styles and images.
+SECURITY_HEADERS = {
+    "Content-Security-Policy": "default-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "no-referrer",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+}
+
+
+@app.middleware("http")
+async def security_middleware(request: Request, call_next):
+    length = request.headers.get("content-length")
+    if length and length.isdigit() and int(length) > MAX_BODY_BYTES:
+        return JSONResponse(status_code=413, content={"detail": "Request body too large."})
+    response = await call_next(request)
+    for header, value in SECURITY_HEADERS.items():
+        # FastAPI's /docs page loads Swagger UI from a CDN, so it gets every header except the CSP.
+        if header == "Content-Security-Policy" and request.url.path in ("/docs", "/redoc"):
+            continue
+        response.headers.setdefault(header, value)
+    return response
 
 
 def _no_data():
@@ -71,6 +101,8 @@ def _with_item_icons(build: dict) -> dict:
         "situational": [
             {"when": s["when"], "replace": entry(s["replace"]), "with": entry(s["with"])} for s in build["situational"]
         ],
+        "runes": [{"name": r, "icon": data.rune_icon(r)} for r in build["runes"]],
+        "spells": [{"name": s, "icon": data.spell_icon(s)} for s in build["spells"]],
     }
 
 
@@ -83,8 +115,20 @@ def get_meta() -> dict:
     return {**meta, "positions": data.POSITIONS, "update": update_status}
 
 
-@app.post("/api/refresh", status_code=202)
+@app.get("/api/usage")
+def get_usage(user: str = Depends(require_access)) -> dict:
+    return ai_usage.status(user)
+
+
+_last_manual_refresh = 0.0
+
+
+@app.post("/api/refresh", status_code=202, dependencies=protected)
 def refresh() -> dict:
+    global _last_manual_refresh
+    if time.monotonic() - _last_manual_refresh < REFRESH_COOLDOWN_SECONDS:
+        raise HTTPException(status_code=429, detail="A patch check ran recently. Try again later.")
+    _last_manual_refresh = time.monotonic()
     threading.Thread(target=check_for_update, daemon=True).start()
     return {"update": update_status}
 
@@ -127,41 +171,95 @@ def list_items() -> list[dict]:
         _no_data()
 
 
+@app.get("/api/runes")
+def list_runes() -> list[dict]:
+    try:
+        return sorted(data.get_runes().values(), key=lambda r: (r["kind"] != "keystone", r["tree"], r["name"]))
+    except data.NoDataError:
+        _no_data()
+
+
+class Preferences(BaseModel):
+    core: list[Name] = Field(min_length=1, max_length=6)
+    runes: list[Name] = Field(min_length=1, max_length=8)
+
+
+@app.get("/api/preferences/{champion}")
+def get_preferences(champion: str, request: Request) -> dict:
+    try:
+        return {"saved": data.get_preferences(identify(request), champion)}
+    except data.UnknownChampionError as e:
+        raise HTTPException(status_code=404, detail=e.args[0])
+
+
+@app.put("/api/preferences/{champion}")
+def save_preferences(champion: str, body: Preferences, user: str = Depends(write_rate_limit)) -> dict:
+    try:
+        return {"saved": data.save_preferences(user, champion, body.core, body.runes)}
+    except (data.UnknownChampionError, data.UnknownItemError, data.UnknownRuneError) as e:
+        raise HTTPException(status_code=404, detail=e.args[0])
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.delete("/api/preferences/{champion}")
+def reset_preferences(champion: str, user: str = Depends(write_rate_limit)) -> dict:
+    try:
+        data.reset_preferences(user, champion)
+    except data.UnknownChampionError as e:
+        raise HTTPException(status_code=404, detail=e.args[0])
+    return {"saved": None}
+
+
 @app.get("/api/profile")
-def get_profile() -> dict:
-    return data.get_profile()
+def get_profile(request: Request) -> dict:
+    return data.get_profile(identify(request))
+
+
+class Profile(BaseModel):
+    baron: list[Name] = Field(default=[], max_length=40)
+    jungle: list[Name] = Field(default=[], max_length=40)
+    mid: list[Name] = Field(default=[], max_length=40)
+    dragon: list[Name] = Field(default=[], max_length=40)
+    support: list[Name] = Field(default=[], max_length=40)
 
 
 @app.put("/api/profile")
-def save_profile(profile: dict[str, list[str]]) -> dict:
+def save_profile(body: Profile, user: str = Depends(write_rate_limit)) -> dict:
     try:
-        return data.save_profile(profile)
+        return data.save_profile(user, body.model_dump())
     except data.UnknownChampionError as e:
         raise HTTPException(status_code=404, detail=e.args[0])
 
 
 class Swap(BaseModel):
-    remove: str
-    add: str
+    remove: Name
+    add: Name
 
 
 class TailorRequest(BaseModel):
-    champion: str
-    enemies: list[str] = Field(min_length=1, description="Lane opponent first")
-    swaps: list[Swap] = []
-    position: str | None = None
+    champion: Name
+    enemies: list[Name] = Field(min_length=1, max_length=5, description="Lane opponent first")
+    swaps: list[Swap] = Field(default=[], max_length=3)
+    runes: list[Name] | None = Field(default=None, max_length=8, description="Your rune page, if you changed it")
+    position: str | None = Field(default=None, pattern="^(baron|jungle|mid|dragon|support)$")
 
 
 @app.post("/api/builds/tailor")
-def tailor(request: TailorRequest) -> dict:
+def tailor(request: TailorRequest, user: str = Depends(write_rate_limit)) -> dict:
     # Plain `def` on purpose: the agent call blocks, so FastAPI runs it in a worker thread.
     from wildrift.agent import tailor_build  # imported lazily so the read-only endpoints work without the agent's deps
 
     try:
         result = tailor_build(
-            request.champion, request.enemies, [(s.remove, s.add) for s in request.swaps], request.position
+            request.champion,
+            request.enemies,
+            [(s.remove, s.add) for s in request.swaps],
+            request.position,
+            runes=request.runes,
+            on_api_call=lambda: ai_usage.consume(user),
         )
-    except (data.UnknownChampionError, data.UnknownItemError) as e:
+    except (data.UnknownChampionError, data.UnknownItemError, data.UnknownRuneError) as e:
         raise HTTPException(status_code=404, detail=e.args[0])
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -169,7 +267,7 @@ def tailor(request: TailorRequest) -> dict:
         _no_data()
     except RuntimeError as e:  # missing API key
         raise HTTPException(status_code=503, detail=str(e))
-    return {"result": result}
+    return {"result": result, "ai_usage": ai_usage.status(user)}
 
 
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")

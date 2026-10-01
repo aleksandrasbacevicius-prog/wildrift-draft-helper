@@ -5,5 +5,9 @@ __pycache__/
 # Fetched from WildRiftFire.com at runtime, not redistributed
 data/wildriftfire/
 static/icons/wrf/
-# Your personal champion pool
-data/profile.json
+# Champion pools, one file per person
+data/profiles/
+# Saved item and rune choices, one file per person
+data/builds/
+# AI usage counter (custom build limit)
+data/ai_usage.json
