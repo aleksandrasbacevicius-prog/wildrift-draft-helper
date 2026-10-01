@@ -71,8 +71,6 @@
   .item img, .item .badge { width: 64px; height: 64px; border-radius: 12px; display: block; margin: 0 auto 6px; }
   .badge { background: var(--line); display: grid; place-items: center; font-weight: 700; }
   .item.swapped img { outline: 2px solid var(--accent); outline-offset: 2px; }
-  /* Invisible native picker over the whole item: tap the item to swap it (wheel picker on iPhone). */
-  .item select { position: absolute; inset: 0; opacity: 0; cursor: pointer; padding: 0; }
   .swap { font-size: .7rem; font-weight: 400; color: var(--accent); margin-top: 2px; }
 
   .sub { margin-top: 14px; }
@@ -108,6 +106,31 @@
   .pool-pick { border: 2px solid transparent; border-radius: 12px; background: none; padding: 2px; color: var(--text); font-size: .68rem; cursor: pointer; opacity: .5; }
   .pool-pick img { width: 48px; height: 48px; border-radius: 10px; display: block; margin: 0 auto 2px; }
   .pool-pick[aria-pressed="true"] { opacity: 1; border-color: var(--accent); }
+
+  /* Item picker sheet */
+  .sheet { position: fixed; inset: 0; z-index: 10; background: rgba(0, 0, 0, .5); display: flex; align-items: flex-end; justify-content: center; }
+  .sheet-panel {
+    width: 100%; max-width: 560px; max-height: 85vh; display: flex; flex-direction: column;
+    background: var(--card); border-radius: 18px 18px 0 0; padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+  }
+  .sheet-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .sheet-head strong { flex: 1; font-size: 1rem; }
+  .sheet-head button { background: none; border: 0; color: var(--muted); font-size: 1.4rem; line-height: 1; cursor: pointer; padding: 4px 8px; }
+  .sheet input {
+    width: 100%; font-size: 16px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--text); margin-bottom: 8px;
+  }
+  .sheet-body { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .sheet-body h3 { font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 12px 0 6px; }
+  .pick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; }
+  .pick {
+    border: 2px solid transparent; border-radius: 12px; background: none; color: var(--text);
+    padding: 4px 2px; font-size: .68rem; line-height: 1.2; cursor: pointer;
+  }
+  .pick img, .pick .badge { width: 44px; height: 44px; border-radius: 9px; display: block; margin: 0 auto 4px; }
+  .pick.current { border-color: var(--accent); }
+  .pick:disabled { opacity: .35; cursor: default; }
+  .item { cursor: pointer; }
 
   footer { font-size: .72rem; color: var(--muted); text-align: center; padding: 8px 16px 24px; }
   .hidden { display: none !important; }
@@ -165,6 +188,18 @@
     <div id="result"></div>
   </section>
 </main>
+<div id="sheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet-panel">
+    <div class="sheet-head">
+      <strong id="sheetTitle">Swap item</strong>
+      <button id="sheetReset" class="link hidden" style="font-size:.85rem">Reset</button>
+      <button id="sheetClose" aria-label="Close">×</button>
+    </div>
+    <input id="sheetSearch" type="search" placeholder="Search items" autocomplete="off">
+    <div id="sheetBody" class="sheet-body"></div>
+  </div>
+</div>
+
 <footer>
   <div id="dataLine"></div>
   <button id="checkUpdate" class="link">Check for a new patch</button>
@@ -267,26 +302,12 @@ function renderEnemies() {
 
 function renderBuild() {
   const b = state.build;
-  const itemOptions = (selected) => {
-    let selectedShown = false; // an item can sit in several groups; only the first copy is selected
-    return itemGroupOrder().map((group) => {
-      const items = state.items.filter((i) => group === "Other"
-        ? !i.categories.some((c) => ITEM_GROUPS.includes(c)) && !i.categories.includes("Boots")
-        : i.categories.includes(group));
-      const options = items.map((i) => {
-        const isSelected = i.name === selected && !selectedShown;
-        if (isSelected) selectedShown = true;
-        return `<option ${isSelected ? "selected" : ""}>${escapeHtml(i.name)}</option>`;
-      }).join("");
-      return items.length ? `<optgroup label="${group}">${options}</optgroup>` : "";
-    }).join("");
-  };
   $("core").innerHTML = b.core.map((item, slot) => {
     const swapped = item.name !== state.original[slot];
-    return `<div class="item ${swapped ? "swapped" : ""}">
+    return `<div class="item ${swapped ? "swapped" : ""}" data-slot="${slot}" role="button" tabindex="0"
+        aria-label="Swap ${escapeHtml(item.name)}">
       ${icon(item)}<div>${escapeHtml(item.name)}</div>
       <div class="swap">${swapped ? `was ${escapeHtml(state.original[slot])}` : "tap to swap"}</div>
-      <select data-slot="${slot}" aria-label="Swap core item ${slot + 1}">${itemOptions(item.name)}</select>
     </div>`;
   }).join("");
   $("boots").innerHTML = b.boots.map((i) => `${icon(i)}<span class="muted">${escapeHtml(i.name)}</span>`).join("");
@@ -346,16 +367,46 @@ async function setPosition(pos) {
   await refreshView();
 }
 
-function onSwap(select) {
-  const slot = Number(select.dataset.slot), name = select.value;
-  const core = state.build.core;
-  if (core.some((item, i) => i !== slot && item.name === name)) {
-    select.value = core[slot].name;
-    alert(`${name} is already in your core build.`);
-    return;
-  }
-  core[slot] = state.items.find((i) => i.name === name);
+// Item picker: a bottom sheet with icons, grouped by category (lane-relevant groups first).
+function openItemPicker(slot) {
+  state.pickerSlot = slot;
+  const current = state.build.core[slot].name;
+  $("sheetTitle").textContent = `Swap ${current}`;
+  $("sheetReset").classList.toggle("hidden", current === state.original[slot]);
+  $("sheetSearch").value = "";
+  renderItemPicker();
+  $("sheet").classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function closeItemPicker() {
+  $("sheet").classList.add("hidden");
+  document.body.style.overflow = "";
+}
+
+function renderItemPicker() {
+  const slot = state.pickerSlot, query = $("sheetSearch").value.trim().toLowerCase();
+  const core = state.build.core.map((i) => i.name);
+  const matches = (i) => !i.categories.includes("Boots") && (!query || i.name.toLowerCase().includes(query));
+  const shown = new Set(); // while searching, list each item once, under its first group
+  $("sheetBody").innerHTML = itemGroupOrder().map((group) => {
+    const items = state.items.filter((i) => matches(i) && !(query && shown.has(i.name)) && (group === "Other"
+      ? !i.categories.some((c) => ITEM_GROUPS.includes(c))
+      : i.categories.includes(group)));
+    items.forEach((i) => shown.add(i.name));
+    if (!items.length) return "";
+    return `<h3>${group}</h3><div class="pick-grid">${items.map((i) => {
+      const isCurrent = i.name === core[slot], inCore = !isCurrent && core.includes(i.name);
+      return `<button class="pick ${isCurrent ? "current" : ""}" data-name="${escapeHtml(i.name)}" ${inCore ? "disabled title=\"Already in your core\"" : ""}>
+        ${icon(i)}${escapeHtml(i.name)}</button>`;
+    }).join("")}</div>`;
+  }).join("") || `<p class="muted">No items match "${escapeHtml(query)}".</p>`;
+}
+
+function applySwap(name) {
+  state.build.core[state.pickerSlot] = state.items.find((i) => i.name === name);
   $("result").innerHTML = "";
+  closeItemPicker();
   renderBuild();
 }
 
@@ -449,7 +500,15 @@ async function init() {
   $("lanes").addEventListener("click", (e) => { const b = e.target.closest(".lane"); if (b) setPosition(b.dataset.pos); });
   $("me").addEventListener("change", () => { fillVs($("vs").value); refreshView(); });
   $("vs").addEventListener("change", () => refreshView({ build: false }));
-  $("core").addEventListener("change", (e) => e.target.matches("select") && onSwap(e.target));
+  const openFrom = (e) => { const item = e.target.closest(".item"); if (item) openItemPicker(Number(item.dataset.slot)); };
+  $("core").addEventListener("click", openFrom);
+  $("core").addEventListener("keydown", (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), openFrom(e)));
+  $("sheetBody").addEventListener("click", (e) => { const p = e.target.closest(".pick"); if (p && !p.disabled) applySwap(p.dataset.name); });
+  $("sheetSearch").addEventListener("input", renderItemPicker);
+  $("sheetReset").addEventListener("click", () => applySwap(state.original[state.pickerSlot]));
+  $("sheetClose").addEventListener("click", closeItemPicker);
+  $("sheet").addEventListener("click", (e) => e.target === $("sheet") && closeItemPicker());
+  document.addEventListener("keydown", (e) => e.key === "Escape" && closeItemPicker());
   $("editPool").addEventListener("click", openPoolEditor);
   $("poolList").addEventListener("click", (e) => {
     const b = e.target.closest(".pool-pick"); if (!b) return;
