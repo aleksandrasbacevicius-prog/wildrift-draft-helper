@@ -143,6 +143,7 @@ def test_ai_button_without_api_key_shows_an_error(phone, open_server):
 def test_champion_without_build_shows_a_message(phone, open_server):
     load(phone, open_server)
     phone.locator('.lane[data-pos="support"]').click()
+    phone.locator("#vs").select_option("Nami")  # the most picked support may be the default opponent
     phone.locator("#me").select_option("Yuumi")
     expect(phone.locator("#core")).to_contain_text("No build available for Yuumi")
     phone.locator("#me").select_option("Thresh")  # the page still works afterwards
@@ -229,3 +230,38 @@ def test_right_click_shows_rune_details(phone, open_server):
     load(phone, open_server)
     phone.locator('.rune[data-rune-slot="0"] [data-info]').click(button="right")
     expect(phone.locator("#infoBody")).to_contain_text("Keystone")
+
+
+def test_server_core_choice_applies_and_saves(phone, open_server):
+    load(phone, open_server)
+    chips = phone.locator("#coreChoices .choice")
+    expect(chips.first).to_contain_text("Guide")
+    expect(chips.first).to_have_attribute("aria-pressed", "true")
+    expect(chips.nth(1)).to_contain_text(re.compile(r"Most popular.*\d+\.\d% win · \d+\.\d% pick", re.S))
+    expect(phone.locator("#coreChoices")).to_contain_text("Diamond+")
+    chips.nth(1).click()
+    expect(chips.nth(1)).to_have_attribute("aria-pressed", "true")
+    expect(phone.locator("#buildState")).to_have_text("Your saved build")
+    phone.reload()
+    expect(phone.locator("#coreChoices .choice").nth(1)).to_have_attribute("aria-pressed", "true")
+    phone.locator("#coreChoices .choice").first.click()
+    expect(phone.locator("#buildState")).to_have_text("Recommended build")
+
+
+def test_server_rune_page_choice(phone, open_server):
+    load(phone, open_server)
+    chips = phone.locator("#runeChoices .choice")
+    expect(chips.nth(1)).to_contain_text("Most popular")
+    chips.nth(1).click()
+    expect(chips.nth(1)).to_have_attribute("aria-pressed", "true")
+    expect(phone.locator("#serverSpells")).to_contain_text("On the server")
+    chips.first.click()
+    expect(phone.locator("#buildState")).to_have_text("Recommended build")
+
+
+def test_opponents_grouped_by_most_common(phone, open_server):
+    load(phone, open_server)
+    groups = phone.locator("#vs optgroup")
+    expect(groups.first).to_have_attribute("label", "Most common this patch")
+    assert re.search(r"\d+% picked$", groups.first.locator("option").first.inner_text())
+    expect(phone.locator("#laneStats")).to_contain_text("not head-to-head")

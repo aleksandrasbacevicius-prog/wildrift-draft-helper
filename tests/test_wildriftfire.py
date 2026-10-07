@@ -236,7 +236,7 @@ def test_refresh_end_to_end(offline_site):
     downloaded = {str(path.relative_to(path.parents[1])).replace("\\", "/") for _, path in icons}
     assert {"champions/darius.png", "items/ruby-crystal.png", "runes/conqueror.png", "spells/flash.png"} <= downloaded
     assert {"lanes/baron.png", "lanes/dragon.png"} <= downloaded
-    assert all(url.startswith((w.SITE, "https://wr-meta.com/")) for url in requested)
+    assert all(url.startswith((w.SITE, "https://wr-meta.com/", "https://www.riftpatchnotes.com/")) for url in requested)
     assert items["Stridebreaker"]["details"]["gold"] == 3100
     assert items["Sterak's Gage"]["details"]["summary"] == "Shield when low"
     assert "https://wr-meta.com/49-darius.html" in requested  # second counter source was read
@@ -295,6 +295,7 @@ def test_needs_refresh_when_old(offline_site):
     old = (date.today() - timedelta(days=w.MAX_AGE_DAYS)).isoformat()
     (data_dir / "meta.json").write_text(json.dumps({"patch": "7.3a", "fetched": old}))
     assert w.needs_refresh()[0] is True
+    assert w.needs_refresh(check_age=False)[0] is False  # right after waking up, only a new patch counts
 
 
 def test_up_to_date(offline_site):

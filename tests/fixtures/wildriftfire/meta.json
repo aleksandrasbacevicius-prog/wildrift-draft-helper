@@ -1,5 +1,11 @@
 {
  "patch": "7.3a",
  "fetched": "2026-10-01T19:07:45",
- "source": "https://www.wildriftfire.com"
+ "source": "https://www.wildriftfire.com",
+ "server": {
+  "source": "https://www.riftpatchnotes.com",
+  "bracket": "Diamond+",
+  "stats_updated": "2026-10-05",
+  "builds_updated": "2026-10-04"
+ }
 }

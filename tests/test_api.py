@@ -76,7 +76,7 @@ def test_tailor_requires_an_enemy():
 
 def test_check_for_update_refreshes_on_new_patch(monkeypatch):
     calls = []
-    monkeypatch.setattr(wildriftfire, "needs_refresh", lambda: (True, "new patch 7.4 (have 7.3a)"))
+    monkeypatch.setattr(wildriftfire, "needs_refresh", lambda **_: (True, "new patch 7.4 (have 7.3a)"))
     monkeypatch.setattr(wildriftfire, "refresh", lambda log: calls.append("refresh"))
     monkeypatch.setattr(data, "reload", lambda: calls.append("reload"))
     api_module.check_for_update()
@@ -85,14 +85,14 @@ def test_check_for_update_refreshes_on_new_patch(monkeypatch):
 
 
 def test_check_for_update_when_current(monkeypatch):
-    monkeypatch.setattr(wildriftfire, "needs_refresh", lambda: (False, "up to date (patch 7.3a)"))
+    monkeypatch.setattr(wildriftfire, "needs_refresh", lambda **_: (False, "up to date (patch 7.3a)"))
     monkeypatch.setattr(wildriftfire, "refresh", lambda log: pytest.fail("should not refresh"))
     api_module.check_for_update()
     assert api_module.update_status["message"] == "Up to date (patch 7.3a)"
 
 
 def test_check_for_update_reports_errors(monkeypatch):
-    def boom():
+    def boom(**_):
         raise OSError("network down")
 
     monkeypatch.setattr(wildriftfire, "needs_refresh", boom)
@@ -172,3 +172,27 @@ def test_ai_service_failure_is_502_and_not_counted(monkeypatch):
 
 def test_champion_without_build_is_404():
     assert client.get("/api/champions/Yuumi/build").status_code == 404
+
+
+def test_first_check_after_boot_is_delayed_and_patch_only(monkeypatch):
+    calls = []
+
+    def stop(seconds):
+        calls.append(("sleep", seconds))
+        if len(calls) > 2:
+            raise SystemExit
+
+    monkeypatch.setattr(api_module.time, "sleep", stop)
+    monkeypatch.setattr(api_module, "check_for_update", lambda **kw: calls.append(("check", kw)))
+    with pytest.raises(SystemExit):
+        api_module._daily_checks()
+    assert calls[:3] == [
+        ("sleep", api_module.STARTUP_CHECK_DELAY_SECONDS),
+        ("check", {"check_age": False}),
+        ("sleep", api_module.CHECK_EVERY_SECONDS),
+    ]
+
+
+def test_large_responses_are_compressed():
+    r = client.get("/api/items", headers={"Accept-Encoding": "gzip"})
+    assert r.headers.get("content-encoding") == "gzip"

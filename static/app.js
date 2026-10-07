@@ -1,5 +1,7 @@
 const $ = (id) => document.getElementById(id);
 const LANES = { baron: "Baron", jungle: "Jungle", mid: "Mid", dragon: "Dragon", support: "Support" };
+const COMMON_OPPONENTS = 6;
+const pct = (n) => `${Number(n).toFixed(1)}%`;
 const ITEM_GROUPS = ["Fighter", "Assassin", "Marksman", "Magic", "Defense", "Support"];
 // Item groups most relevant to each lane come first in the swap picker.
 const LANE_ITEM_FIRST = {
@@ -11,7 +13,7 @@ const itemGroupOrder = () => {
   return [...first, ...ITEM_GROUPS.filter((g) => !first.includes(g)), "Other"];
 };
 const state = {
-  counters: [], vsName: "",
+  counters: [], vsName: "", serverBracket: "Diamond+",
   position: "baron", all: [], byPosition: {}, items: [], profile: {},
   build: null, original: [], poolDraft: new Set(),
 };
@@ -179,10 +181,19 @@ async function loadCounters() {
 
 function fillVs(selected) {
   // Fall back to every champion if this lane's tier list is empty.
-  const ranked = state.byPosition[state.position] || [];
+  const pos = state.position;
+  const ranked = state.byPosition[pos] || [];
   const choices = ranked.length ? ranked : state.all;
-  selected = choices.some((c) => c.name === selected) ? selected : choices[0].name;
-  $("vs").innerHTML = choices.map((c) => option(c, state.position, selected)).join("");
+  // Most common opponents this patch = highest Diamond+ pick rate in this lane.
+  const common = choices.filter((c) => c.stats && c.stats[pos])
+    .sort((a, b) => b.stats[pos].pick - a.stats[pos].pick).slice(0, COMMON_OPPONENTS);
+  const commonNames = common.map((c) => c.name);
+  const rest = choices.filter((c) => !commonNames.includes(c.name));
+  selected = choices.some((c) => c.name === selected) ? selected : (common[0] || choices[0]).name;
+  const picked = (c) => ` · ${Math.round(c.stats[pos].pick)}% picked`;
+  $("vs").innerHTML =
+    (common.length ? `<optgroup label="Most common this patch">${common.map((c) => option(c, pos, selected, picked(c))).join("")}</optgroup>` : "") +
+    `<optgroup label="${LANES[pos]} tier list">${rest.map((c) => option(c, pos, selected)).join("")}</optgroup>`;
   $("vs").value = selected;
 }
 
@@ -218,12 +229,58 @@ function renderBuild() {
         aria-label="Swap rune ${escapeHtml(r.name)}">${icon(r)}<span>${escapeHtml(r.name)}</span></div>`;
   }).join("");
   $("spells").innerHTML = [...b.spells, ...b.starting].map((x) => `${icon(x)}<span class="muted">${escapeHtml(x.name)}</span>`).join("");
+  renderServerChoices();
   const otherLane = b.position && b.position !== state.position;
   $("laneNote").textContent = otherLane ? `No separate ${LANES[state.position]} build for ${b.name}; showing their ${LANES[b.position] || b.position} build.` : "";
   $("laneNote").classList.toggle("hidden", !otherLane);
   const changed = isCustomised();
   $("buildState").textContent = changed ? (state.savedFor === b.name ? "Your saved build" : "Not saved yet") : "Recommended build";
   $("resetBuild").classList.toggle("hidden", !changed);
+}
+
+// Server builds (RiftPatchNotes, Diamond+ CN): pick a whole item core or rune page in one tap.
+function renderServerChoices() {
+  const b = state.build, server = b.server || {};
+  const sameNames = (a, c) => a.length === c.length && a.every((n, i) => n === c[i]);
+  const core = b.core.map((i) => i.name), page = b.runes.map((r) => r.name);
+  const chip = (kind, key, label, stats, active) =>
+    `<button class="choice ${active ? "active" : ""}" data-kind="${kind}" data-key="${key}" aria-pressed="${active}">
+      <strong>${label}</strong>${stats ? `<span>${pct(stats.win)} win · ${pct(stats.pick)} pick</span>` : "<span>WildRiftFire guide</span>"}</button>`;
+  const source = server.updated ? `<div class="choices-note">Server stats: ${escapeHtml(state.serverBracket)} ranked, CN server, updated ${escapeHtml(server.updated)}</div>` : "";
+
+  const cores = (server.cores || []).filter((c) => c.items.length === core.length);
+  $("coreChoices").classList.toggle("hidden", !cores.length);
+  $("coreChoices").innerHTML = cores.length
+    ? `<div class="choice-row">${chip("core", "guide", "Guide", null, sameNames(core, state.original))}${cores.map((c, i) =>
+        chip("core", i, i === 0 ? "Most popular" : `Alternative ${i}`, c, sameNames(core, c.items.map((x) => x.name)))).join("")}</div>${source}`
+    : "";
+
+  const pages = (server.rune_pages || []).filter((p) => p.runes.length === page.length);
+  $("runeChoices").classList.toggle("hidden", !pages.length);
+  $("runeChoices").innerHTML = pages.length
+    ? `<div class="choice-row">${chip("runes", "guide", "Guide", null, sameNames(page, state.originalRunes))}${pages.map((p, i) =>
+        chip("runes", i, i === 0 ? "Most popular" : `Alternative ${i}`, p, sameNames(page, p.runes.map((r) => r.name)))).join("")}</div>`
+    : "";
+
+  const serverLine = (entries, words) => entries.length
+    ? `<span class="muted">On the server:</span> ${entries.map((e) => `${words(e)} <span class="muted">${pct(e.pick)} pick, ${pct(e.win)} win</span>`).join(" · ")}`
+    : "";
+  $("serverBoots").innerHTML = serverLine(server.boots || [], (e) => escapeHtml(e.item.name));
+  $("serverSpells").innerHTML = serverLine(server.spells || [], (e) => e.spells.map((s) => escapeHtml(s.name)).join(" + "));
+}
+
+async function applyServerChoice(kind, key) {
+  const b = state.build, server = b.server || {};
+  if (kind === "core") {
+    const names = key === "guide" ? state.original : server.cores[Number(key)].items.map((i) => i.name);
+    b.core = names.map(itemByName);
+  } else {
+    const names = key === "guide" ? state.originalRunes : server.rune_pages[Number(key)].runes.map((r) => r.name);
+    b.runes = names.map(runeByName);
+  }
+  $("result").innerHTML = "";
+  renderBuild();
+  await savePreferences();
 }
 
 const isCustomised = () =>
@@ -234,11 +291,12 @@ const itemByName = (name) => state.items.find((i) => i.name === name) || { name,
 const runeByName = (name) => state.runeList.find((r) => r.name === name) || { name, icon: null };
 
 async function loadBuild() {
-  const name = $("me").value;
+  const name = $("me").value, position = state.position;
   const [build, prefs] = await Promise.all([
     api(`/api/champions/${encodeURIComponent(name)}/build?position=${state.position}`),
     api(`/api/preferences/${encodeURIComponent(name)}?position=${state.position}`, {}, true).catch(() => ({ saved: null })),
   ]);
+  if (name !== $("me").value || position !== state.position) return; // a newer pick replaced this one while it loaded
   state.build = build;
   state.original = build.core.map((i) => i.name);
   state.originalRunes = build.runes.map((r) => r.name);
@@ -356,9 +414,15 @@ async function loadMatchup() {
   const me = $("me").value, vs = $("vs").value;
   $("matchupTitle").textContent = `Playing against ${vs}`;
   const m = await api(`/api/matchup?me=${encodeURIComponent(me)}&vs=${encodeURIComponent(vs)}&position=${state.position}`);
+  if (me !== $("me").value || vs !== $("vs").value) return; // a newer pick replaced this one while it loaded
   renderVerdict(m);
   renderCounterStrip();
   const tier = m.enemy_tiers[state.position];
+  const laneLine = (name, s) => s && s.pick != null
+    ? `<div><strong>${escapeHtml(name)}</strong> ${pct(s.win)} win · ${pct(s.pick)} pick · ${pct(s.ban)} ban</div>` : "";
+  const lines = laneLine(me, m.your_lane_stats) + laneLine(vs, m.enemy_lane_stats);
+  $("laneStats").innerHTML = lines
+    ? `<div class="muted">This patch in ${LANES[state.position]}, ${escapeHtml(state.serverBracket)} (not head-to-head):</div>${lines}` : "";
   $("matchupTags").innerHTML =
     (tier ? `<span class="tag">${LANES[state.position]} ${tierBadge(tier)}</span>` : "") +
     (m.enemy_damage_type ? `<span class="tag ${m.enemy_damage_type}">${m.enemy_damage_type} damage</span>` : "") +
@@ -383,7 +447,9 @@ async function refreshView({ build = true } = {}) {
   updatePortraits();
   $("result").innerHTML = "";
   // One champion's missing build or matchup shouldn't break the rest of the page.
+  const pick = `${$("me").value}|${$("vs").value}|${state.position}`;
   const [buildResult, matchupResult] = await Promise.allSettled([build ? loadBuild() : null, loadMatchup()]);
+  if (pick !== `${$("me").value}|${$("vs").value}|${state.position}`) return; // outdated: a newer pick is loading
   if (buildResult.status === "rejected") showBuildError(buildResult.reason);
   if (matchupResult.status === "rejected") $("matchupTips").innerHTML = `<li class="muted">${escapeHtml(matchupResult.reason.message)}</li>`;
 }
@@ -391,7 +457,7 @@ async function refreshView({ build = true } = {}) {
 function showBuildError(error) {
   state.build = null;
   $("core").innerHTML = `<p class="muted">${escapeHtml(error.message)}. Try another champion.</p>`;
-  ["boots", "final", "situational", "runes", "spells"].forEach((id) => ($(id).innerHTML = ""));
+  ["boots", "final", "situational", "runes", "spells", "coreChoices", "runeChoices", "serverBoots", "serverSpells"].forEach((id) => ($(id).innerHTML = ""));
   $("buildState").textContent = "";
   $("resetBuild").classList.add("hidden");
 }
@@ -479,6 +545,7 @@ async function tailor() {
 async function showMeta() {
   const m = await api("/api/meta");
   $("patch").textContent = m.patch ? `Patch ${m.patch}` : "";
+  state.serverBracket = (m.server && m.server.bracket) || "Diamond+";
   const fetched = m.fetched ? `Data fetched ${m.fetched.slice(0, 10)}` : "No data yet";
   const busy = m.update.state === "checking" || m.update.state === "updating";
   $("dataLine").textContent = m.update.message || fetched;
@@ -627,6 +694,9 @@ async function init() {
   $("runes").addEventListener("click", openRune);
   $("runes").addEventListener("keydown", (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), openRune(e)));
   $("resetBuild").addEventListener("click", resetBuild);
+  const onChoice = (e) => { const c = e.target.closest(".choice"); if (c) applyServerChoice(c.dataset.kind, c.dataset.key); };
+  $("coreChoices").addEventListener("click", onChoice);
+  $("runeChoices").addEventListener("click", onChoice);
   $("sheetBody").addEventListener("click", (e) => { const p = e.target.closest(".pick"); if (p && !p.disabled) applyPick(p.dataset.name); });
   $("sheetSearch").addEventListener("input", renderPicker);
   $("sheetReset").addEventListener("click", () => {

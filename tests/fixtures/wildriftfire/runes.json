@@ -362,5 +362,19 @@
   "tree": "Domination",
   "tier": "D",
   "icon": "/icons/wrf/runes/relentless-hunter.png"
+ },
+ "Eyeball Collection": {
+  "name": "Eyeball Collection",
+  "kind": "minor",
+  "tree": "Domination",
+  "tier": null,
+  "icon": "/icons/wrf/runes/eyeball-collection.png"
+ },
+ "Hexflash": {
+  "name": "Hexflash",
+  "kind": "minor",
+  "tree": "Sorcery",
+  "tier": null,
+  "icon": "/icons/wrf/runes/hexflash.png"
  }
 }

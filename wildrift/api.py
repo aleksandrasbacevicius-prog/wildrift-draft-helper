@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, StringConstraints
@@ -22,6 +23,10 @@ from wildrift.security import ai_usage, identify, require_access, write_rate_lim
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 CHECK_EVERY_SECONDS = 24 * 60 * 60
+# Wait a while after starting before the first check, so waking up stays fast. That first check only
+# refreshes for a new patch: the image already has recent data, and on a free host a full download
+# right after every wake-up would slow the app down and be lost again when it sleeps.
+STARTUP_CHECK_DELAY_SECONDS = 5 * 60
 MAX_BODY_BYTES = 16 * 1024
 REFRESH_COOLDOWN_SECONDS = 15 * 60
 protected = [Depends(write_rate_limit)]  # valid token (or this computer) + per-user rate limit
@@ -31,13 +36,13 @@ update_status = {"state": "idle", "message": ""}
 _update_lock = threading.Lock()
 
 
-def check_for_update(force: bool = False) -> None:
+def check_for_update(force: bool = False, check_age: bool = True) -> None:
     """Refresh data from WildRiftFire if the patch changed (or data is old). Runs in a thread."""
     if not _update_lock.acquire(blocking=False):
         return  # already running
     try:
         update_status.update(state="checking", message="Checking for a new patch")
-        stale, reason = wildriftfire.needs_refresh()
+        stale, reason = wildriftfire.needs_refresh(check_age=check_age)
         if force or stale:
             update_status.update(state="updating", message=f"Updating: {reason}")
             wildriftfire.refresh(log=lambda m: update_status.update(message=m))
@@ -52,9 +57,11 @@ def check_for_update(force: bool = False) -> None:
 
 
 def _daily_checks() -> None:
+    time.sleep(STARTUP_CHECK_DELAY_SECONDS)
+    check_for_update(check_age=False)
     while True:
-        check_for_update()
         time.sleep(CHECK_EVERY_SECONDS)
+        check_for_update()
 
 
 @asynccontextmanager
@@ -65,6 +72,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Wild Rift Draft Helper", version="0.3.0", lifespan=lifespan)
+app.add_middleware(GZipMiddleware, minimum_size=1024)  # the item list alone is ~100 KB uncompressed
 
 # Content Security Policy: only this site's own scripts, styles and images.
 SECURITY_HEADERS = {
@@ -105,6 +113,30 @@ def _with_item_icons(build: dict) -> dict:
         ],
         "runes": [{"name": r, "icon": data.rune_icon(r)} for r in build["runes"]],
         "spells": [{"name": s, "icon": data.spell_icon(s)} for s in build["spells"]],
+        "server": _with_server_icons(build.get("server") or {}),
+    }
+
+
+def _with_server_icons(server: dict) -> dict:
+    """The server build options with an icon for every item, rune and spell."""
+    if not server:
+        return {}
+
+    def item(name):
+        return {"name": name, "icon": data.item_icon(name)}
+
+    return {
+        **server,
+        "cores": [{**c, "items": [item(i) for i in c["items"]]} for c in server.get("cores", [])],
+        "boots": [{**b, "item": item(b["item"])} for b in server.get("boots", []) if b.get("item")],
+        "rune_pages": [
+            {**p, "runes": [{"name": r, "icon": data.rune_icon(r)} for r in p["runes"]]}
+            for p in server.get("rune_pages", [])
+        ],
+        "spells": [
+            {**s, "spells": [{"name": x, "icon": data.spell_icon(x)} for x in s["spells"]]}
+            for s in server.get("spells", [])
+        ],
     }
 
 
@@ -190,6 +222,17 @@ def list_runes() -> list[dict]:
 class Preferences(BaseModel):
     core: list[Name] = Field(min_length=1, max_length=6)
     runes: list[Name] = Field(min_length=1, max_length=8)
+
+
+@app.get("/api/common-opponents")
+def common_opponents(position: Position = None) -> list[dict]:
+    """Who you're most likely to face in a lane this patch (highest Diamond+ pick rate first)."""
+    if not position:
+        raise HTTPException(status_code=422, detail="position is required")
+    try:
+        return data.common_opponents(position)
+    except data.NoDataError:
+        _no_data()
 
 
 @app.get("/api/counters/{champion}")

@@ -2899,5 +2899,10 @@
    "gold": null,
    "tip": "This item combines a large Health and Mana pool with Ability Haste, significantly improving the durability of champions who frequently use Mana. Maximum Mana also increases Health, while part of the Mana spent is refunded. Impairing an enemy champion’s movement grants a shield that scales with maximum Mana and becomes stronger when fighting multiple nearby enemies."
   }
+ },
+ "Lord Dominik's Regards": {
+  "name": "Lord Dominik's Regards",
+  "categories": [],
+  "icon": "/icons/wrf/items/lord-dominiks-regards.png"
  }
 }

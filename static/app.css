@@ -190,3 +190,18 @@ img { -webkit-touch-callout: none; }
 .strip-source { font-size: .68rem; color: var(--muted); margin: -2px 0 6px; }
 .agree-mark { font-size: .6rem; font-weight: 700; color: var(--t-b); }
 .verdict-line.even { background: color-mix(in srgb, var(--t-a) 18%, transparent); color: var(--t-a); }
+
+/* Server build options (most popular / alternatives) */
+.choices { margin: 4px 0 12px; }
+.choice-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+.choice {
+  flex: none; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 6px 10px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--text); font-size: .74rem; cursor: pointer;
+}
+.choice strong { font-size: .78rem; }
+.choice span { color: var(--muted); font-size: .68rem; }
+.choice.active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.choices-note { font-size: .66rem; color: var(--muted); margin-top: 4px; }
+.server-note { font-size: .74rem; margin-top: 4px; }
+.lane-stats { font-size: .82rem; margin: 2px 0 10px; }
+.lane-stats > div + div { margin-top: 2px; }

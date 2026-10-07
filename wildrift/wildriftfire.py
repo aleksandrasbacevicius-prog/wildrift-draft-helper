@@ -25,7 +25,15 @@ SITE = "https://www.wildriftfire.com"
 HEADERS = {"User-Agent": "wildrift-draft-helper (personal, non-commercial)"}
 REQUEST_DELAY = 1.0  # seconds between page requests
 # Scraped pages can point anywhere, so only these hosts are ever contacted.
-ALLOWED_HOSTS = {"www.wildriftfire.com", "wildriftfire.com", "www.mobafire.com", "mobafire.com", "wr-meta.com"}
+ALLOWED_HOSTS = {
+    "www.wildriftfire.com",
+    "wildriftfire.com",
+    "www.mobafire.com",
+    "mobafire.com",
+    "wr-meta.com",
+    "www.riftpatchnotes.com",
+    "riftpatchnotes.com",
+}
 # Item stats and descriptions come from WR-META's public item list (its robots.txt allows /items/).
 ITEM_DETAILS_URL = "https://wr-meta.com/items/"
 # WR-META champion pages add a second, independent counter list per lane (only the free "Extreme" band).
@@ -330,6 +338,73 @@ def add_wrmeta_counters(champions: dict, log=print) -> None:
     log(f"Counters combined from WildRiftFire and WR-META ({fetched} WR-META pages)")
 
 
+def add_server_data(champions: dict, items: dict, runes: dict, meta: dict, log=print) -> None:
+    """Attach RiftPatchNotes' Diamond+ CN server stats: lane win/pick/ban rates and, per champion and lane,
+    the most popular item cores, boots, rune pages and spells with their rates. Optional: failures are logged."""
+    from wildrift import riftpatchnotes as rpn
+
+    try:
+        lane_stats, stats_updated = rpn.parse_lane_stats(get(f"{rpn.SITE}/winrates"))
+        time.sleep(REQUEST_DELAY)
+        sitemap = get(f"{rpn.SITE}/sitemap-wr-entities.xml")
+    except Exception as e:
+        log(f"Server stats unavailable ({e})")
+        return
+    slugs = {name_key(s): s for s in re.findall(r"riftpatchnotes\.com/champion/([a-z0-9-]+)", sitemap)}
+    stats_by_key = {name_key(s): v for s, v in lane_stats.items()}
+    builds_updated = set()
+    for i, (name, champ) in enumerate(champions.items(), 1):
+        key = name_key(name)
+        server = {"stats": stats_by_key.get(key, {}), "builds": {}}
+        if key in slugs:
+            time.sleep(REQUEST_DELAY)
+            try:
+                server["builds"] = rpn.parse_champion_builds(get(rpn.champion_url(slugs[key])))
+            except Exception as e:
+                log(f"  {name}: server builds failed ({e})")
+        champ["server"] = server
+        builds_updated |= {b["updated"] for b in server["builds"].values() if b.get("updated")}
+        if i % 20 == 0:
+            log(f"  server builds {i}/{len(champions)}")
+
+    # Server builds can name items or runes the other sources don't list: add them, with icons.
+    for champ in champions.values():
+        for build in champ["server"]["builds"].values():
+            for name in [n for c in build["cores"] for n in c["items"]] + [
+                b["item"] for b in build["boots"] if b["item"]
+            ]:
+                if name not in items:
+                    items[name] = {"name": name, "categories": [], "icon": f"/icons/wrf/items/{slug(name)}.png"}
+                    try:
+                        _download_icon(f"{rpn.SITE}/items/{slug(name)}.png", ICON_DIR / "items" / f"{slug(name)}.png")
+                    except Exception:
+                        items[name]["icon"] = None
+            for page in build["rune_pages"]:
+                for pos, name in enumerate(page["runes"]):
+                    if name not in runes:
+                        tree = "Keystone" if pos == 0 else (page["primary"] if pos < 4 else page["secondary"]) or ""
+                        runes[name] = {
+                            "name": name,
+                            "kind": "keystone" if pos == 0 else "minor",
+                            "tree": tree,
+                            "tier": None,
+                            "icon": f"/icons/wrf/runes/{slug(name)}.png",
+                        }
+                        try:
+                            _download_icon(
+                                f"{rpn.SITE}/runes/{slug(name)}.png", ICON_DIR / "runes" / f"{slug(name)}.png"
+                            )
+                        except Exception as e:
+                            log(f"  icon for rune {name} failed ({e})")
+    meta["server"] = {
+        "source": rpn.SITE,
+        "bracket": rpn.BRACKET,
+        "stats_updated": stats_updated,
+        "builds_updated": max(builds_updated) if builds_updated else None,
+    }
+    log(f"Server stats ({rpn.BRACKET}) for {sum(1 for c in champions.values() if c['server']['builds'])} champions")
+
+
 def add_item_details(items: dict, log=print) -> None:
     """Attach WR-META's stats and descriptions to our items, matched by name. Optional: failures are logged."""
     try:
@@ -391,8 +466,8 @@ def load_meta() -> dict:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
 
 
-def needs_refresh() -> tuple[bool, str]:
-    """One request: compare the live patch with the stored one, and check data age."""
+def needs_refresh(check_age: bool = True) -> tuple[bool, str]:
+    """One request: compare the live patch with the stored one, and (optionally) check data age."""
     meta = load_meta()
     if not meta:
         return True, "no data yet"
@@ -400,7 +475,7 @@ def needs_refresh() -> tuple[bool, str]:
     if live_patch and live_patch != meta.get("patch"):
         return True, f"new patch {live_patch} (have {meta.get('patch')})"
     age = (date.today() - date.fromisoformat(meta["fetched"][:10])).days
-    if age >= MAX_AGE_DAYS:
+    if check_age and age >= MAX_AGE_DAYS:
         return True, f"data is {age} days old"
     return False, f"up to date (patch {meta.get('patch')}, fetched {meta['fetched'][:10]})"
 
@@ -483,6 +558,7 @@ def refresh(log=print) -> dict:
     meta = {"patch": patch, "fetched": datetime.now().isoformat(timespec="seconds"), "source": SITE}
     add_item_details(items, log)
     add_wrmeta_counters(champions, log)
+    add_server_data(champions, items, runes, meta, log)
     unplaced = sorted(
         n for n, c in champions.items() for pos in (c.get("builds") or {}) if pos not in LANE_IMAGES.values()
     )

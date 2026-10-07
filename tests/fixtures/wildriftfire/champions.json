@@ -397,7 +397,225 @@
     }
    ]
   },
-  "icon": "/icons/wrf/champions/darius.png"
+  "icon": "/icons/wrf/champions/darius.png",
+  "server": {
+   "stats": {
+    "baron": {
+     "win": 48.71,
+     "pick": 15.46,
+     "ban": 12.78,
+     "win_trend": -1,
+     "pick_trend": 0
+    },
+    "jungle": {
+     "win": 50.18,
+     "pick": 5.71,
+     "ban": 12.78,
+     "win_trend": -7,
+     "pick_trend": 1
+    }
+   },
+   "builds": {
+    "baron": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 53.71,
+       "pick": 18.34,
+       "items": [
+        "Stridebreaker",
+        "Sterak's Gage",
+        "Amaranth's Twinguard"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 52.57,
+       "pick": 6.77,
+       "items": [
+        "Stridebreaker",
+        "Experimental Hexplate",
+        "Sterak's Gage"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 51.48,
+       "pick": 2.99,
+       "items": [
+        "Trinity Force",
+        "Sundered Sky",
+        "Amaranth's Twinguard"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 48.75,
+       "pick": 84.05,
+       "item": "Plated Steelcaps"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 49.61,
+       "pick": 14.29,
+       "item": "Mercury's Treads"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 50.0,
+       "pick": 19.08,
+       "runes": [
+        "Conqueror",
+        "Unshakeable",
+        "Second Wind",
+        "Perseverance",
+        "Nimbus Cloak"
+       ],
+       "primary": "Resolve",
+       "secondary": "Sorcery"
+      },
+      {
+       "label": "Alternative page",
+       "win": 48.25,
+       "pick": 18.67,
+       "runes": [
+        "Conqueror",
+        "Triumph",
+        "Last Stand",
+        "Legend: Alacrity",
+        "Nimbus Cloak"
+       ],
+       "primary": "Precision",
+       "secondary": "Sorcery"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 48.67,
+       "pick": 83.7,
+       "spells": [
+        "Ghost",
+        "Flash"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 48.1,
+       "pick": 12.8,
+       "spells": [
+        "Flash",
+        "Ignite"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    },
+    "jungle": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 53.55,
+       "pick": 8.8,
+       "items": [
+        "Trinity Force",
+        "The Collector",
+        "Galeforce"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 54.03,
+       "pick": 5.43,
+       "items": [
+        "Trinity Force",
+        "Sterak's Gage",
+        "Death's Dance"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 53.61,
+       "pick": 5.12,
+       "items": [
+        "Trinity Force",
+        "Galeforce",
+        "The Collector"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 48.57,
+       "pick": 78.01,
+       "item": "Plated Steelcaps"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 46.74,
+       "pick": 11.19,
+       "item": "Mercury's Treads"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 51.83,
+       "pick": 12.77,
+       "runes": [
+        "Phase Rush",
+        "Triumph",
+        "Last Stand",
+        "Legend: Alacrity",
+        "Overgrowth"
+       ],
+       "primary": "Precision",
+       "secondary": "Resolve"
+      },
+      {
+       "label": "Alternative page",
+       "win": 49.6,
+       "pick": 8.62,
+       "runes": [
+        "Phase Rush",
+        "Hexflash",
+        "Celerity",
+        "Nimbus Cloak",
+        "Relentless Hunter"
+       ],
+       "primary": "Sorcery",
+       "secondary": "Domination"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 51.1,
+       "pick": 74.74,
+       "spells": [
+        "Flash",
+        "Smite"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 48.78,
+       "pick": 25.16,
+       "spells": [
+        "Ghost",
+        "Smite"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    }
+   }
+  }
  },
  "Garen": {
   "name": "Garen",
@@ -631,7 +849,119 @@
     }
    ]
   },
-  "icon": "/icons/wrf/champions/garen.png"
+  "icon": "/icons/wrf/champions/garen.png",
+  "server": {
+   "stats": {
+    "baron": {
+     "win": 49.11,
+     "pick": 12.45,
+     "ban": 2.67,
+     "win_trend": 2,
+     "pick_trend": 0
+    }
+   },
+   "builds": {
+    "baron": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 52.06,
+       "pick": 5.72,
+       "items": [
+        "Black Cleaver",
+        "Goredrinker",
+        "Thornmail"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 55.36,
+       "pick": 5.28,
+       "items": [
+        "Black Cleaver",
+        "Dead Man's Plate",
+        "Spear of Shojin"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 52.25,
+       "pick": 4.47,
+       "items": [
+        "Heartsteel",
+        "Sunfire Aegis",
+        "Thornmail"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 51.61,
+       "pick": 85.17,
+       "item": "Plated Steelcaps"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 52.97,
+       "pick": 11.94,
+       "item": "Mercury's Treads"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 49.85,
+       "pick": 15.59,
+       "runes": [
+        "Grasp of the Undying",
+        "Unshakeable",
+        "Second Wind",
+        "Overgrowth",
+        "Nimbus Cloak"
+       ],
+       "primary": "Resolve",
+       "secondary": "Sorcery"
+      },
+      {
+       "label": "Alternative page",
+       "win": 51.84,
+       "pick": 14.18,
+       "runes": [
+        "Grasp of the Undying",
+        "Unshakeable",
+        "Second Wind",
+        "Perseverance",
+        "Nimbus Cloak"
+       ],
+       "primary": "Resolve",
+       "secondary": "Sorcery"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 49.58,
+       "pick": 79.22,
+       "spells": [
+        "Flash",
+        "Ignite"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 47.12,
+       "pick": 13.98,
+       "spells": [
+        "Flash",
+        "Teleport"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    }
+   }
+  }
  },
  "Mordekaiser": {
   "name": "Mordekaiser",
@@ -879,7 +1209,119 @@
     }
    ]
   },
-  "icon": "/icons/wrf/champions/mordekaiser.png"
+  "icon": "/icons/wrf/champions/mordekaiser.png",
+  "server": {
+   "stats": {
+    "baron": {
+     "win": 51.07,
+     "pick": 10.54,
+     "ban": 28.52,
+     "win_trend": -1,
+     "pick_trend": 0
+    }
+   },
+   "builds": {
+    "baron": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 54.38,
+       "pick": 9.04,
+       "items": [
+        "Riftmaker",
+        "Dusk and Dawn",
+        "Void Staff"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 53.32,
+       "pick": 4.99,
+       "items": [
+        "Liandry's Torment",
+        "Riftmaker",
+        "Hextech Rocketbelt"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 55.13,
+       "pick": 4.53,
+       "items": [
+        "Riftmaker",
+        "Zeke's Convergence",
+        "Cryptbloom"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 49.37,
+       "pick": 88.07,
+       "item": "Plated Steelcaps"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 51.85,
+       "pick": 10.95,
+       "item": "Mercury's Treads"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 51.5,
+       "pick": 20.33,
+       "runes": [
+        "Conqueror",
+        "Demolish",
+        "Second Wind",
+        "Overgrowth",
+        "Transcendence"
+       ],
+       "primary": "Resolve",
+       "secondary": "Sorcery"
+      },
+      {
+       "label": "Alternative page",
+       "win": 50.88,
+       "pick": 15.19,
+       "runes": [
+        "Conqueror",
+        "Unshakeable",
+        "Second Wind",
+        "Perseverance",
+        "Last Stand"
+       ],
+       "primary": "Resolve",
+       "secondary": "Precision"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 51.59,
+       "pick": 79.66,
+       "spells": [
+        "Flash",
+        "Ignite"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 49.64,
+       "pick": 13.28,
+       "spells": [
+        "Flash",
+        "Teleport"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    }
+   }
+  }
  },
  "Aatrox": {
   "name": "Aatrox",
@@ -1246,7 +1688,225 @@
     }
    ]
   },
-  "icon": "/icons/wrf/champions/aatrox.png"
+  "icon": "/icons/wrf/champions/aatrox.png",
+  "server": {
+   "stats": {
+    "baron": {
+     "win": 49.53,
+     "pick": 6.36,
+     "ban": 6.95,
+     "win_trend": 1,
+     "pick_trend": 2
+    },
+    "jungle": {
+     "win": 45.16,
+     "pick": 1.07,
+     "ban": 6.95,
+     "win_trend": -1,
+     "pick_trend": 0
+    }
+   },
+   "builds": {
+    "baron": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 53.27,
+       "pick": 11.28,
+       "items": [
+        "Eclipse",
+        "Death's Dance",
+        "Serylda's Grudge"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 54.39,
+       "pick": 8.93,
+       "items": [
+        "Eclipse",
+        "Sundered Sky",
+        "Serylda's Grudge"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 54.14,
+       "pick": 8.41,
+       "items": [
+        "Eclipse",
+        "Serylda's Grudge",
+        "Death's Dance"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 48.96,
+       "pick": 77.46,
+       "item": "Plated Steelcaps"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 51.3,
+       "pick": 10.87,
+       "item": "Mercury's Treads"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 49.5,
+       "pick": 24.53,
+       "runes": [
+        "Conqueror",
+        "Courage of the Colossus",
+        "Second Wind",
+        "Perseverance",
+        "Sudden Impact"
+       ],
+       "primary": "Resolve",
+       "secondary": "Domination"
+      },
+      {
+       "label": "Alternative page",
+       "win": 47.89,
+       "pick": 10.74,
+       "runes": [
+        "Conqueror",
+        "Demolish",
+        "Second Wind",
+        "Perseverance",
+        "Sudden Impact"
+       ],
+       "primary": "Resolve",
+       "secondary": "Domination"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 49.58,
+       "pick": 89.5,
+       "spells": [
+        "Flash",
+        "Ignite"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 47.84,
+       "pick": 8.62,
+       "spells": [
+        "Flash",
+        "Teleport"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    },
+    "jungle": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 51.71,
+       "pick": 8.34,
+       "items": [
+        "Youmuu's Ghostblade",
+        "Sundered Sky",
+        "Lord Dominik's Regards"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 46.94,
+       "pick": 8.32,
+       "items": [
+        "Youmuu's Ghostblade",
+        "Trinity Force",
+        "Sundered Sky"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 45.26,
+       "pick": 7.59,
+       "items": [
+        "Trinity Force",
+        "Eclipse",
+        "Serylda's Grudge"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 48.3,
+       "pick": 60.02,
+       "item": "Gluttonous Greaves"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 51.09,
+       "pick": 17.99,
+       "item": "Plated Steelcaps"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 43.43,
+       "pick": 23.67,
+       "runes": [
+        "Conqueror",
+        "Battle Zeal",
+        "Cut Down",
+        "Legend: Alacrity",
+        "Absolute Focus"
+       ],
+       "primary": "Precision",
+       "secondary": "Sorcery"
+      },
+      {
+       "label": "Alternative page",
+       "win": 47.41,
+       "pick": 13.51,
+       "runes": [
+        "Fleet Footwork",
+        "Sudden Impact",
+        "Hubris",
+        "Eyeball Collection",
+        "Absolute Focus"
+       ],
+       "primary": "Domination",
+       "secondary": "Sorcery"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 45.98,
+       "pick": 98.66,
+       "spells": [
+        "Flash",
+        "Smite"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 47.22,
+       "pick": 1.07,
+       "spells": [
+        "Ghost",
+        "Smite"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    }
+   }
+  }
  },
  "Ahri": {
   "name": "Ahri",
@@ -1498,7 +2158,119 @@
     }
    ]
   },
-  "icon": "/icons/wrf/champions/ahri.png"
+  "icon": "/icons/wrf/champions/ahri.png",
+  "server": {
+   "stats": {
+    "mid": {
+     "win": 50.66,
+     "pick": 4.27,
+     "ban": 0.13,
+     "win_trend": 0,
+     "pick_trend": -1
+    }
+   },
+   "builds": {
+    "mid": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 53.0,
+       "pick": 31.38,
+       "items": [
+        "Luden's Echo",
+        "Lich Bane",
+        "Rabadon's Deathcap"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 52.92,
+       "pick": 9.94,
+       "items": [
+        "Malignance",
+        "Infinity Orb",
+        "Rabadon's Deathcap"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 51.78,
+       "pick": 6.49,
+       "items": [
+        "Luden's Echo",
+        "Rabadon's Deathcap",
+        "Infinity Orb"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 43.48,
+       "pick": 43.4,
+       "item": "Mercury's Treads"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 52.94,
+       "pick": 32.08,
+       "item": "Ionian Boots of Lucidity"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 50.83,
+       "pick": 41.86,
+       "runes": [
+        "Electrocute",
+        "Empowered Attack",
+        "Chain Assault",
+        "Eyeball Collection",
+        "Bone Plating"
+       ],
+       "primary": "Domination",
+       "secondary": "Resolve"
+      },
+      {
+       "label": "Alternative page",
+       "win": 49.98,
+       "pick": 15.16,
+       "runes": [
+        "Electrocute",
+        "Sudden Impact",
+        "Tyrant",
+        "Eyeball Collection",
+        "Coup de Grace"
+       ],
+       "primary": "Domination",
+       "secondary": "Precision"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 50.85,
+       "pick": 94.98,
+       "spells": [
+        "Flash",
+        "Ignite"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 50.73,
+       "pick": 1.18,
+       "spells": [
+        "Flash",
+        "Teleport"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    }
+   }
+  }
  },
  "Syndra": {
   "name": "Syndra",
@@ -1778,7 +2550,119 @@
     }
    ]
   },
-  "icon": "/icons/wrf/champions/syndra.png"
+  "icon": "/icons/wrf/champions/syndra.png",
+  "server": {
+   "stats": {
+    "mid": {
+     "win": 51.33,
+     "pick": 6.7,
+     "ban": 23.82,
+     "win_trend": 1,
+     "pick_trend": 0
+    }
+   },
+   "builds": {
+    "mid": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 53.93,
+       "pick": 29.2,
+       "items": [
+        "Stormsurge",
+        "Infinity Orb",
+        "Cryptbloom"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 55.18,
+       "pick": 11.1,
+       "items": [
+        "Stormsurge",
+        "Infinity Orb",
+        "Rabadon's Deathcap"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 54.89,
+       "pick": 7.7,
+       "items": [
+        "Stormsurge",
+        "Rabadon's Deathcap",
+        "Void Staff"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 58.33,
+       "pick": 48.0,
+       "item": "Ionian Boots of Lucidity"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 44.44,
+       "pick": 36.0,
+       "item": "Mercury's Treads"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 50.06,
+       "pick": 35.5,
+       "runes": [
+        "Electrocute",
+        "Hexflash",
+        "Absolute Focus",
+        "Scorch",
+        "Cut Down"
+       ],
+       "primary": "Sorcery",
+       "secondary": "Precision"
+      },
+      {
+       "label": "Alternative page",
+       "win": 50.67,
+       "pick": 7.5,
+       "runes": [
+        "First Strike",
+        "Hexflash",
+        "Transcendence",
+        "Nimbus Cloak",
+        "Cut Down"
+       ],
+       "primary": "Sorcery",
+       "secondary": "Precision"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 50.95,
+       "pick": 82.56,
+       "spells": [
+        "Flash",
+        "Ignite"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 51.53,
+       "pick": 6.76,
+       "spells": [
+        "Ghost",
+        "Flash"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    }
+   }
+  }
  },
  "Lee Sin": {
   "name": "Lee Sin",
@@ -2026,7 +2910,110 @@
     }
    ]
   },
-  "icon": "/icons/wrf/champions/lee-sin.png"
+  "icon": "/icons/wrf/champions/lee-sin.png",
+  "server": {
+   "stats": {
+    "jungle": {
+     "win": 46.06,
+     "pick": 12.61,
+     "ban": 7.27,
+     "win_trend": -2,
+     "pick_trend": 0
+    }
+   },
+   "builds": {
+    "jungle": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 48.91,
+       "pick": 18.28,
+       "items": [
+        "Youmuu's Ghostblade",
+        "Trinity Force",
+        "Serylda's Grudge"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 48.33,
+       "pick": 13.97,
+       "items": [
+        "Youmuu's Ghostblade",
+        "Serpent's Fang",
+        "Serylda's Grudge"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 49.04,
+       "pick": 12.81,
+       "items": [
+        "Eclipse",
+        "Sundered Sky",
+        "Mortal Reminder"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 50.92,
+       "pick": 83.55,
+       "item": "Gluttonous Greaves"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 49.49,
+       "pick": 6.51,
+       "item": "Plated Steelcaps"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 45.99,
+       "pick": 33.41,
+       "runes": [
+        "Conqueror",
+        "Battle Zeal",
+        "Cut Down",
+        "Legend: Alacrity",
+        "Sudden Impact"
+       ],
+       "primary": "Precision",
+       "secondary": "Domination"
+      },
+      {
+       "label": "Alternative page",
+       "win": 46.69,
+       "pick": 15.97,
+       "runes": [
+        "Conqueror",
+        "Battle Zeal",
+        "Cut Down",
+        "Legend: Alacrity",
+        "Perseverance"
+       ],
+       "primary": "Precision",
+       "secondary": "Resolve"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 46.35,
+       "pick": 99.84,
+       "spells": [
+        "Flash",
+        "Smite"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    }
+   }
+  }
  },
  "Jinx": {
   "name": "Jinx",
@@ -2304,7 +3291,119 @@
     }
    ]
   },
-  "icon": "/icons/wrf/champions/jinx.png"
+  "icon": "/icons/wrf/champions/jinx.png",
+  "server": {
+   "stats": {
+    "dragon": {
+     "win": 50.54,
+     "pick": 12.09,
+     "ban": 0.44,
+     "win_trend": 0,
+     "pick_trend": 0
+    }
+   },
+   "builds": {
+    "dragon": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 53.57,
+       "pick": 25.65,
+       "items": [
+        "The Collector",
+        "Stormrazor",
+        "Runaan's Hurricane"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 53.05,
+       "pick": 5.85,
+       "items": [
+        "The Collector",
+        "Stormrazor",
+        "Mortal Reminder"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 54.33,
+       "pick": 5.75,
+       "items": [
+        "Yun Tal Wildarrows",
+        "Infinity Edge",
+        "Runaan's Hurricane"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 52.12,
+       "pick": 77.7,
+       "item": "Berserker's Greaves"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 47.22,
+       "pick": 18.34,
+       "item": "Gluttonous Greaves"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 50.04,
+       "pick": 30.22,
+       "runes": [
+        "Lethal Tempo",
+        "Brutal",
+        "Cut Down",
+        "Legend: Bloodline",
+        "Bone Plating"
+       ],
+       "primary": "Precision",
+       "secondary": "Resolve"
+      },
+      {
+       "label": "Alternative page",
+       "win": 50.73,
+       "pick": 25.03,
+       "runes": [
+        "Lethal Tempo",
+        "Brutal",
+        "Coup de Grace",
+        "Legend: Alacrity",
+        "Nimbus Cloak"
+       ],
+       "primary": "Precision",
+       "secondary": "Sorcery"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 50.4,
+       "pick": 72.06,
+       "spells": [
+        "Ghost",
+        "Flash"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 50.72,
+       "pick": 10.82,
+       "spells": [
+        "Heal",
+        "Flash"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    }
+   }
+  }
  },
  "Thresh": {
   "name": "Thresh",
@@ -2614,7 +3713,119 @@
     }
    ]
   },
-  "icon": "/icons/wrf/champions/thresh.png"
+  "icon": "/icons/wrf/champions/thresh.png",
+  "server": {
+   "stats": {
+    "support": {
+     "win": 50.96,
+     "pick": 14.27,
+     "ban": 9.89,
+     "win_trend": 0,
+     "pick_trend": 0
+    }
+   },
+   "builds": {
+    "support": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 52.0,
+       "pick": 15.68,
+       "items": [
+        "Bulwark of the Mountain",
+        "Warmog's Armor",
+        "Force of Nature"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 51.64,
+       "pick": 12.86,
+       "items": [
+        "Bulwark of the Mountain",
+        "Warmog's Armor",
+        "Thornmail"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 52.89,
+       "pick": 9.33,
+       "items": [
+        "Bulwark of the Mountain",
+        "Warmog's Armor",
+        "Frozen Heart"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 52.29,
+       "pick": 65.41,
+       "item": "Ionian Boots of Lucidity"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 52.4,
+       "pick": 28.3,
+       "item": "Plated Steelcaps"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 50.4,
+       "pick": 36.52,
+       "runes": [
+        "Ice Overlord",
+        "Unshakeable",
+        "Bone Plating",
+        "Perseverance",
+        "Transcendence"
+       ],
+       "primary": "Resolve",
+       "secondary": "Sorcery"
+      },
+      {
+       "label": "Alternative page",
+       "win": 51.28,
+       "pick": 11.05,
+       "runes": [
+        "Ice Overlord",
+        "Courage of the Colossus",
+        "Bone Plating",
+        "Perseverance",
+        "Hexflash"
+       ],
+       "primary": "Resolve",
+       "secondary": "Sorcery"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 51.07,
+       "pick": 89.94,
+       "spells": [
+        "Flash",
+        "Ignite"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 49.39,
+       "pick": 5.24,
+       "spells": [
+        "Exhaust",
+        "Flash"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    }
+   }
+  }
  },
  "Swain": {
   "name": "Swain",
@@ -3040,7 +4251,225 @@
     }
    ]
   },
-  "icon": "/icons/wrf/champions/swain.png"
+  "icon": "/icons/wrf/champions/swain.png",
+  "server": {
+   "stats": {
+    "mid": {
+     "win": 48.6,
+     "pick": 3.01,
+     "ban": 3.13,
+     "win_trend": -7,
+     "pick_trend": -1
+    },
+    "support": {
+     "win": 45.69,
+     "pick": 3.01,
+     "ban": 3.13,
+     "win_trend": 0,
+     "pick_trend": 0
+    }
+   },
+   "builds": {
+    "mid": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 51.07,
+       "pick": 20.87,
+       "items": [
+        "Malignance",
+        "Abyssal Mask",
+        "Rylai's Crystal Scepter"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 52.34,
+       "pick": 6.19,
+       "items": [
+        "Malignance",
+        "Frozen Heart",
+        "Force of Nature"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 50.46,
+       "pick": 3.46,
+       "items": [
+        "Malignance",
+        "Infinity Orb",
+        "Rabadon's Deathcap"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 49.09,
+       "pick": 58.99,
+       "item": "Mercury's Treads"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 47.29,
+       "pick": 34.11,
+       "item": "Plated Steelcaps"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 47.29,
+       "pick": 19.61,
+       "runes": [
+        "Conqueror",
+        "Axiom Arcanist",
+        "Absolute Focus",
+        "Nimbus Cloak",
+        "Hubris"
+       ],
+       "primary": "Sorcery",
+       "secondary": "Domination"
+      },
+      {
+       "label": "Alternative page",
+       "win": 51.32,
+       "pick": 15.94,
+       "runes": [
+        "Conqueror",
+        "Axiom Arcanist",
+        "Transcendence",
+        "Nimbus Cloak",
+        "Legend: Haste"
+       ],
+       "primary": "Sorcery",
+       "secondary": "Precision"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 49.38,
+       "pick": 89.95,
+       "spells": [
+        "Ghost",
+        "Flash"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 45.88,
+       "pick": 6.96,
+       "spells": [
+        "Flash",
+        "Ignite"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    },
+    "support": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 47.97,
+       "pick": 41.86,
+       "items": [
+        "Bulwark of the Mountain",
+        "Heartsteel",
+        "Thornmail"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 45.32,
+       "pick": 4.96,
+       "items": [
+        "Bulwark of the Mountain",
+        "Heartsteel",
+        "Amaranth's Twinguard"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 47.36,
+       "pick": 2.14,
+       "items": [
+        "Bulwark of the Mountain",
+        "Heartsteel",
+        "Rylai's Crystal Scepter"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 48.69,
+       "pick": 90.73,
+       "item": "Plated Steelcaps"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 51.23,
+       "pick": 7.73,
+       "item": "Mercury's Treads"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 45.72,
+       "pick": 57.53,
+       "runes": [
+        "Ice Overlord",
+        "Courage of the Colossus",
+        "Second Wind",
+        "Perseverance",
+        "Gathering Storm"
+       ],
+       "primary": "Resolve",
+       "secondary": "Sorcery"
+      },
+      {
+       "label": "Alternative page",
+       "win": 43.71,
+       "pick": 3.36,
+       "runes": [
+        "Phase Rush",
+        "Unshakeable",
+        "Bone Plating",
+        "Overgrowth",
+        "Manaflow Band"
+       ],
+       "primary": "Resolve",
+       "secondary": "Sorcery"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 45.55,
+       "pick": 66.03,
+       "spells": [
+        "Flash",
+        "Ignite"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 45.93,
+       "pick": 19.83,
+       "spells": [
+        "Ghost",
+        "Flash"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    }
+   }
+  }
  },
  "Caitlyn": {
   "name": "Caitlyn",
@@ -3304,7 +4733,119 @@
     }
    ]
   },
-  "icon": "/icons/wrf/champions/caitlyn.png"
+  "icon": "/icons/wrf/champions/caitlyn.png",
+  "server": {
+   "stats": {
+    "dragon": {
+     "win": 49.41,
+     "pick": 20.88,
+     "ban": 12.67,
+     "win_trend": -2,
+     "pick_trend": 0
+    }
+   },
+   "builds": {
+    "dragon": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 54.92,
+       "pick": 17.0,
+       "items": [
+        "Stormrazor",
+        "Hexoptics C44",
+        "Infinity Edge"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 53.4,
+       "pick": 14.51,
+       "items": [
+        "The Collector",
+        "Hexoptics C44",
+        "Infinity Edge"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 51.76,
+       "pick": 10.0,
+       "items": [
+        "The Collector",
+        "Stormrazor",
+        "Mortal Reminder"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 51.44,
+       "pick": 78.39,
+       "item": "Berserker's Greaves"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 49.69,
+       "pick": 17.76,
+       "item": "Gluttonous Greaves"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 49.27,
+       "pick": 44.62,
+       "runes": [
+        "Lethal Tempo",
+        "Brutal",
+        "Cut Down",
+        "Legend: Bloodline",
+        "Bone Plating"
+       ],
+       "primary": "Precision",
+       "secondary": "Resolve"
+      },
+      {
+       "label": "Alternative page",
+       "win": 50.55,
+       "pick": 21.46,
+       "runes": [
+        "Lethal Tempo",
+        "Brutal",
+        "Cut Down",
+        "Legend: Bloodline",
+        "Absolute Focus"
+       ],
+       "primary": "Precision",
+       "secondary": "Sorcery"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 49.43,
+       "pick": 58.19,
+       "spells": [
+        "Ghost",
+        "Flash"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 50.56,
+       "pick": 18.56,
+       "spells": [
+        "Barrier",
+        "Flash"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    }
+   }
+  }
  },
  "Ezreal": {
   "name": "Ezreal",
@@ -3562,7 +5103,119 @@
     }
    ]
   },
-  "icon": "/icons/wrf/champions/ezreal.png"
+  "icon": "/icons/wrf/champions/ezreal.png",
+  "server": {
+   "stats": {
+    "dragon": {
+     "win": 50.22,
+     "pick": 7.35,
+     "ban": 0.24,
+     "win_trend": 1,
+     "pick_trend": -1
+    }
+   },
+   "builds": {
+    "dragon": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 52.83,
+       "pick": 33.53,
+       "items": [
+        "Muramana",
+        "Trinity Force",
+        "Serylda's Grudge"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 50.55,
+       "pick": 20.13,
+       "items": [
+        "Muramana",
+        "Trinity Force",
+        "Mortal Reminder"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 51.39,
+       "pick": 12.84,
+       "items": [
+        "Muramana",
+        "Iceborn Gauntlet",
+        "Blade of the Ruined King"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 52.82,
+       "pick": 89.72,
+       "item": "Gluttonous Greaves"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 49.87,
+       "pick": 4.1,
+       "item": "Plated Steelcaps"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 50.67,
+       "pick": 21.78,
+       "runes": [
+        "Conqueror",
+        "Brutal",
+        "Cut Down",
+        "Legend: Bloodline",
+        "Absolute Focus"
+       ],
+       "primary": "Precision",
+       "secondary": "Sorcery"
+      },
+      {
+       "label": "Alternative page",
+       "win": 49.79,
+       "pick": 16.15,
+       "runes": [
+        "Conqueror",
+        "Brutal",
+        "Cut Down",
+        "Legend: Alacrity",
+        "Bone Plating"
+       ],
+       "primary": "Precision",
+       "secondary": "Resolve"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 50.56,
+       "pick": 67.44,
+       "spells": [
+        "Barrier",
+        "Flash"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 50.01,
+       "pick": 10.55,
+       "spells": [
+        "Heal",
+        "Flash"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    }
+   }
+  }
  },
  "Nami": {
   "name": "Nami",
@@ -3798,7 +5451,119 @@
     }
    ]
   },
-  "icon": "/icons/wrf/champions/nami.png"
+  "icon": "/icons/wrf/champions/nami.png",
+  "server": {
+   "stats": {
+    "support": {
+     "win": 50.83,
+     "pick": 4.62,
+     "ban": 0.1,
+     "win_trend": 4,
+     "pick_trend": 0
+    }
+   },
+   "builds": {
+    "support": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 54.63,
+       "pick": 32.8,
+       "items": [
+        "Black Mist Scythe",
+        "Diadem of Songs",
+        "Echoes of Helia"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 50.47,
+       "pick": 6.84,
+       "items": [
+        "Black Mist Scythe",
+        "Ardent Censer",
+        "Harmonic Echo"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 49.43,
+       "pick": 6.16,
+       "items": [
+        "Black Mist Scythe",
+        "Harmonic Echo",
+        "Ardent Censer"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 52.3,
+       "pick": 90.73,
+       "item": "Ionian Boots of Lucidity"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 49.71,
+       "pick": 6.6,
+       "item": "Plated Steelcaps"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 51.31,
+       "pick": 61.7,
+       "runes": [
+        "Aery",
+        "Manaflow Band",
+        "Transcendence",
+        "Scorch",
+        "Bone Plating"
+       ],
+       "primary": "Sorcery",
+       "secondary": "Resolve"
+      },
+      {
+       "label": "Alternative page",
+       "win": 49.23,
+       "pick": 4.69,
+       "runes": [
+        "Aery",
+        "Manaflow Band",
+        "Absolute Focus",
+        "Scorch",
+        "Empowered Attack"
+       ],
+       "primary": "Sorcery",
+       "secondary": "Domination"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 50.89,
+       "pick": 76.3,
+       "spells": [
+        "Heal",
+        "Flash"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 47.62,
+       "pick": 17.21,
+       "spells": [
+        "Flash",
+        "Ignite"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    }
+   }
+  }
  },
  "Yuumi": {
   "name": "Yuumi",
@@ -3808,7 +5573,113 @@
   },
   "builds": {},
   "build": null,
-  "icon": "/icons/wrf/champions/yuumi.png"
+  "icon": "/icons/wrf/champions/yuumi.png",
+  "server": {
+   "stats": {
+    "support": {
+     "win": 48.9,
+     "pick": 9.67,
+     "ban": 34.38,
+     "win_trend": 2,
+     "pick_trend": 0
+    }
+   },
+   "builds": {
+    "support": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 50.52,
+       "pick": 36.25,
+       "items": [
+        "Black Mist Scythe",
+        "Ardent Censer",
+        "Harmonic Echo"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 54.11,
+       "pick": 16.03,
+       "items": [
+        "Black Mist Scythe",
+        "Diadem of Songs",
+        "Ardent Censer"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 49.85,
+       "pick": 10.81,
+       "items": [
+        "Black Mist Scythe",
+        "Ardent Censer",
+        "Mikael's Blessing"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 46.64,
+       "pick": 99.77,
+       "item": "Ionian Boots of Lucidity"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 50.24,
+       "pick": 46.44,
+       "runes": [
+        "Aery",
+        "Manaflow Band",
+        "Transcendence",
+        "Scorch",
+        "Revitalize"
+       ],
+       "primary": "Sorcery",
+       "secondary": "Resolve"
+      },
+      {
+       "label": "Alternative page",
+       "win": 48.2,
+       "pick": 13.59,
+       "runes": [
+        "Aery",
+        "Axiom Arcanist",
+        "Transcendence",
+        "Scorch",
+        "Revitalize"
+       ],
+       "primary": "Sorcery",
+       "secondary": "Resolve"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 49.95,
+       "pick": 61.82,
+       "spells": [
+        "Heal",
+        "Ignite"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 47.54,
+       "pick": 26.01,
+       "spells": [
+        "Heal",
+        "Exhaust"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    }
+   }
+  }
  },
  "Malphite": {
   "name": "Malphite",
@@ -4179,7 +6050,225 @@
     }
    ]
   },
-  "icon": "/icons/wrf/champions/malphite.png"
+  "icon": "/icons/wrf/champions/malphite.png",
+  "server": {
+   "stats": {
+    "baron": {
+     "win": 55.33,
+     "pick": 7.38,
+     "ban": 44.26,
+     "win_trend": 0,
+     "pick_trend": 0
+    },
+    "support": {
+     "win": 51.51,
+     "pick": 7.36,
+     "ban": 44.26,
+     "win_trend": 1,
+     "pick_trend": 0
+    }
+   },
+   "builds": {
+    "baron": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 59.77,
+       "pick": 28.17,
+       "items": [
+        "Thornmail",
+        "Iceborn Gauntlet",
+        "Frozen Heart"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 60.11,
+       "pick": 12.27,
+       "items": [
+        "Iceborn Gauntlet",
+        "Thornmail",
+        "Frozen Heart"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 55.9,
+       "pick": 5.25,
+       "items": [
+        "Thornmail",
+        "Iceborn Gauntlet",
+        "Force of Nature"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 53.75,
+       "pick": 87.32,
+       "item": "Plated Steelcaps"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 51.22,
+       "pick": 11.61,
+       "item": "Mercury's Treads"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 56.49,
+       "pick": 44.85,
+       "runes": [
+        "Grasp of the Undying",
+        "Unshakeable",
+        "Second Wind",
+        "Overgrowth",
+        "Empowered Attack"
+       ],
+       "primary": "Resolve",
+       "secondary": "Domination"
+      },
+      {
+       "label": "Alternative page",
+       "win": 56.15,
+       "pick": 9.52,
+       "runes": [
+        "Grasp of the Undying",
+        "Unshakeable",
+        "Second Wind",
+        "Perseverance",
+        "Transcendence"
+       ],
+       "primary": "Resolve",
+       "secondary": "Sorcery"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 54.96,
+       "pick": 50.28,
+       "spells": [
+        "Flash",
+        "Teleport"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 55.18,
+       "pick": 48.21,
+       "spells": [
+        "Flash",
+        "Ignite"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    },
+    "support": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 52.79,
+       "pick": 30.41,
+       "items": [
+        "Bulwark of the Mountain",
+        "Zeke's Convergence",
+        "Thornmail"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 55.72,
+       "pick": 7.2,
+       "items": [
+        "Bulwark of the Mountain",
+        "Thornmail",
+        "Iceborn Gauntlet"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 47.43,
+       "pick": 6.64,
+       "items": [
+        "Black Mist Scythe",
+        "Luden's Echo",
+        "Malignance"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 52.11,
+       "pick": 93.44,
+       "item": "Plated Steelcaps"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 48.52,
+       "pick": 5.42,
+       "item": "Mercury's Treads"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 52.22,
+       "pick": 53.22,
+       "runes": [
+        "Arcane Comet",
+        "Unshakeable",
+        "Second Wind",
+        "Overgrowth",
+        "Transcendence"
+       ],
+       "primary": "Resolve",
+       "secondary": "Sorcery"
+      },
+      {
+       "label": "Alternative page",
+       "win": 47.07,
+       "pick": 11.43,
+       "runes": [
+        "Arcane Comet",
+        "Cheap Shot",
+        "Tyrant",
+        "Eyeball Collection",
+        "Transcendence"
+       ],
+       "primary": "Domination",
+       "secondary": "Sorcery"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 51.19,
+       "pick": 88.4,
+       "spells": [
+        "Flash",
+        "Ignite"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 53.32,
+       "pick": 6.02,
+       "spells": [
+        "Heal",
+        "Flash"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    }
+   }
+  }
  },
  "Dr. Mundo": {
   "name": "Dr. Mundo",
@@ -4519,7 +6608,225 @@
     }
    ]
   },
-  "icon": "/icons/wrf/champions/dr-mundo.png"
+  "icon": "/icons/wrf/champions/dr-mundo.png",
+  "server": {
+   "stats": {
+    "baron": {
+     "win": 51.11,
+     "pick": 7.76,
+     "ban": 2.52,
+     "win_trend": 0,
+     "pick_trend": 0
+    },
+    "jungle": {
+     "win": 52.84,
+     "pick": 1.99,
+     "ban": 2.52,
+     "win_trend": -4,
+     "pick_trend": 0
+    }
+   },
+   "builds": {
+    "baron": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 54.97,
+       "pick": 27.16,
+       "items": [
+        "Heartsteel",
+        "Sunfire Aegis",
+        "Thornmail"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 54.4,
+       "pick": 6.53,
+       "items": [
+        "Heartsteel",
+        "Thornmail",
+        "Sunfire Aegis"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 53.16,
+       "pick": 3.61,
+       "items": [
+        "Heartsteel",
+        "Sunfire Aegis",
+        "Amaranth's Twinguard"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 51.4,
+       "pick": 88.7,
+       "item": "Plated Steelcaps"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 48.05,
+       "pick": 10.51,
+       "item": "Mercury's Treads"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 51.58,
+       "pick": 61.02,
+       "runes": [
+        "Grasp of the Undying",
+        "Demolish",
+        "Second Wind",
+        "Overgrowth",
+        "Last Stand"
+       ],
+       "primary": "Resolve",
+       "secondary": "Precision"
+      },
+      {
+       "label": "Alternative page",
+       "win": 51.39,
+       "pick": 24.89,
+       "runes": [
+        "Grasp of the Undying",
+        "Unshakeable",
+        "Second Wind",
+        "Overgrowth",
+        "Last Stand"
+       ],
+       "primary": "Resolve",
+       "secondary": "Precision"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 51.79,
+       "pick": 56.24,
+       "spells": [
+        "Flash",
+        "Ignite"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 50.22,
+       "pick": 32.82,
+       "spells": [
+        "Flash",
+        "Teleport"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    },
+    "jungle": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 57.21,
+       "pick": 46.47,
+       "items": [
+        "Heartsteel",
+        "Sunfire Aegis",
+        "Thornmail"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 59.38,
+       "pick": 4.31,
+       "items": [
+        "Heartsteel",
+        "Thornmail",
+        "Sunfire Aegis"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 56.32,
+       "pick": 2.54,
+       "items": [
+        "Heartsteel",
+        "Sunfire Aegis",
+        "Unending Despair"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 51.24,
+       "pick": 89.78,
+       "item": "Plated Steelcaps"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 47.27,
+       "pick": 9.43,
+       "item": "Mercury's Treads"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 54.51,
+       "pick": 80.19,
+       "runes": [
+        "Grasp of the Undying",
+        "Unshakeable",
+        "Second Wind",
+        "Overgrowth",
+        "Last Stand"
+       ],
+       "primary": "Resolve",
+       "secondary": "Precision"
+      },
+      {
+       "label": "Alternative page",
+       "win": 53.05,
+       "pick": 7.34,
+       "runes": [
+        "Grasp of the Undying",
+        "Demolish",
+        "Second Wind",
+        "Overgrowth",
+        "Last Stand"
+       ],
+       "primary": "Resolve",
+       "secondary": "Precision"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 53.82,
+       "pick": 78.69,
+       "spells": [
+        "Flash",
+        "Smite"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 54.09,
+       "pick": 20.2,
+       "spells": [
+        "Ghost",
+        "Smite"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    }
+   }
+  }
  },
  "Ornn": {
   "name": "Ornn",
@@ -4982,6 +7289,224 @@
     }
    ]
   },
-  "icon": "/icons/wrf/champions/ornn.png"
+  "icon": "/icons/wrf/champions/ornn.png",
+  "server": {
+   "stats": {
+    "baron": {
+     "win": 52.18,
+     "pick": 2.06,
+     "ban": 0.17,
+     "win_trend": 0,
+     "pick_trend": -1
+    },
+    "support": {
+     "win": 49.25,
+     "pick": 1.18,
+     "ban": 0.17,
+     "win_trend": 5,
+     "pick_trend": 0
+    }
+   },
+   "builds": {
+    "baron": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 59.27,
+       "pick": 26.87,
+       "items": [
+        "Heartsteel",
+        "Sunfire Aegis",
+        "Thornmail"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 57.04,
+       "pick": 4.25,
+       "items": [
+        "Heartsteel",
+        "Thornmail",
+        "Sunfire Aegis"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 58.75,
+       "pick": 3.69,
+       "items": [
+        "Sunfire Aegis",
+        "Radiant Virtue",
+        "Warmog's Armor"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 51.67,
+       "pick": 86.13,
+       "item": "Plated Steelcaps"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 49.73,
+       "pick": 13.37,
+       "item": "Mercury's Treads"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 51.19,
+       "pick": 18.53,
+       "runes": [
+        "Grasp of the Undying",
+        "Courage of the Colossus",
+        "Second Wind",
+        "Overgrowth",
+        "Nimbus Cloak"
+       ],
+       "primary": "Resolve",
+       "secondary": "Sorcery"
+      },
+      {
+       "label": "Alternative page",
+       "win": 51.86,
+       "pick": 11.05,
+       "runes": [
+        "Grasp of the Undying",
+        "Unshakeable",
+        "Second Wind",
+        "Perseverance",
+        "Legend: Haste"
+       ],
+       "primary": "Resolve",
+       "secondary": "Precision"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 51.88,
+       "pick": 68.94,
+       "spells": [
+        "Flash",
+        "Teleport"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 52.28,
+       "pick": 29.99,
+       "spells": [
+        "Flash",
+        "Ignite"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    },
+    "support": {
+     "cores": [
+      {
+       "label": "Most popular core",
+       "win": 52.74,
+       "pick": 15.71,
+       "items": [
+        "Bulwark of the Mountain",
+        "Warmog's Armor",
+        "Radiant Virtue"
+       ]
+      },
+      {
+       "label": "Alternative core 1",
+       "win": 48.19,
+       "pick": 11.76,
+       "items": [
+        "Bulwark of the Mountain",
+        "Heartsteel",
+        "Hollow Radiance"
+       ]
+      },
+      {
+       "label": "Alternative core 2",
+       "win": 43.08,
+       "pick": 7.46,
+       "items": [
+        "Bulwark of the Mountain",
+        "Heartsteel",
+        "Sunfire Aegis"
+       ]
+      }
+     ],
+     "boots": [
+      {
+       "label": "Most popular boots",
+       "win": 52.79,
+       "pick": 93.4,
+       "item": "Plated Steelcaps"
+      },
+      {
+       "label": "Alternative boots",
+       "win": 55.19,
+       "pick": 5.43,
+       "item": "Mercury's Treads"
+      }
+     ],
+     "rune_pages": [
+      {
+       "label": "Most popular page",
+       "win": 47.22,
+       "pick": 17.22,
+       "runes": [
+        "Ice Overlord",
+        "Unshakeable",
+        "Second Wind",
+        "Overgrowth",
+        "Sudden Impact"
+       ],
+       "primary": "Resolve",
+       "secondary": "Domination"
+      },
+      {
+       "label": "Alternative page",
+       "win": 47.85,
+       "pick": 9.01,
+       "runes": [
+        "Ice Overlord",
+        "Unshakeable",
+        "Second Wind",
+        "Overgrowth",
+        "Relentless Hunter"
+       ],
+       "primary": "Resolve",
+       "secondary": "Domination"
+      }
+     ],
+     "spells": [
+      {
+       "label": "Most popular summoners",
+       "win": 48.61,
+       "pick": 73.6,
+       "spells": [
+        "Flash",
+        "Ignite"
+       ]
+      },
+      {
+       "label": "Alternative summoners",
+       "win": 50.92,
+       "pick": 18.27,
+       "spells": [
+        "Heal",
+        "Flash"
+       ]
+      }
+     ],
+     "updated": "2026-10-04"
+    }
+   }
+  }
  }
 }

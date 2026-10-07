@@ -50,6 +50,16 @@ def get_matchup(my_champion: str, enemy: str, position: str | None = None) -> di
 
 
 @server.tool()
+def get_common_opponents(position: str) -> list[dict]:
+    """The most common opponents in a lane this patch: champions with the highest Diamond+ pick rate on the CN
+    server, with their win, pick and ban rates (percent). Position: baron, jungle, mid, dragon or support."""
+    return [
+        {"name": c["name"], "win": c["win"], "pick": c["pick"], "ban": c["ban"]}
+        for c in data.common_opponents(position)
+    ]
+
+
+@server.tool()
 def get_counters(champion: str, position: str | None = None) -> list[dict] | dict:
     """List champions that are strong against (counter) this champion in a lane, best tier first."""
     try:

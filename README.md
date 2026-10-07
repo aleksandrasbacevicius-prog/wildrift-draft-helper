@@ -1,15 +1,15 @@
 # Wild Rift Draft Helper
 
-Champion-select helper for Wild Rift. Pick your lane, your champion and your opponent, and see the current core build, full build, runes, situational swaps and the tier list. Pick your champion with counterpicks in mind ("Strong against [opponent]"), see who counters whom and who pairs well with you, and press and hold any item for its stats. Builds follow the lane you play. Swap core items and runes, and your choices are saved per champion and lane. An AI agent can then tailor the build to the enemy team.
+Champion-select helper for Wild Rift. Pick your lane, your champion and your opponent, and see the current core build, full build, runes, situational swaps and the tier list. Pick your champion with counterpicks in mind ("Strong against [opponent]"), see who counters whom and who pairs well with you, and press and hold any item for its stats. Server stats from real Diamond+ ranked games let you switch to the most popular item core or rune page this patch in one tap, and the opponent list starts with the champions you're most likely to face in your lane. Builds follow the lane you play. Swap core items and runes, and your choices are saved per champion and lane. An AI agent can then tailor the build to the enemy team.
 
 ```
 Website ── FastAPI ──> data layer ──> WildRiftFire data (refreshed when the patch changes)
                   └──> Strands agent (Claude Haiku 4.5) ──MCP──> MCP server ──> data layer
 ```
 
-- **`wildrift/wildriftfire.py`**: downloads the tier list, every champion's builds per lane (with counters and synergies), the item and rune lists, icons and the patch number from [WildRiftFire.com](https://www.wildriftfire.com), plus item stats and descriptions from [WR-META](https://wr-meta.com/items/). It only reads public pages that robots.txt allows, one per second.
+- **`wildrift/wildriftfire.py`**: downloads the tier list, every champion's builds per lane (with counters and synergies), the item and rune lists, icons and the patch number from [WildRiftFire.com](https://www.wildriftfire.com), plus item stats and descriptions from [WR-META](https://wr-meta.com/items/), and Diamond+ server builds and lane win/pick/ban rates from [RiftPatchNotes](https://www.riftpatchnotes.com) (`wildrift/riftpatchnotes.py`). It only reads public pages that robots.txt allows, one per second.
 - **`wildrift/data.py`**: data access with no LLM calls. Covers champions by position and tier, builds, items, core swaps and your champion pool.
-- **`wildrift/mcp_server.py`**: an MCP server exposing the data as tools. Any MCP client can use it, for example Claude Desktop.
+- **`wildrift/mcp_server.py`**: an MCP server exposing the data as 9 tools. Any MCP client can use it, for example Claude Desktop.
 - **`wildrift/agent.py`**: a Strands agent that calls those tools to tailor a build. Only this part costs API credits, and repeat drafts are cached.
 - **`wildrift/api.py`** and **`static/index.html`**: a REST API and a phone-first website.
 - **`data/tips.json`**: hand-written matchup tips (currently for 8 Baron champions).
@@ -47,6 +47,10 @@ Counters are combined from two independent sources for each lane:
 - **WR-META**: the free "Extreme threats" list per lane on each champion page. Its premium-locked lists aren't used.
 
 Each source ranks its picks (1st = 1.0, 2nd = 0.9, ...), and a champion's score is the **average across the sources that rate that lane**. A champion both sites name ranks above one only a single site names, and the app marks those "both sites". Tencent's Chinese server stats were considered, but its CDN's robots.txt blocks AI crawlers, so they're not used.
+
+## Server builds and common opponents
+
+RiftPatchNotes publishes per-lane stats from Diamond+ ranked games on the CN server (the only region with official ranked stats): the most popular item core plus two alternatives, boots, rune pages and summoner spells, each with a win and pick rate. The build card shows them as choices next to the WildRiftFire guide build. The opponent list puts the lane's most picked champions first ("Most common this patch"), and the matchup card shows both champions' lane win, pick and ban rates. These are overall lane stats, not head-to-head results: no free source that allows crawling publishes per-matchup win rates.
 
 ## Security
 
@@ -93,4 +97,4 @@ GitHub Actions runs all of these on every push, plus a Docker build (`.github/wo
 - AWS: ECS Fargate behind an ALB, plus a scheduled Lambda for the patch check
 - Persistent storage for pools and usage counters (e.g. a small database)
 
-Builds, tiers and counters from WildRiftFire.com; item details from WR-META.com. Fan project, not endorsed by Riot Games.
+Builds, tiers and counters from WildRiftFire.com; item details from WR-META.com; server stats from RiftPatchNotes.com. Fan project, not endorsed by Riot Games.

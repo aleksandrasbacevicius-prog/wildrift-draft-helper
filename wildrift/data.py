@@ -89,13 +89,29 @@ def _best_tier(champ: dict) -> int:
 def list_champions(position: str | None = None) -> list[dict]:
     """Champions with their tier per position. Sorted by tier for a position, else by name."""
     champs = [
-        {"name": c["name"], "icon": c["icon"], "positions": c["positions"]}
+        {"name": c["name"], "icon": c["icon"], "positions": c["positions"], "stats": _server(c)["stats"]}
         for c in _wrf()["champions"].values()
         if position is None or position in c["positions"]
     ]
     if position:
         return sorted(champs, key=lambda c: (TIER_ORDER.get(c["positions"][position], 9), c["name"]))
     return sorted(champs, key=lambda c: c["name"])
+
+
+def _server(champ: dict) -> dict:
+    """RiftPatchNotes' Diamond+ CN server data for a champion: lane stats and server builds (may be empty)."""
+    server = champ.get("server") or {}
+    return {"stats": server.get("stats") or {}, "builds": server.get("builds") or {}}
+
+
+def common_opponents(position: str, limit: int = 8) -> list[dict]:
+    """The champions you're most likely to face in a lane this patch: highest Diamond+ pick rate first."""
+    picked = [
+        {"name": c["name"], "icon": c["icon"], "positions": c["positions"], **_server(c)["stats"][position]}
+        for c in _wrf()["champions"].values()
+        if position in _server(c)["stats"]
+    ]
+    return sorted(picked, key=lambda c: -c["pick"])[:limit]
 
 
 def get_champion(name: str) -> dict:
@@ -126,6 +142,9 @@ def get_build(name: str, position: str | None = None) -> dict:
         "countered_by": [],
         "synergies": [],
         **build,
+        # Server builds and stats for the lane asked for (or the build's own lane when it fell back).
+        "server": _server(champ)["builds"].get(position or used) or _server(champ)["builds"].get(used) or {},
+        "server_stats": _server(champ)["stats"].get(position or used) or {},
         "patch": meta()["patch"],
     }
 
@@ -198,6 +217,8 @@ def get_matchup(my_champion: str, enemy: str, position: str | None = None) -> di
         "your_counter_score": mine_vs,
         "enemy_counter_score": theirs_vs,
         "your_synergies": my_synergies,
+        "your_lane_stats": _server(_find(mine["name"]))["stats"].get(position or "") or {},
+        "enemy_lane_stats": _server(_find(theirs["name"]))["stats"].get(position or "") or {},
         "you": mine["name"],
         "enemy": theirs["name"],
         "enemy_tiers": theirs["positions"],
