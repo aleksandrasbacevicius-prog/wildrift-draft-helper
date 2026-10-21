@@ -467,3 +467,18 @@ def test_get_retries_a_timeout_once(monkeypatch):
     monkeypatch.setattr(w, "_open", down)
     with pytest.raises(TimeoutError):
         w.get("https://www.wildriftfire.com/x")
+
+
+def test_get_does_not_retry_a_refusal(monkeypatch):
+    import urllib.error
+
+    calls = []
+
+    def forbidden(url, max_bytes):
+        calls.append(url)
+        raise urllib.error.HTTPError(url, 403, "Forbidden", None, None)
+
+    monkeypatch.setattr(w, "_open", forbidden)
+    with pytest.raises(urllib.error.HTTPError):
+        w.get("https://wildriftcore.com/x")
+    assert len(calls) == 1

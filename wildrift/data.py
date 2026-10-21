@@ -152,6 +152,17 @@ def _lane_data(champ: dict, position: str | None) -> tuple[str | None, dict, dic
     return lane, wrc.get(lane) or {}, server.get(lane) or {}, wrf.get(lane) or {}
 
 
+def _lanes_with_data(champ: dict) -> list[str]:
+    """Every lane any source has a build for, the champion's listed lanes first."""
+    lanes = list(champ.get("positions") or {})
+    lanes += (
+        list((champ.get("wrc") or {}).get("builds") or {})
+        + list(_server(champ)["builds"])
+        + list(champ.get("builds") or {})
+    )
+    return list(dict.fromkeys(lanes))
+
+
 def _choices(wrc: dict, server: dict, wrf: dict) -> tuple[list[dict], list[dict]]:
     """Whole item cores and rune pages to choose from, most played first."""
     cores, pages = [], []
@@ -329,6 +340,14 @@ def get_build(name: str, position: str | None = None, enemy: str | None = None) 
     champ = _find(name)
     lane, wrc, server, wrf = _lane_data(champ, position)
     cores, pages = _choices(wrc, server, wrf)
+    if cores and not pages:
+        # Items for this lane but no rune page: runes depend less on the lane, so borrow another lane's page.
+        for other in _lanes_with_data(champ):
+            if other != lane:
+                _, other_pages = _choices(*_lane_data(champ, other)[1:])
+                pages = [{**page, "label": f"{page['label']} ({other})"} for page in other_pages]
+                if pages:
+                    break
     if not cores or not pages:
         raise UnknownChampionError(f"No build available for {champ['name']}")
     core = list(cores[0]["items"])
@@ -493,7 +512,14 @@ def matchup_card(mine: str, enemy: str, position: str | None = None) -> dict | N
     # Not on your champion's page: their page may rate you. Flip the edge; its tips are for the other side.
     reverse = card_on(foe, champ)
     if reverse:
-        return {"enemy": foe["name"], "edge": -reverse["edge"], "group": None, "tags": reverse["tags"], "key": "", "how": ""}
+        return {
+            "enemy": foe["name"],
+            "edge": -reverse["edge"],
+            "group": None,
+            "tags": reverse["tags"],
+            "key": "",
+            "how": "",
+        }
     return None
 
 

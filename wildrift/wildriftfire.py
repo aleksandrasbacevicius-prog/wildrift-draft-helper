@@ -84,8 +84,10 @@ def get(url: str, retries: int = 1) -> str:
     for attempt in range(retries + 1):
         try:
             return _open(url, MAX_PAGE_BYTES)[0].decode("utf-8", errors="ignore")
-        except (TimeoutError, ConnectionError, urllib.error.URLError):
-            if attempt == retries:
+        except (TimeoutError, ConnectionError, urllib.error.URLError) as e:
+            # A refusal like 403 Forbidden won't change on a retry; only network trouble is worth a second try.
+            client_error = isinstance(e, urllib.error.HTTPError) and 400 <= e.code < 500
+            if attempt == retries or client_error:
                 raise
             time.sleep(3)
     raise AssertionError("unreachable")

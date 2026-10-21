@@ -156,3 +156,13 @@ def test_rating_from_the_opponents_page_is_flipped_without_tips():
     card = data.matchup_card("Mordekaiser", "Darius", "baron")
     assert card["edge"] == 0 and card["key"] == "" and card["how"] == ""
     assert data.matchup_card("Ahri", "Syndra", "mid") is None
+
+
+def test_lane_without_rune_page_borrows_one(monkeypatch):
+    champ = data._find("Darius")
+    jungle = champ["server"]["builds"]["jungle"]
+    monkeypatch.setitem(champ["server"]["builds"], "jungle", {**jungle, "rune_pages": []})
+    monkeypatch.setitem(champ["builds"], "jungle", {**champ["builds"]["jungle"], "runes": []})
+    build = data.get_build("Darius", "jungle")
+    assert build["position"] == "jungle" and build["core"] == jungle["cores"][0]["items"]
+    assert build["choices"]["runes"][0]["label"].endswith("(baron)")
