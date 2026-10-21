@@ -136,12 +136,12 @@ function renderCounterStrip() {
   $("counterStrip").classList.toggle("hidden", !counters.length);
   $("counterStrip").innerHTML = counters.length
     ? `<div class="strip-label">Counters to ${escapeHtml(vs)} <span class="plain">(tap to play)</span></div>
-       <div class="strip-source">From WildRiftFire and WR-META. "Both sites" = they agree.</div>
+       <div class="strip-source">From WildRiftCore, WildRiftFire and WR-META. "2 sites" = they agree.</div>
        <div class="counter-row">${counters.map((c) => `
          <button class="counter-pick ${pool.includes(c.name) ? "mine" : ""} ${c.name === $("me").value ? "chosen" : ""}" data-champ="${escapeHtml(c.name)}">
            <img src="${c.icon}" alt="" draggable="false"><span>${escapeHtml(c.name)}</span>
            ${tierBadge(c.positions[state.position])}${pool.includes(c.name) ? '<span class="pool-mark">your pool</span>' : ""}
-           ${(c.sources || []).length > 1 ? '<span class="agree-mark">both sites</span>' : ""}
+           ${(c.sources || []).length > 1 ? `<span class="agree-mark">${c.sources.length} sites</span>` : ""}
          </button>`).join("")}</div>`
     : "";
 }
@@ -150,7 +150,9 @@ function renderCounterStrip() {
 function renderVerdict(m) {
   const me = $("me").value, vs = $("vs").value, pool = state.profile[state.position] || [];
   let html = "";
-  if (m.counters_each_other) {
+  if (m.even) {
+    html = `<div class="verdict-line even">≈ Skill matchup: neither side has an edge</div>`;
+  } else if (m.counters_each_other) {
     html = `<div class="verdict-line even">≈ Even matchup: sources list ${escapeHtml(me)} and ${escapeHtml(vs)} as countering each other</div>`;
   } else if (m.you_counter_enemy) {
     html = `<div class="verdict-line good">✓ ${escapeHtml(me)} counters ${escapeHtml(vs)}</div>`;
@@ -208,28 +210,39 @@ function renderEnemies() {
 
 function renderBuild() {
   const b = state.build;
+  const opts = b.options || { core: [], boots: [], extras: [], runes: [] };
+  const count = (list) => (list && list.length ? `${list.length} option${list.length > 1 ? "s" : ""}` : "tap to swap");
   $("core").innerHTML = b.core.map((item, slot) => {
     const swapped = item.name !== state.original[slot];
     return `<div class="item ${swapped ? "swapped" : ""}" data-slot="${slot}" role="button" tabindex="0"
         aria-label="Swap ${escapeHtml(item.name)}">
       ${icon(item)}<div>${escapeHtml(item.name)}</div>
-      <div class="swap">${swapped ? `was ${escapeHtml(state.original[slot])}` : "tap to swap"}</div>
+      <div class="swap">${swapped ? `was ${escapeHtml(state.original[slot])}` : count(opts.core[slot])}</div>
     </div>`;
   }).join("");
   $("boots").innerHTML = b.boots.map((i) => `${icon(i)}<span class="muted">${escapeHtml(i.name)}</span>`).join("");
-  // The full build follows your core swaps.
-  const swappedFor = Object.fromEntries(state.original.map((name, slot) => [name, b.core[slot]]));
-  $("final").innerHTML = b.final.map((i) => swappedFor[i.name] || i).map(icon).join("");
-  $("sitBlock").classList.toggle("hidden", !b.situational.length);
-  $("situational").innerHTML = b.situational.map((s) =>
-    `<div class="sit"><span class="when">${escapeHtml(s.when)}</span>${icon(s.replace)}<span>→</span>${icon(s.with)}</div>`).join("");
+  // The full build: boots, then the core (follows your swaps), then the later items. Boots and later items swap here.
+  const later = b.extras.map((item, slot) =>
+    `<button class="slot ${item.name !== state.originalExtras[slot] ? "swapped" : ""} ${adjusted("extras", slot) ? "adjusted" : ""}"
+       data-extra-slot="${slot}" aria-label="Swap ${escapeHtml(item.name)}">${icon(item)}</button>`);
+  const boots = b.boots.map((item) =>
+    `<button class="slot ${item.name !== state.originalBoots[0] ? "swapped" : ""} ${adjusted("boots", 0) ? "adjusted" : ""}"
+       data-boots-slot="0" aria-label="Swap ${escapeHtml(item.name)}">${icon(item)}</button>`);
+  $("final").innerHTML = [...boots, ...b.core.map(icon), ...later].join("");
+  const sits = [
+    ...(b.situational_items || []).map((s) => `<div class="sit"><span class="when">${escapeHtml(s.when)}</span>${icon(s.item)}</div>`),
+    ...b.situational.map((s) => `<div class="sit"><span class="when">${escapeHtml(s.when)}</span>${icon(s.replace)}<span>→</span>${icon(s.with)}</div>`),
+  ];
+  $("sitBlock").classList.toggle("hidden", !sits.length);
+  $("situational").innerHTML = sits.join("");
   $("runes").innerHTML = b.runes.map((r, slot) => {
     const swapped = r.name !== state.originalRunes[slot];
     return `<div class="rune ${slot === 0 ? "keystone" : ""} ${swapped ? "swapped" : ""}" data-rune-slot="${slot}" role="button" tabindex="0"
         aria-label="Swap rune ${escapeHtml(r.name)}">${icon(r)}<span>${escapeHtml(r.name)}</span></div>`;
   }).join("");
   $("spells").innerHTML = [...b.spells, ...b.starting].map((x) => `${icon(x)}<span class="muted">${escapeHtml(x.name)}</span>`).join("");
-  renderServerChoices();
+  renderChoices();
+  renderMatchupNote();
   const otherLane = b.position && b.position !== state.position;
   $("laneNote").textContent = otherLane ? `No separate ${LANES[state.position]} build for ${b.name}; showing their ${LANES[b.position] || b.position} build.` : "";
   $("laneNote").classList.toggle("hidden", !otherLane);
@@ -238,30 +251,38 @@ function renderBuild() {
   $("resetBuild").classList.toggle("hidden", !changed);
 }
 
-// Server builds (RiftPatchNotes, Diamond+ CN): pick a whole item core or rune page in one tap.
-function renderServerChoices() {
-  const b = state.build, server = b.server || {};
+const adjusted = (slot, index) => ((state.build.matchup || {}).adjustments || []).some((a) => a.slot === slot && a.index === index);
+
+// Why the build differs against this opponent: matchup-specific counter items, or anti-magic when they deal magic damage.
+function renderMatchupNote() {
+  const m = state.build.matchup;
+  const show = Boolean(m && m.enemy);
+  $("matchupNote").classList.toggle("hidden", !show);
+  if (!show) return;
+  const changes = m.adjustments.map((a) =>
+    `<li>${icon(a.with)}<span><strong>${escapeHtml(a.with.name)}</strong> instead of ${escapeHtml(a.replace.name)}: ${escapeHtml(a.why)}</span></li>`).join("");
+  $("matchupNote").innerHTML = `<div class="matchup-note__head ${m.rule}">${escapeHtml(m.note)}</div>` + (changes ? `<ul>${changes}</ul>` : "");
+}
+
+// Whole item cores and rune pages: most played on the server, alternatives, WildRiftCore variants, the guide.
+function renderChoices() {
+  const b = state.build, choices = b.choices || { core: [], runes: [] };
   const sameNames = (a, c) => a.length === c.length && a.every((n, i) => n === c[i]);
   const core = b.core.map((i) => i.name), page = b.runes.map((r) => r.name);
-  const chip = (kind, key, label, stats, active) =>
+  const sub = (c) => c.pick != null ? `${pct(c.win)} win · ${pct(c.pick)} pick` : escapeHtml(c.when || c.source);
+  const chip = (kind, key, c, active) =>
     `<button class="choice ${active ? "active" : ""}" data-kind="${kind}" data-key="${key}" aria-pressed="${active}">
-      <strong>${label}</strong>${stats ? `<span>${pct(stats.win)} win · ${pct(stats.pick)} pick</span>` : "<span>WildRiftFire guide</span>"}</button>`;
+      <strong>${escapeHtml(c.label)}</strong><span>${sub(c)}</span></button>`;
+  const server = b.server || {};
   const source = server.updated ? `<div class="choices-note">Server stats: ${escapeHtml(state.serverBracket)} ranked, CN server, updated ${escapeHtml(server.updated)}</div>` : "";
-
-  const cores = (server.cores || []).filter((c) => c.items.length === core.length);
-  $("coreChoices").classList.toggle("hidden", !cores.length);
-  $("coreChoices").innerHTML = cores.length
-    ? `<div class="choice-row">${chip("core", "guide", "Guide", null, sameNames(core, state.original))}${cores.map((c, i) =>
-        chip("core", i, i === 0 ? "Most popular" : `Alternative ${i}`, c, sameNames(core, c.items.map((x) => x.name)))).join("")}</div>${source}`
+  $("coreChoices").classList.toggle("hidden", choices.core.length < 2);
+  $("coreChoices").innerHTML = choices.core.length > 1
+    ? `<div class="choice-row">${choices.core.map((c, i) => chip("core", i, c, sameNames(core, c.items.map((x) => x.name)))).join("")}</div>${source}`
     : "";
-
-  const pages = (server.rune_pages || []).filter((p) => p.runes.length === page.length);
-  $("runeChoices").classList.toggle("hidden", !pages.length);
-  $("runeChoices").innerHTML = pages.length
-    ? `<div class="choice-row">${chip("runes", "guide", "Guide", null, sameNames(page, state.originalRunes))}${pages.map((p, i) =>
-        chip("runes", i, i === 0 ? "Most popular" : `Alternative ${i}`, p, sameNames(page, p.runes.map((r) => r.name)))).join("")}</div>`
+  $("runeChoices").classList.toggle("hidden", choices.runes.length < 2);
+  $("runeChoices").innerHTML = choices.runes.length > 1
+    ? `<div class="choice-row">${choices.runes.map((c, i) => chip("runes", i, c, sameNames(page, c.runes.map((r) => r.name)))).join("")}</div>`
     : "";
-
   const serverLine = (entries, words) => entries.length
     ? `<span class="muted">On the server:</span> ${entries.map((e) => `${words(e)} <span class="muted">${pct(e.pick)} pick, ${pct(e.win)} win</span>`).join(" · ")}`
     : "";
@@ -269,42 +290,44 @@ function renderServerChoices() {
   $("serverSpells").innerHTML = serverLine(server.spells || [], (e) => e.spells.map((s) => escapeHtml(s.name)).join(" + "));
 }
 
-async function applyServerChoice(kind, key) {
-  const b = state.build, server = b.server || {};
-  if (kind === "core") {
-    const names = key === "guide" ? state.original : server.cores[Number(key)].items.map((i) => i.name);
-    b.core = names.map(itemByName);
-  } else {
-    const names = key === "guide" ? state.originalRunes : server.rune_pages[Number(key)].runes.map((r) => r.name);
-    b.runes = names.map(runeByName);
-  }
+async function applyChoice(kind, key) {
+  const choice = state.build.choices[kind][Number(key)];
+  if (kind === "core") state.build.core = choice.items.map((i) => itemByName(i.name));
+  else state.build.runes = choice.runes.map((r) => runeByName(r.name));
   $("result").innerHTML = "";
   renderBuild();
   await savePreferences();
 }
 
+const differs = (list, original) => list.some((x, slot) => x.name !== original[slot]);
 const isCustomised = () =>
-  state.build.core.some((i, slot) => i.name !== state.original[slot]) ||
-  state.build.runes.some((r, slot) => r.name !== state.originalRunes[slot]);
+  differs(state.build.core, state.original) || differs(state.build.runes, state.originalRunes) ||
+  differs(state.build.boots, state.originalBoots) || differs(state.build.extras, state.originalExtras);
 
 const itemByName = (name) => state.items.find((i) => i.name === name) || { name, icon: null };
 const runeByName = (name) => state.runeList.find((r) => r.name === name) || { name, icon: null };
 
 async function loadBuild() {
-  const name = $("me").value, position = state.position;
+  const name = $("me").value, vs = $("vs").value, position = state.position;
   const [build, prefs] = await Promise.all([
-    api(`/api/champions/${encodeURIComponent(name)}/build?position=${state.position}`),
-    api(`/api/preferences/${encodeURIComponent(name)}?position=${state.position}`, {}, true).catch(() => ({ saved: null })),
+    api(`/api/champions/${encodeURIComponent(name)}/build?position=${position}&vs=${encodeURIComponent(vs)}`),
+    api(`/api/preferences/${encodeURIComponent(name)}?position=${position}`, {}, true).catch(() => ({ saved: null })),
   ]);
-  if (name !== $("me").value || position !== state.position) return; // a newer pick replaced this one while it loaded
+  if (name !== $("me").value || vs !== $("vs").value || position !== state.position) return; // a newer pick replaced this one
+  // The full build is boots + core + later items; keep the later items separately so they can be swapped.
+  build.extras = build.final.slice(build.boots.length + build.core.length);
   state.build = build;
   state.original = build.core.map((i) => i.name);
   state.originalRunes = build.runes.map((r) => r.name);
+  state.originalBoots = build.boots.map((i) => i.name);
+  state.originalExtras = build.extras.map((i) => i.name);
   state.savedFor = null;
   const saved = prefs.saved;
   if (saved && saved.core.length === build.core.length && saved.runes.length === build.runes.length) {
     build.core = saved.core.map(itemByName);
     build.runes = saved.runes.map(runeByName);
+    if (saved.boots && build.boots.length) build.boots = [itemByName(saved.boots)];
+    if (saved.extras && saved.extras.length === build.extras.length) build.extras = saved.extras.map(itemByName);
     state.savedFor = build.name;
   }
   renderBuild();
@@ -317,7 +340,11 @@ async function savePreferences() {
     if (isCustomised()) {
       await api(`/api/preferences/${encodeURIComponent(b.name)}?position=${state.position}`, {
         method: "PUT", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ core: b.core.map((i) => i.name), runes: b.runes.map((r) => r.name) }),
+        body: JSON.stringify({
+          core: b.core.map((i) => i.name), runes: b.runes.map((r) => r.name),
+          boots: differs(b.boots, state.originalBoots) ? b.boots[0].name : null,
+          extras: differs(b.extras, state.originalExtras) ? b.extras.map((i) => i.name) : [],
+        }),
       });
       state.savedFor = b.name;
     } else {
@@ -336,36 +363,44 @@ async function savePreferences() {
 async function resetBuild() {
   state.build.core = state.original.map(itemByName);
   state.build.runes = state.originalRunes.map(runeByName);
+  state.build.boots = state.originalBoots.map(itemByName);
+  state.build.extras = state.originalExtras.map(itemByName);
   $("result").innerHTML = "";
   renderBuild();
   await savePreferences();
 }
 
-// Picker: a bottom sheet with icons. Items are grouped by category (lane-relevant first),
-// runes by tree (keystones for the first slot, the slot's own tree first for the others).
+// Picker: a bottom sheet with icons. Suggestions for this slot and matchup come first, with the reason;
+// then items by category (lane-relevant first) or runes by tree (keystones for the first slot).
+const PICKER_SLOTS = {
+  item: { list: () => state.build.core, original: () => state.original, options: (slot) => state.build.options.core[slot] },
+  boots: { list: () => state.build.boots, original: () => state.originalBoots, options: () => state.build.options.boots },
+  extra: { list: () => state.build.extras, original: () => state.originalExtras, options: (slot) => state.build.options.extras[slot] },
+  rune: { list: () => state.build.runes, original: () => state.originalRunes, options: (slot) => state.build.options.runes[slot] },
+};
+
 function openPicker(kind, slot) {
   state.picker = { kind, slot };
-  const list = kind === "item" ? state.build.core : state.build.runes;
-  const original = kind === "item" ? state.original : state.originalRunes;
-  const current = list[slot].name;
+  const { list, original } = PICKER_SLOTS[kind];
+  const current = list()[slot].name;
   $("sheetTitle").textContent = `Swap ${current}`;
-  $("sheetReset").classList.toggle("hidden", current === original[slot]);
+  $("sheetReset").classList.toggle("hidden", current === original()[slot]);
   $("sheetSearch").value = "";
-  $("sheetSearch").placeholder = kind === "item" ? "Search items" : "Search runes";
+  $("sheetSearch").placeholder = kind === "rune" ? "Search runes" : "Search items";
   renderPicker();
   $("sheet").classList.remove("hidden");
   document.body.style.overflow = "hidden";
 }
-
 function closePicker() {
   $("sheet").classList.add("hidden");
   document.body.style.overflow = "";
 }
 
-function pickButton(entry, current, taken, extra = "") {
+function pickButton(entry, current, taken, extra = "", suggestion = null) {
   const isCurrent = entry.name === current, inUse = !isCurrent && taken.includes(entry.name);
-  return `<button class="pick ${isCurrent ? "current" : ""}" data-name="${escapeHtml(entry.name)}" ${inUse ? 'disabled title="Already picked"' : ""}>
-    ${icon(entry)}${extra}${escapeHtml(entry.name)}</button>`;
+  const why = suggestion ? `<small class="why ${suggestion.matchup ? "matchup" : ""}">${escapeHtml(suggestion.why)}</small>` : "";
+  return `<button class="pick ${isCurrent ? "current" : ""} ${suggestion ? "suggestion" : ""}" data-name="${escapeHtml(entry.name)}" ${inUse ? 'disabled title="Already picked"' : ""}>
+    ${icon(entry)}<span>${extra}${escapeHtml(entry.name)}${why}</span></button>`;
 }
 
 const RUNE_TREES = ["Domination", "Precision", "Resolve", "Sorcery"];
@@ -375,15 +410,21 @@ function renderPicker() {
   const { kind, slot } = state.picker, query = $("sheetSearch").value.trim().toLowerCase();
   const matches = (name) => !query || name.toLowerCase().includes(query);
   const shown = new Set(); // while searching, list each entry once, under its first group
+  const suggestions = (PICKER_SLOTS[kind].options(slot) || []).filter((o) => matches(o.name));
   let groups;
-  if (kind === "item") {
-    const core = state.build.core.map((i) => i.name);
+  if (kind !== "rune") {
+    // Everything already in the full build counts as taken, so an item can't be picked twice.
+    const taken = [...state.build.boots, ...state.build.core, ...state.build.extras].map((i) => i.name);
+    const current = PICKER_SLOTS[kind].list()[slot].name;
+    const wantBoots = kind === "boots";
     groups = itemGroupOrder().map((group) => {
-      const items = state.items.filter((i) => !i.categories.includes("Boots") && matches(i.name) && !(query && shown.has(i.name)) &&
-        (group === "Other" ? !i.categories.some((c) => ITEM_GROUPS.includes(c)) : i.categories.includes(group)));
+      const items = state.items.filter((i) => i.categories.includes("Boots") === wantBoots && matches(i.name) && !(query && shown.has(i.name)) &&
+        (wantBoots || (group === "Other" ? !i.categories.some((c) => ITEM_GROUPS.includes(c)) : i.categories.includes(group))));
       items.forEach((i) => shown.add(i.name));
-      return [group, items.map((i) => pickButton(i, core[slot], core))];
+      return [wantBoots ? "Boots" : group, items.map((i) => pickButton(i, current, taken))];
     });
+    if (wantBoots) groups = groups.slice(0, 1);
+    groups.unshift(["Suggested", suggestions.map((o) => pickButton({ ...itemByName(o.name), ...o }, current, taken, "", o))]);
   } else {
     const page = state.build.runes.map((r) => r.name);
     const tree = runeByName(page[slot]).tree || "";
@@ -394,22 +435,21 @@ function renderPicker() {
         .sort((a, b) => (TIER_RANK[a.tier] ?? 9) - (TIER_RANK[b.tier] ?? 9) || a.name.localeCompare(b.name));
       return [t === "Keystone" ? "Keystones" : t, runes.map((r) => pickButton(r, page[slot], page, `${tierBadge(r.tier)} `))];
     });
+    groups.unshift(["Suggested", suggestions.map((o) => pickButton({ ...runeByName(o.name), ...o }, page[slot], page, "", o))]);
   }
   $("sheetBody").innerHTML = groups.filter(([, buttons]) => buttons.length)
-    .map(([label, buttons]) => `<h3>${label}</h3><div class="pick-grid">${buttons.join("")}</div>`).join("")
+    .map(([label, buttons]) => `<h3>${label}</h3><div class="pick-grid ${label === "Suggested" ? "suggested" : ""}">${buttons.join("")}</div>`).join("")
     || `<p class="muted">Nothing matches "${escapeHtml(query)}".</p>`;
 }
 
 async function applyPick(name) {
   const { kind, slot } = state.picker;
-  if (kind === "item") state.build.core[slot] = itemByName(name);
-  else state.build.runes[slot] = runeByName(name);
+  PICKER_SLOTS[kind].list()[slot] = kind === "rune" ? runeByName(name) : itemByName(name);
   $("result").innerHTML = "";
   closePicker();
   renderBuild();
   await savePreferences();
 }
-
 async function loadMatchup() {
   const me = $("me").value, vs = $("vs").value;
   $("matchupTitle").textContent = `Playing against ${vs}`;
@@ -429,7 +469,7 @@ async function loadMatchup() {
     (m.enemy_heals ? `<span class="tag">Heals: consider anti-heal</span>` : "");
   $("matchupTips").innerHTML = m.has_tips
     ? m.how_to_play_against_enemy.map((t) => `<li>${escapeHtml(t)}</li>`).join("")
-    : `<li class="muted">No hand-written tips for ${escapeHtml(vs)} yet. The AI button can still help.</li>`;
+    : `<li class="muted">No matchup tips for ${escapeHtml(me)} against ${escapeHtml(vs)} yet. The AI button can still help.</li>`;
   $("synergies").innerHTML = m.your_synergies.length
     ? `<h3>${escapeHtml(me)} pairs well with</h3><div class="strip">${m.your_synergies.map((s) => {
         const c = champ(s.name);
@@ -439,8 +479,9 @@ async function loadMatchup() {
 }
 
 function updatePortraits() {
-  $("meIcon").src = champ($("me").value).icon;
-  $("vsIcon").src = champ($("vs").value).icon;
+  const portrait = (name) => (champ(name) || {}).icon || "";
+  $("meIcon").src = portrait($("me").value);
+  $("vsIcon").src = portrait($("vs").value);
 }
 
 async function refreshView({ build = true } = {}) {
@@ -679,7 +720,7 @@ async function init() {
   $("vs").addEventListener("change", async () => {
     const before = $("me").value;
     await loadCounters();
-    refreshView({ build: $("me").value !== before }); // your pick only changes if it was the new opponent
+    refreshView(); // the build adapts to the opponent
   });
   $("counterStrip").addEventListener("click", (e) => {
     const pick = e.target.closest(".counter-pick");
@@ -694,14 +735,19 @@ async function init() {
   $("runes").addEventListener("click", openRune);
   $("runes").addEventListener("keydown", (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), openRune(e)));
   $("resetBuild").addEventListener("click", resetBuild);
-  const onChoice = (e) => { const c = e.target.closest(".choice"); if (c) applyServerChoice(c.dataset.kind, c.dataset.key); };
+  const onChoice = (e) => { const c = e.target.closest(".choice"); if (c) applyChoice(c.dataset.kind, c.dataset.key); };
+  $("final").addEventListener("click", (e) => {
+    const slot = e.target.closest(".slot");
+    if (slot && slot.dataset.bootsSlot != null) openPicker("boots", 0);
+    else if (slot) openPicker("extra", Number(slot.dataset.extraSlot));
+  });
   $("coreChoices").addEventListener("click", onChoice);
   $("runeChoices").addEventListener("click", onChoice);
   $("sheetBody").addEventListener("click", (e) => { const p = e.target.closest(".pick"); if (p && !p.disabled) applyPick(p.dataset.name); });
   $("sheetSearch").addEventListener("input", renderPicker);
   $("sheetReset").addEventListener("click", () => {
     const { kind, slot } = state.picker;
-    applyPick((kind === "item" ? state.original : state.originalRunes)[slot]);
+    applyPick(PICKER_SLOTS[kind].original()[slot]);
   });
   $("sheetClose").addEventListener("click", closePicker);
   $("sheet").addEventListener("click", (e) => e.target === $("sheet") && closePicker());

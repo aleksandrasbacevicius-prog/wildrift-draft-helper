@@ -136,7 +136,8 @@ def test_ai_button_without_api_key_shows_an_error(phone, open_server):
     load(phone, open_server)
     expect(phone.locator("#aiUsage")).to_contain_text("5 of 5")
     phone.locator("#tailor").click()
-    expect(phone.locator("#result .error")).to_contain_text("ANTHROPIC_API_KEY")
+    # The first AI request imports the agent libraries, which takes a few seconds.
+    expect(phone.locator("#result .error")).to_contain_text("ANTHROPIC_API_KEY", timeout=15_000)
     expect(phone.locator("#aiUsage")).to_contain_text("5 of 5")  # a failed setup doesn't use up a build
 
 
@@ -156,7 +157,7 @@ def test_counter_strip_under_the_opponent(phone, open_server):
     strip = phone.locator("#counterStrip")
     expect(strip).to_contain_text("Counters to Darius")
     names = set(strip.locator(".counter-pick").evaluate_all("els => els.map(e => e.dataset.champ)"))
-    assert names and names <= {"Malphite", "Dr. Mundo", "Ornn"}
+    assert names and names <= {"Malphite", "Dr. Mundo", "Ornn", "Garen"}
     expect(phone.locator('#me optgroup[label="Baron tier list"]')).to_have_count(1)  # general tier list still there
     assert "Darius" not in phone.locator("#me option").all_inner_texts()[0]  # can't pick the opponent's champion
 
@@ -232,13 +233,19 @@ def test_right_click_shows_rune_details(phone, open_server):
     expect(phone.locator("#infoBody")).to_contain_text("Keystone")
 
 
-def test_server_core_choice_applies_and_saves(phone, open_server):
+def pick_darius_vs(page, opponent: str) -> None:
+    page.locator("#vs").select_option(opponent)
+    page.locator("#me").select_option("Darius")
+    expect(page.locator("#matchupNote")).to_contain_text(opponent)
+
+
+def test_core_choice_applies_and_saves(phone, open_server):
     load(phone, open_server)
     chips = phone.locator("#coreChoices .choice")
-    expect(chips.first).to_contain_text("Guide")
+    expect(chips.first).to_contain_text(re.compile(r"Most played.*\d+\.\d% win · \d+\.\d% pick", re.S))
     expect(chips.first).to_have_attribute("aria-pressed", "true")
-    expect(chips.nth(1)).to_contain_text(re.compile(r"Most popular.*\d+\.\d% win · \d+\.\d% pick", re.S))
     expect(phone.locator("#coreChoices")).to_contain_text("Diamond+")
+    expect(phone.locator("#coreChoices")).to_contain_text("WildRiftFire guide")
     chips.nth(1).click()
     expect(chips.nth(1)).to_have_attribute("aria-pressed", "true")
     expect(phone.locator("#buildState")).to_have_text("Your saved build")
@@ -248,15 +255,63 @@ def test_server_core_choice_applies_and_saves(phone, open_server):
     expect(phone.locator("#buildState")).to_have_text("Recommended build")
 
 
-def test_server_rune_page_choice(phone, open_server):
+def test_rune_page_choice(phone, open_server):
     load(phone, open_server)
     chips = phone.locator("#runeChoices .choice")
-    expect(chips.nth(1)).to_contain_text("Most popular")
+    expect(chips.first).to_contain_text("Most played")
     chips.nth(1).click()
     expect(chips.nth(1)).to_have_attribute("aria-pressed", "true")
     expect(phone.locator("#serverSpells")).to_contain_text("On the server")
     chips.first.click()
     expect(phone.locator("#buildState")).to_have_text("Recommended build")
+
+
+def test_specific_matchup_changes_the_build(phone, open_server):
+    load(phone, open_server)
+    pick_darius_vs(phone, "Malphite")
+    expect(phone.locator("#matchupNote")).to_contain_text("Matchup-specific build against Malphite")
+    expect(phone.locator("#matchupNote")).to_contain_text("Wit's End")
+    expect(phone.locator("#final .slot.adjusted")).to_have_count(1)
+
+
+def test_mage_opponent_gets_anti_magic(phone, open_server):
+    load(phone, open_server)
+    pick_darius_vs(phone, "Mordekaiser")
+    expect(phone.locator("#matchupNote")).to_contain_text("Anti-magic build")
+    expect(phone.locator("#boots")).to_contain_text("Mercury's Treads")
+    assert "—" not in phone.locator("#matchupNote").inner_text()
+
+
+def test_picker_suggests_options_with_reasons(phone, open_server):
+    load(phone, open_server)
+    pick_darius_vs(phone, "Mordekaiser")
+    phone.locator('#final .slot[data-boots-slot="0"]').click()
+    expect(phone.locator("#sheet")).to_be_visible()
+    expect(phone.locator("#sheetBody h3").first).to_have_text("Suggested")
+    first = phone.locator(".pick-grid.suggested .pick").first
+    expect(first.locator(".why")).not_to_be_empty()
+    phone.locator("#sheetClose").click()
+    phone.locator('#core .item[data-slot="0"]').click()
+    expect(phone.locator("#sheetBody h3").first).to_have_text("Suggested")
+    expect(phone.locator(".pick-grid.suggested .pick .why").first).to_contain_text("%")
+
+
+def test_later_item_swap_saves(phone, open_server):
+    load(phone, open_server)
+    pick_darius_vs(phone, "Garen")
+    phone.locator('#final .slot[data-extra-slot="1"]').click()
+    phone.locator("#sheetSearch").fill("thornmail")
+    phone.locator('.pick[data-name="Thornmail"]').first.click()
+    expect(phone.locator("#buildState")).to_have_text("Your saved build")
+    phone.locator("#resetBuild").click()
+    expect(phone.locator("#buildState")).to_have_text("Recommended build")
+
+
+def test_skill_matchup_verdict(phone, open_server):
+    load(phone, open_server)
+    pick_darius_vs(phone, "Mordekaiser")
+    expect(phone.locator("#verdict")).to_contain_text("Skill matchup")
+    expect(phone.locator("#matchupTips")).to_contain_text("Sample key tip vs Mordekaiser.")
 
 
 def test_opponents_grouped_by_most_common(phone, open_server):

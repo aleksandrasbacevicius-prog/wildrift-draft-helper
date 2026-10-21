@@ -35,6 +35,7 @@ def _start_server(app_tokens: str):
         "WILDRIFT_PREFS_DIR": str(tmp / "builds"),
         "WILDRIFT_USAGE_FILE": str(tmp / "usage.json"),
         "WILDRIFT_AUTO_UPDATE": "0",
+        "WILDRIFT_WRITE_LIMIT": "1000",  # every browser test saves as the same user
         "APP_TOKENS": app_tokens,
         "ANTHROPIC_API_KEY": "",
     }

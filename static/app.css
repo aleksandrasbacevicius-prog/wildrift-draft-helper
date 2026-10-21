@@ -163,7 +163,7 @@ footer { font-size: .72rem; color: var(--muted); text-align: center; padding: 8p
    iPhone's "save image" menu. */
 .ico { display: inline-block; line-height: 0; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 .ico img { pointer-events: none; -webkit-user-drag: none; }
-img { -webkit-touch-callout: none; }
+img { -webkit-touch-callout: none; max-width: 100%; }  /* an unsized icon must never widen the page */
 
 /* Counter strip under the opponent picker */
 .counter-strip { margin: 10px 0 12px; }
@@ -205,3 +205,24 @@ img { -webkit-touch-callout: none; }
 .server-note { font-size: .74rem; margin-top: 4px; }
 .lane-stats { font-size: .82rem; margin: 2px 0 10px; }
 .lane-stats > div + div { margin-top: 2px; }
+
+/* Matchup-adjusted build */
+.matchup-note { margin: 4px 0 12px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; font-size: .78rem; }
+.matchup-note__head { font-weight: 600; }
+.matchup-note__head.specific, .matchup-note__head.magic, .matchup-note__head.physical { color: var(--accent); }
+.matchup-note ul { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 6px; }
+.matchup-note li { display: flex; gap: 8px; align-items: center; }
+.matchup-note li .ico { flex: none; }
+.matchup-note .ico img { width: 32px; height: 32px; border-radius: 8px; }
+
+/* Full build slots you can swap */
+.strip.final { gap: 6px; }
+.slot { border: 1px solid transparent; border-radius: 10px; background: none; padding: 2px; cursor: pointer; }
+.slot.adjusted { border-color: var(--accent); }
+.slot.swapped { border-style: dashed; border-color: var(--muted); }
+
+/* Picker suggestions */
+.pick-grid.suggested .pick { text-align: left; }
+.pick span { display: flex; flex-direction: column; }
+.pick .why { color: var(--muted); font-size: .66rem; font-weight: 400; line-height: 1.25; }
+.pick .why.matchup { color: var(--accent); }

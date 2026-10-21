@@ -171,4 +171,4 @@ ai_usage = UsageLimit(
     global_limit=int(os.getenv("AI_GLOBAL_LIMIT", "30")),
     window_hours=float(os.getenv("AI_WINDOW_HOURS", "48")),
 )
-write_rate_limit = RateLimiter(limit=10, seconds=60)
+write_rate_limit = RateLimiter(limit=int(os.getenv("WILDRIFT_WRITE_LIMIT", "10")), seconds=60)

@@ -114,6 +114,35 @@ def _with_item_icons(build: dict) -> dict:
         "runes": [{"name": r, "icon": data.rune_icon(r)} for r in build["runes"]],
         "spells": [{"name": s, "icon": data.spell_icon(s)} for s in build["spells"]],
         "server": _with_server_icons(build.get("server") or {}),
+        "situational_items": [{**s, "item": entry(s["item"])} for s in build.get("situational_items", [])],
+        "choices": {
+            "core": [{**c, "items": [entry(i) for i in c["items"]]} for c in build["choices"]["core"]],
+            "runes": [
+                {**c, "runes": [{"name": r, "icon": data.rune_icon(r)} for r in c["runes"]]}
+                for c in build["choices"]["runes"]
+            ],
+        },
+        "options": _with_option_icons(build["options"]),
+        "matchup": {
+            **build["matchup"],
+            "adjustments": [
+                {**a, "replace": entry(a["replace"]), "with": entry(a["with"])} for a in build["matchup"]["adjustments"]
+            ],
+        }
+        if build.get("matchup")
+        else None,
+    }
+
+
+def _with_option_icons(options: dict) -> dict:
+    def items(slot):
+        return [{**o, "icon": data.item_icon(o["name"])} for o in slot]
+
+    return {
+        "core": [items(slot) for slot in options["core"]],
+        "boots": items(options["boots"]),
+        "extras": [items(slot) for slot in options["extras"]],
+        "runes": [[{**o, "icon": data.rune_icon(o["name"])} for o in slot] for slot in options["runes"]],
     }
 
 
@@ -182,11 +211,15 @@ def list_champions(position: str | None = None) -> list[dict]:
 Position = Annotated[str | None, Query(pattern="^(baron|jungle|mid|dragon|support)$")]
 
 
+Opponent = Annotated[str | None, Query(min_length=1, max_length=40)]
+
+
 @app.get("/api/champions/{name}/build")
-def get_build(name: str, position: Position = None) -> dict:
-    """The build for that lane, or the champion's recommended lane if they have no separate build for it."""
+def get_build(name: str, position: Position = None, vs: Opponent = None) -> dict:
+    """The build for that lane (or the champion's main lane if they have none for it), adjusted for the
+    opponent when `vs` is given."""
     try:
-        return _with_item_icons(data.get_build(name, position))
+        return _with_item_icons(data.get_build(name, position, vs))
     except data.UnknownChampionError as e:
         raise HTTPException(status_code=404, detail=e.args[0]) from e
     except data.NoDataError:
@@ -222,6 +255,8 @@ def list_runes() -> list[dict]:
 class Preferences(BaseModel):
     core: list[Name] = Field(min_length=1, max_length=6)
     runes: list[Name] = Field(min_length=1, max_length=8)
+    boots: Name | None = None
+    extras: list[Name] = Field(default_factory=list, max_length=4)
 
 
 @app.get("/api/common-opponents")
@@ -260,7 +295,11 @@ def save_preferences(
     champion: str, body: Preferences, position: Position = None, user: str = Depends(write_rate_limit)
 ) -> dict:
     try:
-        return {"saved": data.save_preferences(user, champion, body.core, body.runes, position)}
+        return {
+            "saved": data.save_preferences(
+                user, champion, body.core, body.runes, position, boots=body.boots, extras=body.extras
+            )
+        }
     except (data.UnknownChampionError, data.UnknownItemError, data.UnknownRuneError) as e:
         raise HTTPException(status_code=404, detail=e.args[0]) from e
     except ValueError as e:

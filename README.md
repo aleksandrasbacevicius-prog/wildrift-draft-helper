@@ -1,13 +1,13 @@
 # Wild Rift Draft Helper
 
-Champion-select helper for Wild Rift. Pick your lane, your champion and your opponent, and see the current core build, full build, runes, situational swaps and the tier list. Pick your champion with counterpicks in mind ("Strong against [opponent]"), see who counters whom and who pairs well with you, and press and hold any item for its stats. Server stats from real Diamond+ ranked games let you switch to the most popular item core or rune page this patch in one tap, and the opponent list starts with the champions you're most likely to face in your lane. Builds follow the lane you play. Swap core items and runes, and your choices are saved per champion and lane. An AI agent can then tailor the build to the enemy team.
+Champion-select helper for Wild Rift. Pick your lane, your champion and your opponent, and see the current core build, full build, runes, situational swaps and the tier list. Pick your champion with counterpicks in mind ("Strong against [opponent]"), see who counters whom and who pairs well with you, and press and hold any item for its stats. Server stats from real Diamond+ ranked games let you switch to the most popular item core or rune page this patch in one tap, and the opponent list starts with the champions you're most likely to face in your lane. Builds follow the lane you play and adapt to your lane opponent: a counter item when the matchup calls for one, anti-magic items against mages, otherwise the most played build this patch. Every slot (core items, boots, later items, runes) suggests ranked options with the reason. Swap anything, and your choices are saved per champion and lane. An AI agent can then tailor the build to the enemy team.
 
 ```
-Website ── FastAPI ──> data layer ──> WildRiftFire data (refreshed when the patch changes)
+Website ── FastAPI ──> data layer ──> WildRiftCore, RiftPatchNotes, WildRiftFire, WR-META data (refreshed per patch)
                   └──> Strands agent (Claude Haiku 4.5) ──MCP──> MCP server ──> data layer
 ```
 
-- **`wildrift/wildriftfire.py`**: downloads the tier list, every champion's builds per lane (with counters and synergies), the item and rune lists, icons and the patch number from [WildRiftFire.com](https://www.wildriftfire.com), plus item stats and descriptions from [WR-META](https://wr-meta.com/items/), and Diamond+ server builds and lane win/pick/ban rates from [RiftPatchNotes](https://www.riftpatchnotes.com) (`wildrift/riftpatchnotes.py`). It only reads public pages that robots.txt allows, one per second.
+- **`wildrift/wildriftfire.py`**: downloads the tier list, every champion's builds per lane (with counters and synergies), the item and rune lists, icons and the patch number from [WildRiftFire.com](https://www.wildriftfire.com), plus item stats and descriptions from [WR-META](https://wr-meta.com/items/), Diamond+ server builds and lane win/pick/ban rates from [RiftPatchNotes](https://www.riftpatchnotes.com) (`wildrift/riftpatchnotes.py`), build variants, situational items, counter items per opponent, matchup ratings and tier lists from [WildRiftCore](https://wildriftcore.com) (`wildrift/wildriftcore.py`), and champion classes (mage, assassin, tank...) from Riot's Data Dragon. It only reads public pages that robots.txt allows, one per second.
 - **`wildrift/data.py`**: data access with no LLM calls. Covers champions by position and tier, builds, items, core swaps and your champion pool.
 - **`wildrift/mcp_server.py`**: an MCP server exposing the data as 9 tools. Any MCP client can use it, for example Claude Desktop.
 - **`wildrift/agent.py`**: a Strands agent that calls those tools to tailor a build. Only this part costs API credits, and repeat drafts are cached.
@@ -39,14 +39,35 @@ From the command line:
 python -m wildrift.agent Darius --position baron --enemies Garen Ahri --swap "Stridebreaker=triforce"
 ```
 
+## Matchup-aware builds
+
+With no opponent picked, the build is the most played one this patch: the server's most played core, boots, rune
+page and spells, with the later items from WildRiftCore's closest build variant (WildRiftFire's guide is the
+fallback). Against an opponent, the first rule that applies decides:
+
+1. **Specific:** WildRiftCore lists them as one of your hardest matchups with a counter item, or one of your
+   situational items names them (e.g. "Against healing (Soraka, Aatrox...)"). That item goes in.
+2. **Magic damage:** they're a mage by Riot's class data. Anti-magic boots and an anti-magic item go in, taken only
+   from your champion's own options so they fit the build.
+3. **Physical burst:** a physical-damage assassin gets your champion's own anti-burst item.
+
+Otherwise the most played build stays. The card says which rule applied and what changed. Tapping any slot shows
+ranked suggestions first (matchup ones on top), each with its reason, such as a server pick rate or "Against AP
+burst". Whole cores and rune pages can be switched in one tap: most played, server alternatives, WildRiftCore's
+variants (standard, anti-tank, sustain) and the WildRiftFire guide.
+
 ## Counter data
 
-Counters are combined from two independent sources for each lane:
+Counters are combined from three independent sources for each lane:
 
+- **WildRiftCore**: every opponent rated by their edge over your champion (-2 to +2). Opponents with an edge count
+  as counters, and the card for your exact pairing also decides the matchup verdict and gives the key tip.
 - **WildRiftFire**: 3 "countered by" picks per lane on each champion guide.
 - **WR-META**: the free "Extreme threats" list per lane on each champion page. Its premium-locked lists aren't used.
 
-Each source ranks its picks (1st = 1.0, 2nd = 0.9, ...), and a champion's score is the **average across the sources that rate that lane**. A champion both sites name ranks above one only a single site names, and the app marks those "both sites". Tencent's Chinese server stats were considered, but its CDN's robots.txt blocks AI crawlers, so they're not used.
+Each source ranks its picks (1st = 1.0, 2nd = 0.9, ...), and a champion's score is the **average across the sources
+that rate that lane**. A champion several sites name ranks above one only a single site names, and the app shows how
+many sites agree. Tencent's Chinese server stats were considered, but its CDN's robots.txt blocks AI crawlers, so they're not used.
 
 ## Server builds and common opponents
 
@@ -97,4 +118,4 @@ GitHub Actions runs all of these on every push, plus a Docker build (`.github/wo
 - AWS: ECS Fargate behind an ALB, plus a scheduled Lambda for the patch check
 - Persistent storage for pools and usage counters (e.g. a small database)
 
-Builds, tiers and counters from WildRiftFire.com; item details from WR-META.com; server stats from RiftPatchNotes.com. Fan project, not endorsed by Riot Games.
+Builds, matchups and tiers from WildRiftCore.com and WildRiftFire.com; item details from WR-META.com; server stats from RiftPatchNotes.com; champion classes from Riot's Data Dragon. A private tool for a few friends, not a public or commercial product. WildRiftCore's content isn't stored in this repository: the tests use made-up samples. Fan project, not endorsed by Riot Games.

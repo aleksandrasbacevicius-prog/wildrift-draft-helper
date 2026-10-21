@@ -30,10 +30,11 @@ SYSTEM_PROMPT = """You help a Wild Rift player adjust their build during champio
 
 Use the tools to fetch the player's current build for this patch and lane, and the enemy champions' info,
 including whether the lane opponent counters the player (get_matchup).
-The build includes server statistics ("server": the most popular item cores and rune pages in Diamond+ ranked
-games on the CN server, with win and pick rates in percent). Prefer options with a good win rate AND a real pick
-rate; mention the numbers when you recommend one.
-The build also includes items, runes and situational swaps for both (e.g. "vs Healing: replace X with Y").
+Call get_build with the lane opponent as `enemy`: the build is then already adjusted for that matchup
+("matchup" says which rule applied and why). "options" lists ranked alternatives per slot with a reason, such as
+a Diamond+ CN server pick rate or "Against AP burst". Prefer options with a good win rate AND a real pick rate;
+mention the numbers when you recommend one.
+The build also includes situational items and swaps (e.g. "vs Healing: replace X with Y").
 Decide which swaps apply to this enemy team, and whether anything else should change. Consider damage
 types (mostly AD vs AP), healing (anti-heal), crowd control (tenacity), burst and tankiness.
 

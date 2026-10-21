@@ -6,6 +6,7 @@ data/wildriftfire/. Matchup tips in data/tips.json are hand-written.
 
 import json
 import os
+import re
 from functools import lru_cache
 from pathlib import Path
 
@@ -124,29 +125,261 @@ def get_champion(name: str) -> dict:
     }
 
 
-def get_build(name: str, position: str | None = None) -> dict:
-    """The champion's build for a lane. Falls back to their recommended lane's build when they have
-    no separate build for that lane. "position" in the result says which lane the build is for."""
-    champ = _find(name)
-    builds = champ.get("builds") or {}
-    if position in builds:
-        build, used = builds[position], position
-    elif champ.get("build"):
-        build = champ["build"]
-        used = next((pos for pos, b in builds.items() if b is build or b == build), None)
+# How many options to suggest per build slot.
+MAX_OPTIONS = 4
+ANTI_MAGIC = re.compile(r"\bAP\b|magic", re.I)
+ANTI_PHYSICAL_BURST = re.compile(r"\bAD burst\b|assassin", re.I)
+
+
+def _plain(label: str) -> str:
+    """Source labels like "Standard — bruiser" without the dash."""
+    return re.sub(r"\s*[—–]\s*", ": ", label)
+
+
+def _lane_data(champ: dict, position: str | None) -> tuple[str | None, dict, dict, dict]:
+    """The lane to use and each source's build for it: WildRiftCore, server (RiftPatchNotes), WildRiftFire.
+    When the champion has nothing for the lane asked for, their main lane is used instead."""
+    wrc = (champ.get("wrc") or {}).get("builds") or {}
+    server = _server(champ)["builds"]
+    wrf = champ.get("builds") or {}
+    if position and (position in wrc or position in server or position in wrf):
+        lane = position
     else:
-        raise UnknownChampionError(f"No build available for {champ['name']}")
+        main = next((pos for pos, b in wrf.items() if b is champ.get("build") or b == champ.get("build")), None)
+        lane = main or next(iter(champ.get("positions") or {}), None)
+        if lane not in wrc and lane not in server and lane not in wrf:
+            lane = next(iter(wrc), None) or next(iter(server), None) or next(iter(wrf), None)
+    return lane, wrc.get(lane) or {}, server.get(lane) or {}, wrf.get(lane) or {}
+
+
+def _choices(wrc: dict, server: dict, wrf: dict) -> tuple[list[dict], list[dict]]:
+    """Whole item cores and rune pages to choose from, most played first."""
+    cores, pages = [], []
+    for i, core in enumerate(server.get("cores", [])):
+        label = "Most played" if i == 0 else f"Server alternative {i}"
+        cores.append(
+            {"label": label, "items": core["items"], "win": core["win"], "pick": core["pick"], "source": "server"}
+        )
+    for variant in wrc.get("variants", []):
+        if len(variant["items"]) >= 3:
+            cores.append(
+                {
+                    "label": _plain(variant["name"]),
+                    "items": variant["items"][:3],
+                    "when": variant["when"],
+                    "source": "WildRiftCore",
+                }
+            )
+    if wrf.get("core"):
+        cores.append({"label": "WildRiftFire guide", "items": wrf["core"], "source": "WildRiftFire"})
+    for i, page in enumerate(server.get("rune_pages", [])):
+        label = "Most played" if i == 0 else f"Server alternative {i}"
+        pages.append(
+            {"label": label, "runes": page["runes"], "win": page["win"], "pick": page["pick"], "source": "server"}
+        )
+    if len(wrc.get("runes", [])) == 5:
+        pages.append(
+            {
+                "label": "WildRiftCore",
+                "runes": wrc["runes"],
+                "note": wrc.get("rune_reason", ""),
+                "source": "WildRiftCore",
+            }
+        )
+    if wrf.get("runes"):
+        pages.append({"label": "WildRiftFire guide", "runes": wrf["runes"], "source": "WildRiftFire"})
+    if not pages and wrc.get("runes"):  # an incomplete page beats none when it's the only source for the lane
+        pages.append(
+            {
+                "label": "WildRiftCore",
+                "runes": wrc["runes"],
+                "note": wrc.get("rune_reason", ""),
+                "source": "WildRiftCore",
+            }
+        )
+    # Keep one shape per build: the default's length decides.
+    if cores:
+        cores = [c for c in cores if len(c["items"]) == len(cores[0]["items"])]
+    if pages:
+        pages = [p for p in pages if len(p["runes"]) == len(pages[0]["runes"])]
+    return cores, pages
+
+
+def _extras(core: list[str], boots: list[str], wrc: dict, wrf: dict, count: int = 2) -> list[str]:
+    """Items after the core: from the WildRiftCore variant closest to this core, then the guide's full build."""
+    variants = sorted(wrc.get("variants", []), key=lambda v: -len(set(v["items"]) & set(core)))
+    pool = [i for v in variants[:1] for i in v["items"]] + list(wrf.get("final", []))
+    pool += [i for v in variants[1:] for i in v["items"]]
+    taken = set(core) | set(boots)
+    return [i for i in dict.fromkeys(pool) if i not in taken and not _is_boots(i)][:count]
+
+
+def _is_boots(name: str) -> bool:
+    item = _wrf()["items"].get(name) or {}
+    return "Boots" in item.get("categories", []) or name in {"Mercury's Treads", "Plated Steelcaps"}
+
+
+def _matchup_rule(foe: dict, wrc: dict, wrf: dict, server: dict) -> dict:
+    """What to change against this opponent, most specific first:
+    1. WildRiftCore names them as a hard matchup with a counter item (or a situational item names them).
+    2. They deal magic damage: anti-magic boots and an anti-magic item from this champion's own options.
+    3. They're a physical-damage assassin: the champion's own anti-burst item.
+    Otherwise nothing changes and the most played build stays."""
+    profile = foe.get("profile") or {}
+    changes: list[dict] = []
+    for entry in wrc.get("vs", []):
+        if slug(entry["foe"]) == slug(foe["name"]):
+            changes.append({"item": entry["item"], "why": f"Counter to {foe['name']} ({entry['why'].lower()})"})
+    for entry in wrc.get("situational", []):
+        if re.search(rf"\b{re.escape(foe['name'])}\b", entry["when"]):
+            changes.append({"item": entry["item"], "why": entry["when"]})
+    if changes:
+        return {"rule": "specific", "changes": changes, "note": f"Matchup-specific build against {foe['name']}"}
+
+    def own_options(pattern):
+        items = [s["item"] for s in wrc.get("situational", []) if pattern.search(s["when"])]
+        swaps = [s for s in wrf.get("situational", []) if pattern.search(s["when"])]
+        return items + [s["with"] for s in swaps if not _is_boots(s["with"])], [
+            s["with"] for s in swaps if _is_boots(s["with"])
+        ]
+
+    if profile.get("damage") == "magic":
+        items, boots = own_options(ANTI_MAGIC)
+        boots += [b["item"] for b in server.get("boots", []) if b.get("item") == "Mercury's Treads"]
+        changes += [{"item": b, "why": f"{foe['name']} deals magic damage", "boots": True} for b in boots[:1]]
+        changes += [{"item": i, "why": f"{foe['name']} deals magic damage"} for i in items[:1]]
+        if changes:
+            return {"rule": "magic", "changes": changes, "note": f"Anti-magic build: {foe['name']} deals magic damage"}
+    if profile.get("damage") == "physical" and "assassin" in profile.get("tags", []):
+        items, _ = own_options(ANTI_PHYSICAL_BURST)
+        changes += [{"item": i, "why": f"{foe['name']} is a physical-damage assassin"} for i in items[:1]]
+        if changes:
+            return {"rule": "physical", "changes": changes, "note": f"Anti-burst build against {foe['name']}"}
+    return {"rule": "general", "changes": [], "note": f"No change needed against {foe['name']}: most played build"}
+
+
+def _option(name: str, why: str, matchup: bool = False) -> dict:
+    return {"name": name, "why": why, "matchup": matchup}
+
+
+def _rank(options: list[dict], current: str, taken: set[str]) -> list[dict]:
+    """Unique options, matchup ones first, without the current pick or items used elsewhere in the build."""
+    seen, ranked = set(), []
+    for opt in sorted(options, key=lambda o: not o["matchup"]):
+        if opt["name"] != current and opt["name"] not in taken and opt["name"] not in seen:
+            seen.add(opt["name"])
+            ranked.append(opt)
+    return ranked[:MAX_OPTIONS]
+
+
+def _choice_why(choice: dict) -> str:
+    if "pick" in choice:
+        return f"{choice['label']}: {choice['pick']:.0f}% pick, {choice['win']:.1f}% win"
+    return choice["label"] + (f" ({choice['when']})" if choice.get("when") else "")
+
+
+def _slot_options(build: dict, wrc: dict, wrf: dict, server: dict, rule: dict) -> dict:
+    """Ranked alternatives for every slot: core items, boots, later items and runes."""
+    choices, core, final, runes = build["choices"], build["core"], build["final"], build["runes"]
+    used = set(final)
+    matchup = [_option(c["item"], c["why"], True) for c in rule["changes"]]
+    core_opts = []
+    for slot in range(len(core)):
+        opts = [_option(c["items"][slot], _choice_why(c)) for c in choices["core"] if slot < len(c["items"])]
+        core_opts.append(_rank(opts, core[slot], used))
+    boots_opts = [m for m in matchup if _is_boots(m["name"])]
+    boots_opts += [
+        _option(b["item"], f"Server: {b['pick']:.0f}% pick, {b['win']:.1f}% win")
+        for b in server.get("boots", [])
+        if b.get("item")
+    ]
+    boots_opts += [_option(s["with"], s["when"]) for s in wrf.get("situational", []) if _is_boots(s["with"])]
+    if wrc.get("boots"):
+        boots_opts.append(_option(wrc["boots"], "WildRiftCore"))
+    later = [m for m in matchup if not _is_boots(m["name"])]
+    later += [_option(s["item"], s["when"]) for s in wrc.get("situational", [])]
+    later += [_option(s["with"], s["when"]) for s in wrf.get("situational", []) if not _is_boots(s["with"])]
+    later += [_option(i, _plain(v["name"])) for v in wrc.get("variants", []) for i in v["items"][3:]]
+    extra_opts = [_rank(later, item, used) for item in final[len(build["boots"]) + len(core) :]]
+    catalog = _wrf()["runes"]
+    rune_opts = []
+    for slot in range(len(runes)):
+        kind = "keystone" if slot == 0 else "minor"
+        opts = [
+            _option(p["runes"][slot], _choice_why(p))
+            for p in choices["runes"]
+            if slot < len(p["runes"]) and (catalog.get(p["runes"][slot]) or {}).get("kind", kind) == kind
+        ]
+        rune_opts.append(_rank(opts, runes[slot], set(runes)))
     return {
+        "core": core_opts,
+        "boots": _rank(boots_opts, (build["boots"] or [""])[0], used),
+        "extras": extra_opts,
+        "runes": rune_opts,
+    }
+
+
+def get_build(name: str, position: str | None = None, enemy: str | None = None) -> dict:
+    """The champion's build for a lane, adjusted for the opponent when one is given.
+
+    Without an opponent it's the most played build this patch: the server's most played core, boots, rune page
+    and spells (RiftPatchNotes), later items from WildRiftCore's closest variant, with WildRiftFire's guide as
+    the fallback. With an opponent, _matchup_rule decides what changes. "options" has ranked alternatives for
+    every slot, "choices" whole cores and rune pages. "position" says which lane the build is for."""
+    champ = _find(name)
+    lane, wrc, server, wrf = _lane_data(champ, position)
+    cores, pages = _choices(wrc, server, wrf)
+    if not cores or not pages:
+        raise UnknownChampionError(f"No build available for {champ['name']}")
+    core = list(cores[0]["items"])
+    boots = [b["item"] for b in server.get("boots", [])[:1] if b.get("item")]
+    boots = boots or ([wrc["boots"]] if wrc.get("boots") else list(wrf.get("boots", []))[:1])
+    extras = _extras(core, boots, wrc, wrf)
+    spells = (server.get("spells") or [{}])[0].get("spells") or wrf.get("spells", [])
+
+    foe = _find(enemy) if enemy else None
+    rule = _matchup_rule(foe, wrc, wrf, server) if foe else {"rule": "general", "changes": [], "note": ""}
+    adjustments = []
+    for change in rule["changes"]:
+        item = change["item"]
+        if change.get("boots"):
+            if boots and boots[0] != item:
+                adjustments.append(
+                    {"slot": "boots", "index": 0, "replace": boots[0], "with": item, "why": change["why"]}
+                )
+                boots = [item]
+        elif item not in core and item not in extras and extras:
+            slot = len(extras) - 1 - sum(1 for a in adjustments if a["slot"] == "extras")
+            if slot >= 0:
+                adjustments.append(
+                    {"slot": "extras", "index": slot, "replace": extras[slot], "with": item, "why": change["why"]}
+                )
+                extras[slot] = item
+    build = {
         "name": champ["name"],
-        "position": used,
-        "countered_by": [],
-        "synergies": [],
-        **build,
+        "position": lane,
+        "core": core,
+        "boots": boots,
+        "final": boots + core + extras,
+        "runes": list(pages[0]["runes"]),
+        "spells": spells,
+        "starting": wrf.get("starting", []),
+        "situational": wrf.get("situational", []),
+        "situational_items": wrc.get("situational", []),
+        "countered_by": wrf.get("countered_by", []),
+        "synergies": wrf.get("synergies", []),
+        "counters": (champ.get("counters") or {}).get(lane) or wrf.get("counters") or [],
+        "choices": {"core": cores, "runes": pages},
+        "matchup": {"enemy": foe["name"], "rule": rule["rule"], "note": rule["note"], "adjustments": adjustments}
+        if foe
+        else None,
         # Server builds and stats for the lane asked for (or the build's own lane when it fell back).
-        "server": _server(champ)["builds"].get(position or used) or _server(champ)["builds"].get(used) or {},
-        "server_stats": _server(champ)["stats"].get(position or used) or {},
+        "server": server,
+        "server_stats": _server(champ)["stats"].get(position or lane) or {},
         "patch": meta()["patch"],
     }
+    build["options"] = _slot_options(build, wrc, wrf, server, rule)
+    return build
 
 
 def _names(entries: list[dict]) -> list[str]:
@@ -204,6 +437,15 @@ def get_matchup(my_champion: str, enemy: str, position: str | None = None) -> di
     # Sources sometimes list each champion as countering the other; then the scores decide.
     mine_vs, theirs_vs = counter_score(mine["name"], theirs["name"]), counter_score(theirs["name"], mine["name"])
     gap = mine_vs - theirs_vs
+    you_counter, they_counter, mutual = gap > EVEN_MARGIN, gap < -EVEN_MARGIN, bool(mine_vs and theirs_vs)
+    mutual = mutual and abs(gap) <= EVEN_MARGIN
+    # WildRiftCore rates this exact pairing: the opponent's edge over you, -2..+2. When it does, it decides.
+    card = matchup_card(mine["name"], theirs["name"], position)
+    if card:
+        you_counter, they_counter, mutual = card["edge"] < 0, card["edge"] > 0, False
+    tips = [t for t in (card["key"], card["how"]) if t] if card else []
+    tips += theirs.get("playing_against", [])
+    profile = _find(theirs["name"]).get("profile") or {}
 
     try:
         my_synergies = get_build(my_champion, position)["synergies"]
@@ -211,9 +453,11 @@ def get_matchup(my_champion: str, enemy: str, position: str | None = None) -> di
         my_synergies = []
     return {
         "enemy_countered_by": counter_names(theirs["name"]),
-        "you_counter_enemy": gap > EVEN_MARGIN,
-        "enemy_counters_you": gap < -EVEN_MARGIN,
-        "counters_each_other": bool(mine_vs and theirs_vs) and abs(gap) <= EVEN_MARGIN,
+        "you_counter_enemy": you_counter,
+        "enemy_counters_you": they_counter,
+        "counters_each_other": mutual,
+        "even": bool(card) and card["edge"] == 0,
+        "card": card,
         "your_counter_score": mine_vs,
         "enemy_counter_score": theirs_vs,
         "your_synergies": my_synergies,
@@ -225,11 +469,32 @@ def get_matchup(my_champion: str, enemy: str, position: str | None = None) -> di
         "your_strengths": mine.get("strengths", []),
         "enemy_strengths": theirs.get("strengths", []),
         "enemy_weaknesses": theirs.get("weaknesses", []),
-        "how_to_play_against_enemy": theirs.get("playing_against", []),
-        "enemy_damage_type": theirs.get("damage"),
+        "how_to_play_against_enemy": tips,
+        "enemy_damage_type": theirs.get("damage") or profile.get("damage"),
+        "enemy_classes": profile.get("tags", []),
         "enemy_heals": theirs.get("heals"),
-        "has_tips": "playing_against" in theirs,
+        "has_tips": bool(tips),
     }
+
+
+def matchup_card(mine: str, enemy: str, position: str | None = None) -> dict | None:
+    """WildRiftCore's card for this pairing: the opponent's edge over you (-2..+2), the matchup group,
+    tags, the interaction that decides it and how to play it. None when they don't rate the pairing."""
+    champ, foe = _find(mine), _find(enemy)
+
+    def card_on(page_of: dict, about: dict) -> dict | None:
+        lanes = (page_of.get("wrc") or {}).get("matchups") or {}
+        lane_cards = lanes.get(position) if position else next(iter(lanes.values()), None)
+        return next((c for n, c in (lane_cards or {}).items() if slug(n) == slug(about["name"])), None)
+
+    card = card_on(champ, foe)
+    if card:
+        return {"enemy": foe["name"], **card}
+    # Not on your champion's page: their page may rate you. Flip the edge; its tips are for the other side.
+    reverse = card_on(foe, champ)
+    if reverse:
+        return {"enemy": foe["name"], "edge": -reverse["edge"], "group": None, "tags": reverse["tags"], "key": "", "how": ""}
+    return None
 
 
 def get_items(category: str | None = None) -> dict[str, dict]:
@@ -254,6 +519,10 @@ def item_icon(name: str) -> str | None:
 
 
 def rune_icon(name: str) -> str | None:
+    """The rune list's icon (some are .webp from WildRiftCore), else a downloaded .png."""
+    icon = (_wrf()["runes"].get(name) or {}).get("icon")
+    if icon and (ROOT / "static" / icon.lstrip("/")).exists():
+        return icon
     return _local_icon("runes", name)
 
 
@@ -393,25 +662,42 @@ def get_preferences(user: str | None, champion: str, position: str | None = None
     # A patch can remove items or runes or change the build's shape; then the saved build is dropped.
     try:
         build = get_build(champion, position)
-        items_ok = all(i in _wrf()["items"] for i in saved["core"]) and len(saved["core"]) == len(build["core"])
+        later = saved.get("extras", []) + ([saved["boots"]] if saved.get("boots") else [])
+        items_ok = all(i in _wrf()["items"] for i in saved["core"] + later)
+        items_ok = items_ok and len(saved["core"]) == len(build["core"])
         validate_runes(champion, saved["runes"], position)
     except (UnknownChampionError, UnknownRuneError, ValueError, KeyError):
         return None
     return saved if items_ok else None
 
 
-def save_preferences(user: str, champion: str, core: list[str], runes: list[str], position: str | None = None) -> dict:
-    """Save a user's own core items and runes for a champion in a lane (validated like swaps)."""
+def save_preferences(
+    user: str,
+    champion: str,
+    core: list[str],
+    runes: list[str],
+    position: str | None = None,
+    boots: str | None = None,
+    extras: list[str] | None = None,
+) -> dict:
+    """Save a user's own core items and runes (and optionally boots and later items) for a champion in a lane."""
     build = get_build(champion, position)
     core_items = [resolve_item(i) for i in core]
     if len(core_items) != len(build["core"]) or len(set(core_items)) != len(core_items):
         raise ValueError(f"Core needs {len(build['core'])} different items")
-    boots = [i for i in core_items if "Boots" in _wrf()["items"][i]["categories"]]
-    if boots:
-        raise ValueError(f"Boots can't be core items: {', '.join(boots)}")
+    boots_in_core = [i for i in core_items if "Boots" in _wrf()["items"][i]["categories"]]
+    if boots_in_core:
+        raise ValueError(f"Boots can't be core items: {', '.join(boots_in_core)}")
     prefs = _all_prefs(user)
     key = _prefs_key(champion, position)
     prefs[key] = {"core": core_items, "runes": validate_runes(build["name"], runes, position)}
+    if boots:
+        prefs[key]["boots"] = resolve_item(boots)
+    if extras:
+        later = [resolve_item(i) for i in extras]
+        if len(set(later) | set(core_items)) != len(later) + len(core_items):
+            raise ValueError("An item can only be in the build once")
+        prefs[key]["extras"] = later
     PREFS_DIR.mkdir(parents=True, exist_ok=True)
     _prefs_file(user).write_text(json.dumps(prefs, indent=1), encoding="utf-8")
     return prefs[key]

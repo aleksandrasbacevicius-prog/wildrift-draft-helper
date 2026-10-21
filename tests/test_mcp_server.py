@@ -39,6 +39,6 @@ def test_matchup_has_tips_flag():
 def test_get_counters_and_lane_build():
     from wildrift import mcp_server as mcp
 
-    assert {c["name"] for c in mcp.get_counters("Darius", "baron")} <= {"Dr. Mundo", "Malphite", "Ornn"}
+    assert {c["name"] for c in mcp.get_counters("Darius", "baron")} <= {"Dr. Mundo", "Malphite", "Ornn", "Garen"}
     assert "error" in mcp.get_counters("Nobody")
     assert mcp.get_build("Darius", "jungle")["position"] == "jungle"

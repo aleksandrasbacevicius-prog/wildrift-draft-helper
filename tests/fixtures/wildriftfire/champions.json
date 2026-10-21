@@ -615,6 +615,152 @@
      "updated": "2026-10-04"
     }
    }
+  },
+  "profile": {
+   "damage": "physical",
+   "tags": [
+    "fighter",
+    "tank"
+   ]
+  },
+  "wrc": {
+   "slug": "darius",
+   "stats": {
+    "baron": {
+     "win": 50.0,
+     "pick": 14.0,
+     "ban": 12.0
+    }
+   },
+   "builds": {
+    "baron": {
+     "variants": [
+      {
+       "key": "standard",
+       "name": "Standard — bruiser",
+       "description": "Sample standard build.",
+       "items": [
+        "Stridebreaker",
+        "Sterak's Gage",
+        "Black Cleaver",
+        "Death's Dance",
+        "Force of Nature"
+       ],
+       "when": "No strong signal"
+      },
+      {
+       "key": "anti-tank",
+       "name": "Anti-tank — shred",
+       "description": "Sample anti-tank build.",
+       "items": [
+        "Black Cleaver",
+        "Serylda's Grudge",
+        "Sterak's Gage",
+        "Divine Sunderer",
+        "Death's Dance"
+       ],
+       "when": "Two or more tanks"
+      }
+     ],
+     "boots": "Plated Steelcaps",
+     "runes": [
+      "Conqueror",
+      "Unshakeable",
+      "Second Wind",
+      "Perseverance",
+      "Nimbus Cloak"
+     ],
+     "rune_reason": "Sample reason.",
+     "situational": [
+      {
+       "item": "Chempunk Chainsword",
+       "when": "Against healing (Aatrox, Dr. Mundo)"
+      },
+      {
+       "item": "Wit's End",
+       "when": "Against AP burst"
+      },
+      {
+       "item": "Guardian Angel",
+       "when": "Against AD burst"
+      }
+     ],
+     "vs": [
+      {
+       "foe": "Malphite",
+       "why": "Magic damage",
+       "item": "Wit's End"
+      }
+     ]
+    }
+   },
+   "matchups": {
+    "baron": {
+     "Garen": {
+      "edge": 1,
+      "group": "unfavorable",
+      "tags": [
+       "Sustain"
+      ],
+      "key": "Sample key tip vs Garen.",
+      "how": "Sample how to play vs Garen."
+     },
+     "Mordekaiser": {
+      "edge": 0,
+      "group": "skill",
+      "tags": [],
+      "key": "Sample key tip vs Mordekaiser.",
+      "how": "Sample how to play vs Mordekaiser."
+     }
+    }
+   }
+  },
+  "wrmeta_counters": {
+   "baron": [
+    "vayne",
+    "jax",
+    "kennen",
+    "jayce"
+   ],
+   "jungle": [
+    "kindred",
+    "olaf",
+    "gwen",
+    "pantheon"
+   ]
+  },
+  "counters": {
+   "baron": [
+    {
+     "name": "Dr. Mundo",
+     "score": 0.333,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Garen",
+     "score": 0.333,
+     "sources": [
+      "WildRiftCore"
+     ]
+    },
+    {
+     "name": "Malphite",
+     "score": 0.3,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Ornn",
+     "score": 0.267,
+     "sources": [
+      "WildRiftFire"
+     ]
+    }
+   ],
+   "jungle": []
   }
  },
  "Garen": {
@@ -961,6 +1107,46 @@
      "updated": "2026-10-04"
     }
    }
+  },
+  "profile": {
+   "damage": "physical",
+   "tags": [
+    "fighter",
+    "tank"
+   ]
+  },
+  "wrc": {
+   "slug": "garen",
+   "stats": {
+    "baron": {
+     "win": 51.0,
+     "pick": 12.0,
+     "ban": 3.0
+    }
+   },
+   "builds": {},
+   "matchups": {
+    "baron": {
+     "Darius": {
+      "edge": -1,
+      "group": "favorable",
+      "tags": [],
+      "key": "Sample key tip vs Darius.",
+      "how": "Sample how to play vs Darius."
+     }
+    }
+   }
+  },
+  "wrmeta_counters": {
+   "baron": [
+    "vayne",
+    "kayle",
+    "teemo",
+    "akshan"
+   ]
+  },
+  "counters": {
+   "baron": []
   }
  },
  "Mordekaiser": {
@@ -1321,6 +1507,33 @@
      "updated": "2026-10-04"
     }
    }
+  },
+  "profile": {
+   "damage": "magic",
+   "tags": [
+    "fighter",
+    "mage"
+   ]
+  },
+  "wrmeta_counters": {
+   "baron": [
+    "fiora",
+    "vayne",
+    "olaf",
+    "jax",
+    "garen"
+   ]
+  },
+  "counters": {
+   "baron": [
+    {
+     "name": "Garen",
+     "score": 0.3,
+     "sources": [
+      "WR-META"
+     ]
+    }
+   ]
   }
  },
  "Aatrox": {
@@ -1906,6 +2119,34 @@
      "updated": "2026-10-04"
     }
    }
+  },
+  "profile": {
+   "damage": "physical",
+   "tags": [
+    "fighter"
+   ]
+  },
+  "wrmeta_counters": {
+   "baron": [
+    "vayne",
+    "warwick",
+    "singed",
+    "camille",
+    "jax"
+   ],
+   "jungle": []
+  },
+  "counters": {
+   "baron": [
+    {
+     "name": "Malphite",
+     "score": 0.45,
+     "sources": [
+      "WildRiftFire"
+     ]
+    }
+   ],
+   "jungle": []
   }
  },
  "Ahri": {
@@ -2270,6 +2511,31 @@
      "updated": "2026-10-04"
     }
    }
+  },
+  "profile": {
+   "damage": "magic",
+   "tags": [
+    "mage",
+    "assassin"
+   ]
+  },
+  "wrmeta_counters": {
+   "mid": [
+    "twistedfate",
+    "akshan",
+    "zed"
+   ]
+  },
+  "counters": {
+   "mid": [
+    {
+     "name": "Syndra",
+     "score": 0.45,
+     "sources": [
+      "WildRiftFire"
+     ]
+    }
+   ]
   }
  },
  "Syndra": {
@@ -2662,6 +2928,28 @@
      "updated": "2026-10-04"
     }
    }
+  },
+  "profile": {
+   "damage": "magic",
+   "tags": [
+    "mage"
+   ]
+  },
+  "wrmeta_counters": {
+   "mid": [
+    "irelia",
+    "yasuo",
+    "kassadin",
+    "gragas",
+    "diana",
+    "fizz",
+    "ekko",
+    "viktor",
+    "velkoz"
+   ]
+  },
+  "counters": {
+   "mid": []
   }
  },
  "Lee Sin": {
@@ -3013,6 +3301,25 @@
      "updated": "2026-10-04"
     }
    }
+  },
+  "profile": {
+   "damage": "physical",
+   "tags": [
+    "fighter",
+    "assassin"
+   ]
+  },
+  "wrmeta_counters": {
+   "jungle": [
+    "lillia",
+    "nunuwillump",
+    "olaf",
+    "xinzhao",
+    "khazix"
+   ]
+  },
+  "counters": {
+   "jungle": []
   }
  },
  "Jinx": {
@@ -3403,6 +3710,25 @@
      "updated": "2026-10-04"
     }
    }
+  },
+  "profile": {
+   "damage": "physical",
+   "tags": [
+    "marksman"
+   ]
+  },
+  "wrmeta_counters": {
+   "dragon": [
+    "ashe",
+    "amumu",
+    "vayne",
+    "twitch",
+    "leona",
+    "rakan"
+   ]
+  },
+  "counters": {
+   "dragon": []
   }
  },
  "Thresh": {
@@ -3825,6 +4151,36 @@
      "updated": "2026-10-04"
     }
    }
+  },
+  "profile": {
+   "damage": "mixed",
+   "tags": [
+    "support",
+    "tank"
+   ]
+  },
+  "wrmeta_counters": {
+   "support": [
+    "zyra",
+    "maokai",
+    "brand",
+    "pyke",
+    "morgana",
+    "poppy",
+    "draven",
+    "sivir"
+   ]
+  },
+  "counters": {
+   "support": [
+    {
+     "name": "Nami",
+     "score": 0.45,
+     "sources": [
+      "WildRiftFire"
+     ]
+    }
+   ]
   }
  },
  "Swain": {
@@ -4469,6 +4825,56 @@
      "updated": "2026-10-04"
     }
    }
+  },
+  "profile": {
+   "damage": "magic",
+   "tags": [
+    "mage",
+    "support"
+   ]
+  },
+  "wrmeta_counters": {
+   "mid": [
+    "brand",
+    "pantheon",
+    "kassadin",
+    "tristana",
+    "fizz",
+    "gragas",
+    "zoe",
+    "aurelionsol"
+   ],
+   "support": [
+    "brand",
+    "janna",
+    "zilean",
+    "maokai",
+    "nami",
+    "senna",
+    "kalista",
+    "vayne",
+    "yasuo"
+   ]
+  },
+  "counters": {
+   "support": [
+    {
+     "name": "Nami",
+     "score": 0.3,
+     "sources": [
+      "WR-META"
+     ]
+    }
+   ],
+   "mid": [
+    {
+     "name": "Syndra",
+     "score": 0.45,
+     "sources": [
+      "WildRiftFire"
+     ]
+    }
+   ]
   }
  },
  "Caitlyn": {
@@ -4845,6 +5251,32 @@
      "updated": "2026-10-04"
     }
    }
+  },
+  "profile": {
+   "damage": "physical",
+   "tags": [
+    "marksman"
+   ]
+  },
+  "wrmeta_counters": {
+   "dragon": [
+    "kogmaw",
+    "leona",
+    "tristana",
+    "lucian",
+    "nautilus"
+   ]
+  },
+  "counters": {
+   "dragon": [
+    {
+     "name": "Ezreal",
+     "score": 0.45,
+     "sources": [
+      "WildRiftFire"
+     ]
+    }
+   ]
   }
  },
  "Ezreal": {
@@ -5215,6 +5647,25 @@
      "updated": "2026-10-04"
     }
    }
+  },
+  "profile": {
+   "damage": "physical",
+   "tags": [
+    "marksman",
+    "mage"
+   ]
+  },
+  "wrmeta_counters": {
+   "dragon": [
+    "samira",
+    "kaisa",
+    "tristana",
+    "pyke",
+    "lux"
+   ]
+  },
+  "counters": {
+   "dragon": []
   }
  },
  "Nami": {
@@ -5563,6 +6014,33 @@
      "updated": "2026-10-04"
     }
    }
+  },
+  "profile": {
+   "damage": "magic",
+   "tags": [
+    "support",
+    "mage"
+   ]
+  },
+  "wrmeta_counters": {
+   "support": [
+    "blitzcrank",
+    "pyke",
+    "maokai",
+    "nautilus",
+    "thresh"
+   ]
+  },
+  "counters": {
+   "support": [
+    {
+     "name": "Thresh",
+     "score": 0.3,
+     "sources": [
+      "WR-META"
+     ]
+    }
+   ]
   }
  },
  "Yuumi": {
@@ -5574,112 +6052,15 @@
   "builds": {},
   "build": null,
   "icon": "/icons/wrf/champions/yuumi.png",
-  "server": {
-   "stats": {
-    "support": {
-     "win": 48.9,
-     "pick": 9.67,
-     "ban": 34.38,
-     "win_trend": 2,
-     "pick_trend": 0
-    }
-   },
-   "builds": {
-    "support": {
-     "cores": [
-      {
-       "label": "Most popular core",
-       "win": 50.52,
-       "pick": 36.25,
-       "items": [
-        "Black Mist Scythe",
-        "Ardent Censer",
-        "Harmonic Echo"
-       ]
-      },
-      {
-       "label": "Alternative core 1",
-       "win": 54.11,
-       "pick": 16.03,
-       "items": [
-        "Black Mist Scythe",
-        "Diadem of Songs",
-        "Ardent Censer"
-       ]
-      },
-      {
-       "label": "Alternative core 2",
-       "win": 49.85,
-       "pick": 10.81,
-       "items": [
-        "Black Mist Scythe",
-        "Ardent Censer",
-        "Mikael's Blessing"
-       ]
-      }
-     ],
-     "boots": [
-      {
-       "label": "Most popular boots",
-       "win": 46.64,
-       "pick": 99.77,
-       "item": "Ionian Boots of Lucidity"
-      }
-     ],
-     "rune_pages": [
-      {
-       "label": "Most popular page",
-       "win": 50.24,
-       "pick": 46.44,
-       "runes": [
-        "Aery",
-        "Manaflow Band",
-        "Transcendence",
-        "Scorch",
-        "Revitalize"
-       ],
-       "primary": "Sorcery",
-       "secondary": "Resolve"
-      },
-      {
-       "label": "Alternative page",
-       "win": 48.2,
-       "pick": 13.59,
-       "runes": [
-        "Aery",
-        "Axiom Arcanist",
-        "Transcendence",
-        "Scorch",
-        "Revitalize"
-       ],
-       "primary": "Sorcery",
-       "secondary": "Resolve"
-      }
-     ],
-     "spells": [
-      {
-       "label": "Most popular summoners",
-       "win": 49.95,
-       "pick": 61.82,
-       "spells": [
-        "Heal",
-        "Ignite"
-       ]
-      },
-      {
-       "label": "Alternative summoners",
-       "win": 47.54,
-       "pick": 26.01,
-       "spells": [
-        "Heal",
-        "Exhaust"
-       ]
-      }
-     ],
-     "updated": "2026-10-04"
-    }
-   }
-  }
+  "profile": {
+   "damage": "magic",
+   "tags": [
+    "support",
+    "mage"
+   ]
+  },
+  "wrmeta_counters": {},
+  "counters": {}
  },
  "Malphite": {
   "name": "Malphite",
@@ -6268,6 +6649,71 @@
      "updated": "2026-10-04"
     }
    }
+  },
+  "profile": {
+   "damage": "magic",
+   "tags": [
+    "tank",
+    "mage"
+   ]
+  },
+  "wrmeta_counters": {
+   "baron": [
+    "mordekaiser",
+    "rumble",
+    "drmundo",
+    "chogath",
+    "darius",
+    "sion"
+   ],
+   "support": [
+    "maokai",
+    "draven",
+    "morgana",
+    "alistar",
+    "lucian",
+    "vayne",
+    "caitlyn",
+    "zilean",
+    "samira",
+    "lux",
+    "velkoz"
+   ]
+  },
+  "counters": {
+   "baron": [
+    {
+     "name": "Mordekaiser",
+     "score": 0.95,
+     "sources": [
+      "WildRiftFire",
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Dr. Mundo",
+     "score": 0.4,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Darius",
+     "score": 0.3,
+     "sources": [
+      "WR-META"
+     ]
+    }
+   ],
+   "support": [
+    {
+     "name": "Caitlyn",
+     "score": 0.4,
+     "sources": [
+      "WR-META"
+     ]
+    }
+   ]
   }
  },
  "Dr. Mundo": {
@@ -6826,6 +7272,41 @@
      "updated": "2026-10-04"
     }
    }
+  },
+  "profile": {
+   "damage": "mixed",
+   "tags": [
+    "tank",
+    "fighter"
+   ]
+  },
+  "wrmeta_counters": {
+   "baron": [
+    "gwen",
+    "warwick",
+    "vayne",
+    "darius"
+   ],
+   "jungle": []
+  },
+  "counters": {
+   "baron": [
+    {
+     "name": "Aatrox",
+     "score": 0.5,
+     "sources": [
+      "WildRiftFire"
+     ]
+    },
+    {
+     "name": "Darius",
+     "score": 0.35,
+     "sources": [
+      "WR-META"
+     ]
+    }
+   ],
+   "jungle": []
   }
  },
  "Ornn": {
@@ -7507,6 +7988,54 @@
      "updated": "2026-10-04"
     }
    }
+  },
+  "profile": {
+   "damage": "physical",
+   "tags": [
+    "tank"
+   ]
+  },
+  "wrmeta_counters": {
+   "baron": [
+    "fiora",
+    "camille",
+    "darius",
+    "singed",
+    "aatrox",
+    "gwen",
+    "irelia",
+    "warwick",
+    "vayne"
+   ],
+   "support": [
+    "vayne",
+    "alistar",
+    "morgana",
+    "samira",
+    "lulu",
+    "kalista",
+    "zyra",
+    "sivir"
+   ]
+  },
+  "counters": {
+   "baron": [
+    {
+     "name": "Darius",
+     "score": 0.4,
+     "sources": [
+      "WR-META"
+     ]
+    },
+    {
+     "name": "Aatrox",
+     "score": 0.3,
+     "sources": [
+      "WR-META"
+     ]
+    }
+   ],
+   "support": []
   }
  }
 }

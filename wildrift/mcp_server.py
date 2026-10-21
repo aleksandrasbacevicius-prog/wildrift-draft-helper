@@ -34,18 +34,34 @@ def get_champion(name: str) -> dict:
 
 
 @server.tool()
-def get_build(name: str, position: str | None = None) -> dict:
-    """Get the champion's current build for a lane (baron, jungle, mid, dragon, support): starting item,
-    core items, boots, final build, situational swaps (e.g. 'vs Healing: replace X with Y'), summoner
-    spells, runes, and who counters them / synergises with them in that lane."""
-    return _safe(data.get_build, name, position)
+def get_build(name: str, position: str | None = None, enemy: str | None = None) -> dict:
+    """Get the champion's build for a lane (baron, jungle, mid, dragon, support) this patch, adjusted for the
+    lane opponent when `enemy` is given: core items, boots, full build, runes, summoner spells, situational
+    items, "matchup" (the rule used and each change with its reason) and "options" (ranked alternatives per
+    slot with a reason, e.g. a server pick rate or "Against AP burst")."""
+    build = _safe(data.get_build, name, position, enemy)
+    if "error" in build:
+        return build
+    keep = ("name", "position", "core", "boots", "final", "runes", "spells", "situational", "situational_items")
+    return {
+        **{k: build[k] for k in keep},
+        "matchup": build["matchup"],
+        "options": {
+            slot: [[f"{o['name']} ({o['why']})" for o in opts] for opts in lists]
+            if slot != "boots"
+            else [f"{o['name']} ({o['why']})" for o in lists]
+            for slot, lists in build["options"].items()
+        },
+        "server_stats": build["server_stats"],
+    }
 
 
 @server.tool()
 def get_matchup(my_champion: str, enemy: str, position: str | None = None) -> dict:
     """Get lane matchup info: whether either champion counters the other, the enemy's tiers, strengths,
     weaknesses, how to play against them, damage type and whether they heal.
-    Hand-written tips exist only for some champions (see has_tips)."""
+    "card" is WildRiftCore's rating of this exact pairing when available: the enemy's edge over you (-2..+2),
+    the interaction that decides it and how to play it."""
     return _safe(data.get_matchup, my_champion, enemy, position)
 
 

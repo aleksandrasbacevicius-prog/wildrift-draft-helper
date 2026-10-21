@@ -13,6 +13,7 @@ import json
 import os
 import re
 import time
+import urllib.error
 import urllib.request
 from datetime import date, datetime
 from pathlib import Path
@@ -33,6 +34,8 @@ ALLOWED_HOSTS = {
     "wr-meta.com",
     "www.riftpatchnotes.com",
     "riftpatchnotes.com",
+    "wildriftcore.com",
+    "ddragon.leagueoflegends.com",
 }
 # Item stats and descriptions come from WR-META's public item list (its robots.txt allows /items/).
 ITEM_DETAILS_URL = "https://wr-meta.com/items/"
@@ -49,7 +52,9 @@ WRMETA_LANES = {
     "bot": "dragon",
     "support": "support",
 }
-COUNTER_SOURCES = ("WildRiftFire", "WR-META")
+COUNTER_SOURCES = ("WildRiftCore", "WildRiftFire", "WR-META")
+# Riot's Data Dragon: every champion's class tags and attack/magic ratings, used to tell magic from physical damage.
+DDRAGON = "https://ddragon.leagueoflegends.com"
 MAX_PAGE_BYTES = 3 * 1024 * 1024
 MAX_IMAGE_BYTES = 512 * 1024
 MAX_AGE_DAYS = 7  # tier lists move within a patch, so refresh weekly anyway
@@ -57,6 +62,7 @@ MAX_AGE_DAYS = 7  # tier lists move within a patch, so refresh weekly anyway
 # Site lane names -> in-game positions
 POSITIONS = {"Solo": "baron", "Jungle": "jungle", "Mid": "mid", "Duo": "dragon", "Support": "support"}
 TIERS = {"splus": "S+", "s": "S", "a": "A", "b": "B", "c": "C", "d": "D"}
+TIER_RANK = {"S+": 0, "S": 1, "A": 2, "B": 3, "C": 4, "D": 5}
 
 
 def _open(url: str, max_bytes: int) -> tuple[bytes, str]:
@@ -73,8 +79,16 @@ def _open(url: str, max_bytes: int) -> tuple[bytes, str]:
         return body, response.headers.get_content_type()
 
 
-def get(url: str) -> str:
-    return _open(url, MAX_PAGE_BYTES)[0].decode("utf-8", errors="ignore")
+def get(url: str, retries: int = 1) -> str:
+    """A page as text. A timeout or dropped connection is retried once after a short pause."""
+    for attempt in range(retries + 1):
+        try:
+            return _open(url, MAX_PAGE_BYTES)[0].decode("utf-8", errors="ignore")
+        except (TimeoutError, ConnectionError, urllib.error.URLError):
+            if attempt == retries:
+                raise
+            time.sleep(3)
+    raise AssertionError("unreachable")
 
 
 def slug(name: str) -> str:
@@ -335,7 +349,166 @@ def add_wrmeta_counters(champions: dict, log=print) -> None:
         for position, build in (champ.get("builds") or {}).items():
             wrf = [name_key(c["name"]) for c in build.get("countered_by", [])]
             build["counters"] = combine_counters({"WildRiftFire": wrf, "WR-META": wrmeta.get(position, [])}, names)
+        champ["wrmeta_counters"] = wrmeta
     log(f"Counters combined from WildRiftFire and WR-META ({fetched} WR-META pages)")
+
+
+def combine_all_counters(champions: dict) -> None:
+    """Per champion and lane, counters averaged across every source that rates the lane:
+    WildRiftCore's matchup cards (opponents with an edge over the champion, biggest edge first),
+    WildRiftFire's "countered by" list and WR-META's "Extreme threats". Stored in champ["counters"][lane]."""
+    names = {name_key(n): n for n in champions}
+    for champ in champions.values():
+        builds = champ.get("builds") or {}
+        matchups = (champ.get("wrc") or {}).get("matchups") or {}
+        wrmeta = champ.get("wrmeta_counters") or {}
+        champ["counters"] = {}
+        for lane in set(builds) | set(matchups) | set(wrmeta):
+            wrc = sorted(
+                ((card["edge"], foe) for foe, card in matchups.get(lane, {}).items() if card["edge"] > 0),
+                key=lambda e: -e[0],
+            )
+            lists = {
+                "WildRiftCore": [name_key(foe) for _, foe in wrc],
+                "WildRiftFire": [name_key(c["name"]) for c in builds.get(lane, {}).get("countered_by", [])],
+                "WR-META": wrmeta.get(lane, []),
+            }
+            champ["counters"][lane] = combine_counters(lists, names)
+
+
+def add_wildriftcore_data(champions: dict, items: dict, meta: dict, log=print, runes: dict | None = None) -> None:
+    """Attach WildRiftCore's tier lists, build variants, situational items, adaptations by opponent and
+    matchup cards. Optional: failures are logged and the other sources still work."""
+    from wildrift import wildriftcore as wrc
+
+    tiers: dict[str, dict] = {}
+    patch = None
+    for position in wrc.TIER_PAGES:
+        try:
+            page = get(wrc.tier_url(position))
+        except Exception as e:
+            log(f"WildRiftCore tier list ({position}) unavailable ({e})")
+            continue
+        patch = patch or wrc.parse_patch(page)
+        for name, entry in wrc.parse_tier_list(page).items():
+            tiers.setdefault(name_key(name), {})[position] = entry
+        time.sleep(REQUEST_DELAY)
+    if not tiers:
+        log("WildRiftCore unavailable; keeping WildRiftFire builds and tiers")
+        return
+
+    icons: dict[str, str] = {}
+    fetched = 0
+    for i, (name, champ) in enumerate(champions.items(), 1):
+        lanes = tiers.get(name_key(name))
+        if not lanes:
+            continue
+        champ["positions"] = {pos: e["tier"] for pos, e in lanes.items()}
+        slug_ = next(iter(lanes.values()))["slug"]
+        data = {"slug": slug_, "stats": {pos: {k: e[k] for k in ("win", "pick", "ban")} for pos, e in lanes.items()}}
+        try:
+            page = get(wrc.champion_url(slug_, "builds"))
+            # Single-lane pages don't name the lane: use their best-tier lane.
+            main_lane = min(lanes, key=lambda pos: TIER_RANK.get(lanes[pos]["tier"], 9))
+            data["builds"] = wrc.parse_builds(page, main_lane)
+            icons |= {
+                html.unescape(a): u for u, a in re.findall(r'<img src="(/assets/images/[^"]+)" alt="([^"]+)"', page)
+            }
+            time.sleep(REQUEST_DELAY)
+            data["matchups"] = wrc.parse_matchups(get(wrc.champion_url(slug_, "counters")))
+            fetched += 1
+        except Exception as e:
+            log(f"  {name}: WildRiftCore pages failed ({e})")
+        champ["wrc"] = data
+        time.sleep(REQUEST_DELAY)
+        if i % 20 == 0:
+            log(f"  WildRiftCore {i}/{len(champions)}")
+
+    # Their builds can name items the item list doesn't have: add them with WildRiftCore's icon.
+    for champ in champions.values():
+        for build in ((champ.get("wrc") or {}).get("builds") or {}).values():
+            _use_item_list_names(build, items)
+            wanted = [n for v in build["variants"] for n in v["items"]] + [s["item"] for s in build["situational"]]
+            wanted += [v["item"] for v in build["vs"]] + ([build["boots"]] if build["boots"] else [])
+            for item in wanted:
+                if item in items or _item_alias(item, items):
+                    continue
+                items[item] = {"name": item, "categories": [], "icon": None}
+                if item in icons:
+                    path = ICON_DIR / "items" / f"{slug(item)}.webp"
+                    try:
+                        _download_icon(wrc.SITE + icons[item], path)
+                        items[item]["icon"] = f"/icons/wrf/items/{slug(item)}.webp"
+                    except Exception as e:
+                        log(f"  icon for {item} failed ({e})")
+    # Their rune pages can name runes the rune list doesn't have (e.g. newer ones): add them too.
+    for champ in champions.values() if runes is not None else []:
+        for build in ((champ.get("wrc") or {}).get("builds") or {}).values():
+            for pos, rune in enumerate(build["runes"]):
+                if rune in runes:
+                    continue
+                runes[rune] = {"name": rune, "kind": "keystone" if pos == 0 else "minor", "tree": "", "tier": None}
+                runes[rune]["icon"] = None
+                if rune in icons:
+                    path = ICON_DIR / "runes" / f"{slug(rune)}.webp"
+                    try:
+                        _download_icon(wrc.SITE + icons[rune], path)
+                        runes[rune]["icon"] = f"/icons/wrf/runes/{slug(rune)}.webp"
+                    except Exception as e:
+                        log(f"  icon for rune {rune} failed ({e})")
+    meta["wildriftcore"] = {"source": wrc.SITE, "patch": patch, "champions": fetched}
+    log(f"WildRiftCore builds and matchups for {fetched} champions (patch {patch})")
+
+
+def _use_item_list_names(build: dict, items: dict) -> None:
+    """Rewrite a WildRiftCore build's item names to the item list's spelling where they differ."""
+
+    def canon(name):
+        return name if name in items else (_item_alias(name, items) or name)
+
+    for variant in build["variants"]:
+        variant["items"] = [canon(n) for n in variant["items"]]
+    for entry in build["situational"] + build["vs"]:
+        entry["item"] = canon(entry["item"])
+    if build["boots"]:
+        build["boots"] = canon(build["boots"])
+
+
+# Items the sites spell differently beyond case and punctuation: other spelling -> item list key.
+ITEM_SPELLINGS = {"lorddominiksregards": "lorddominiksregard"}
+
+
+def _item_alias(name: str, items: dict) -> str | None:
+    """The item list's spelling of an item another site spells differently (case, apostrophes, plurals)."""
+    key = ITEM_SPELLINGS.get(_item_key(name), _item_key(name))
+    return next((n for n in items if _item_key(n) == key), None)
+
+
+def damage_type(info: dict, tags: list[str]) -> str:
+    """magic, physical or mixed, from Data Dragon's 0-10 attack and magic ratings. Magic needs the Mage tag or a
+    clear lead, so fighters with a bit of magic damage (e.g. Dr. Mundo) don't count as mages."""
+    attack, magic = info["attack"], info["magic"]
+    if magic - attack >= 2 or ("mage" in tags and magic >= attack):
+        return "magic"
+    return "physical" if attack > magic else "mixed"
+
+
+def add_profiles(champions: dict, log=print) -> None:
+    """Class tags and damage type for every champion, from Riot's Data Dragon (League PC data;
+    Wild Rift champions share their kits). "damage" is magic, physical or mixed."""
+    try:
+        version = json.loads(get(f"{DDRAGON}/api/versions.json"))[0]
+        roster = json.loads(get(f"{DDRAGON}/cdn/{version}/data/en_US/champion.json"))["data"]
+    except Exception as e:
+        log(f"Champion classes unavailable ({e})")
+        return
+    by_key = {name_key(c["name"]): c for c in roster.values()}
+    for name, champ in champions.items():
+        found = by_key.get(name_key(name))
+        if found:
+            tags = [t.lower() for t in found["tags"]]
+            champ["profile"] = {"damage": damage_type(found["info"], tags), "tags": tags}
+    log(f"Champion classes for {sum(1 for c in champions.values() if 'profile' in c)} champions")
 
 
 def add_server_data(champions: dict, items: dict, runes: dict, meta: dict, log=print) -> None:
@@ -370,6 +543,11 @@ def add_server_data(champions: dict, items: dict, runes: dict, meta: dict, log=p
     # Server builds can name items or runes the other sources don't list: add them, with icons.
     for champ in champions.values():
         for build in champ["server"]["builds"].values():
+            for core in build["cores"]:
+                core["items"] = [n if n in items else (_item_alias(n, items) or n) for n in core["items"]]
+            for boots in build["boots"]:
+                if boots["item"] and boots["item"] not in items:
+                    boots["item"] = _item_alias(boots["item"], items) or boots["item"]
             for name in [n for c in build["cores"] for n in c["items"]] + [
                 b["item"] for b in build["boots"] if b["item"]
             ]:
@@ -559,6 +737,9 @@ def refresh(log=print) -> dict:
     add_item_details(items, log)
     add_wrmeta_counters(champions, log)
     add_server_data(champions, items, runes, meta, log)
+    add_wildriftcore_data(champions, items, meta, log, runes)
+    add_profiles(champions, log)
+    combine_all_counters(champions)
     unplaced = sorted(
         n for n, c in champions.items() for pos in (c.get("builds") or {}) if pos not in LANE_IMAGES.values()
     )

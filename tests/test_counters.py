@@ -39,6 +39,7 @@ def test_matchup_clear_counter():
 
 
 def test_matchup_mutual_counters_with_close_scores_are_even():
+    # No WildRiftCore card for this pairing, so the averaged scores decide.
     m = data.get_matchup("Darius", "Malphite", "baron")  # each listed against the other, scores close
     assert m["counters_each_other"] is True
     assert m["you_counter_enemy"] is False and m["enemy_counters_you"] is False

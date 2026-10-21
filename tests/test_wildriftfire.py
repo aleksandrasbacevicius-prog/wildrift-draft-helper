@@ -236,7 +236,18 @@ def test_refresh_end_to_end(offline_site):
     downloaded = {str(path.relative_to(path.parents[1])).replace("\\", "/") for _, path in icons}
     assert {"champions/darius.png", "items/ruby-crystal.png", "runes/conqueror.png", "spells/flash.png"} <= downloaded
     assert {"lanes/baron.png", "lanes/dragon.png"} <= downloaded
-    assert all(url.startswith((w.SITE, "https://wr-meta.com/", "https://www.riftpatchnotes.com/")) for url in requested)
+    assert all(
+        url.startswith(
+            (
+                w.SITE,
+                "https://wr-meta.com/",
+                "https://www.riftpatchnotes.com/",
+                "https://wildriftcore.com/",
+                "https://ddragon.leagueoflegends.com/",
+            )
+        )
+        for url in requested
+    )
     assert items["Stridebreaker"]["details"]["gold"] == 3100
     assert items["Sterak's Gage"]["details"]["summary"] == "Shield when low"
     assert "https://wr-meta.com/49-darius.html" in requested  # second counter source was read
@@ -435,3 +446,24 @@ def test_single_build_page_falls_back_to_tier_list_lane():
     page = SINGLE_BUILD_GUIDE.replace("Recommended Role", "Something Else")
     assert list(w.parse_guides(page, default_position="support")) == ["support"]
     assert list(w.parse_guides(page)) == ["guide-112"]  # last resort, never seen with real pages
+
+
+def test_get_retries_a_timeout_once(monkeypatch):
+    calls = []
+
+    def flaky(url, max_bytes):
+        calls.append(url)
+        if len(calls) == 1:
+            raise TimeoutError("slow")
+        return b"ok", "text/html"
+
+    monkeypatch.setattr(w, "_open", flaky)
+    monkeypatch.setattr(w.time, "sleep", lambda s: None)
+    assert w.get("https://www.wildriftfire.com/x") == "ok" and len(calls) == 2
+
+    def down(url, max_bytes):
+        raise TimeoutError("down")
+
+    monkeypatch.setattr(w, "_open", down)
+    with pytest.raises(TimeoutError):
+        w.get("https://www.wildriftfire.com/x")
